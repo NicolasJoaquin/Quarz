@@ -1,0 +1,9 @@
+Proveedores (PRACTICAMENTE IGUAL A CLIENTES) 		OK
++ productos asociados --> de aca tengo que sacar la info. para hacer las OC 		
+hacer CUIT UNIQUE 			OK
+validar todos los inputs en el front (MANEJAR LOS LARGOS DE LOS INPUTS PARA QUE ENTRE TODA LA DESCRIPCIÓN)
+hacer USER UNIQUE		OK
+hacer descuento de stock cuando se genera una venta (A REVISAR: SÓLO CUANDO LA VENTA PASA A ESTAR DESPACHADA, ESTO LO PUEDO HACER CON UN TRIGGER UPDATE)  	OK SIN EL ESTADO
+no permitir realizar una venta si no hay stock	OK
+armar vista detalle pedido		OK
+en el login que me mande directo a HOME

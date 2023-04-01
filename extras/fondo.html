@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" style="height:100%">
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<style type="text/css">
+    table{
+        border-radius: 20px;
+        border: solid;
+    }
+
+    #ppal strong.importante #uno{
+        color: red;
+    }
+
+    td#pri span, td#seg .pag{
+        color: blue;
+    }
+
+    div{
+        height: 70%;
+        width:100%;
+        font-size: 25px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color:black;
+        border-radius: 50px;
+    }
+
+    /* EFECTO FADE IN */
+
+    img{
+        animation: fadeIn 3s ease;
+    }
+
+    @keyframes fadeIn{
+        0% { 
+            opacity: 0;
+            filter: blur(20px);
+        }
+
+        10% {
+            opacity: 1;
+            filter: brightness(2) blur(10px);
+        }
+    }
+
+</style>
+<body style="height:100%">
+
+    <h1>Armador de pedidos</h1>
+
+    <div id="app">
+        <div id="lista_prods">
+            <img src="./quarz.jpg">
+        </div>
+    </div>
+
+    <div>
+        <table border="1">
+            <tr>
+                <th>Descripción</th><th>Precio Vta.</th>
+            </tr>
+        </table>
+    </div>
+
+    <!-- PRUEBAS EJERCICIOS
+
+    <div id="ppal">
+        <strong class="importante">
+            <div id="uno"> TEXTO EN ROJO</div>
+        </strong>
+    </div>
+
+    <table>
+        <tr>
+            <td id="seg"> <div class="pag"> TEXTO EN AZUL SEG</div> </td>
+
+            <td id="pri"> <span> TEXTO EN AZUL PRI</span> </td>
+        </tr>
+    </table>
+    -->
+
+    
+            
+</body>
+</html>

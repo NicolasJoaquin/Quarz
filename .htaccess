@@ -1,0 +1,23 @@
+# Archivo .htaccess -- Ruteo
+
+RewriteEngine on
+
+RewriteRule ^home$ controllers/home.php
+
+RewriteRule ^viewClients$ controllers/viewClients.php
+RewriteRule ^viewProducts$ controllers/viewProducts.php
+RewriteRule ^viewStock$ controllers/viewStock.php
+RewriteRule ^viewSales$ controllers/viewSales.php
+RewriteRule ^viewProviders$ controllers/viewProviders.php
+RewriteRule ^viewBuys$ controllers/viewBuys.php
+
+RewriteRule ^newUser$ controllers/newUser.php
+RewriteRule ^newProduct$ controllers/newProduct.php
+RewriteRule ^newClient$ controllers/newClient.php
+RewriteRule ^newSale$ controllers/newSale.php
+RewriteRule ^newProvider$ controllers/newProvider.php
+RewriteRule ^newBuy$ controllers/newBuy.php
+
+RewriteRule ^closeSession$ controllers/closeSession.php
+
+RewriteRule ^prueba$ controllers/prueba.php
