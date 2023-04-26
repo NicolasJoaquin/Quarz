@@ -31,6 +31,25 @@ class Products extends Model{
         return $this->db->fetchAll();
     }
 
+    public function getProductsListStock($filterValue) { // Por ahora sólo depósito Hur. y lista minorista
+        // VALIDO FILTRO
+        if(!empty($filterValue)){
+            $filterValue = substr($filterValue, 0, 50);
+            $filterValue = $this->db->escape($filterValue);
+            $filterValue = $this->db->escapeWildcards($filterValue);
+        }
+
+        $this->db->query("SELECT *
+                            FROM view_products_list_stock as p 
+                            WHERE p.product_id LIKE '%$filterValue%' OR 
+                                    p.description LIKE '%$filterValue%' OR
+                                    p.packing_unit LIKE '%$filterValue%'"); // MODIFICAR LIMIT Y FILTROS
+        //VERIFICACIÓN DE LA QUERY Y RETORNO
+        $errno = $this->db->getErrorNo();
+        if($errno !== 0) throw new QueryErrorException($this->db->getError());
+        return $this->db->fetchAll();
+    }
+
     //ALTAS, BAJAS Y MODIFICACIONES------------------------------------------------------------------------------------------------------------------
     public function newProduct($product){
         //Valido description

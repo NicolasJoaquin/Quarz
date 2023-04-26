@@ -60,7 +60,7 @@ class ProductController extends Controller{
     public function get($filterValue){
         // MODIFICAR ACA
         try{
-            $ret = $this->models['products']->getProducts($filterValue);
+            $ret = $this->models['products']->getProductsListStock($filterValue);
         }
         catch(QueryErrorException $error){ //ACA HAY QUE VER COMO DEVOLVER Y MOSTRAR ESTE MSG DE ERROR (PROBABLEMENTE CONDICIONAL DESDE FRONT)
             $msg = "Se produjo un error intentando consultar los productos con el filtro " . $filterValue . ",

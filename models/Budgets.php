@@ -1,97 +1,93 @@
 <?php
-//models/Sales.php
+//models/Budgets.php
 
 require_once '../fw/fw.php';
 
-class Sales extends Model{
+class Budgets extends Model {
     //GETERS------------------------------------------------------------------------------------------------------------------------
-    public function getAll(){ //MODIFICAR LIMIT
+    public function getAll() { //MODIFICAR LIMIT
         $this->db->query("SELECT *
-                            FROM sales"); // MODIFICAR PARA VER VISTA
+                            FROM budgets"); // MODIFICAR PARA VER VISTA
         return $this->db->fetchAll();
     }
 
-    public function getSales($filterValue){
+    public function getBudgets($filterValue) {
         // VALIDO FILTRO
-        if(!empty($filterValue)){
+        if(!empty($filterValue)) {
             $filterValue = substr($filterValue, 0, 50);
             $filterValue = $this->db->escape($filterValue);
             $filterValue = $this->db->escapeWildcards($filterValue);
         }
 
         $this->db->query("SELECT *
-                            FROM view_sales as s 
-                            WHERE s.sale_id LIKE '%$filterValue%' OR 
-                                    s.user_name LIKE '%$filterValue%' OR
-                                    s.client_name LIKE '%$filterValue%' OR 
-                                    s.total LIKE '%$filterValue%' OR
-                                    s.start_date LIKE '%$filterValue%' OR
-                                    s.ship_desc LIKE '%$filterValue%' OR
-                                    s.pay_desc LIKE '%$filterValue%' OR
-                                    s.description LIKE '%$filterValue%'"); // MODIFICAR LIMIT ACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                            FROM view_budgets as b 
+                            WHERE b.budget_id LIKE '%$filterValue%' OR 
+                                    b.user_name LIKE '%$filterValue%' OR
+                                    b.client_name LIKE '%$filterValue%' OR 
+                                    b.total LIKE '%$filterValue%' OR
+                                    b.start_date LIKE '%$filterValue%' OR
+                                    b.description LIKE '%$filterValue%'"); // MODIFICAR LIMIT ACA
         //VERIFICACIÓN DE LA QUERY Y RETORNO
-        $errno = $this->db->getErrorNo();
-        if($errno !== 0) throw new QueryErrorException($this->db->getError());
+        $this->db->validateLastQuery();
         return $this->db->fetchAll();
     }
 
-    public function getSaleItems($saleId){
-        //Valido $saleId
-        if(!ctype_digit($saleId)) die ("error 1 getSaleItems/Sales (modelo)");
+    public function getBudgetItems($budgetId) {
+        //Valido $budgetId
+        if(!ctype_digit($budgetId)) throw new Exception("El id del presupuesto es erróneo");
 
         //QUERY SELECT 
         $this->db->query("SELECT *
-                            FROM `view_sales_items` 
-                            WHERE sale_id = '$saleId'");
+                            FROM `view_budgets_items` 
+                            WHERE sale_id = '$budgetId'");
 
         //VERIFICACIÓN DE LA QUERY Y RETORNO
-        $errno = $this->db->getErrorNo();
-        if($errno !== 0) throw new QueryErrorException($this->db->getError());
+        $this->db->validateLastQuery();
         return $this->db->fetchAll();
     }
 
     //ALTAS, BAJAS Y MODIFICACIONES------------------------------------------------------------------------------------------------------------------
     // A partir de acá se usan nuevas validaciones y sanitizaciones
-    public function newSale($sale) {
-        $this->db->validateSanitizeId($sale->client->client_id, "El identificador del cliente es inválido");
-        $clientId = $sale->client->client_id;
+    public function newBudget($budget) { 
+        $this->db->validateSanitizeId($budget->client->client_id, "El identificador del cliente es inválido");
+        $clientId = $budget->client->client_id;
 
-        $this->db->validateSanitizeFloat($sale->totalPrice, "El precio total de la venta es inválido");
-        $totalPrice = $sale->totalPrice;
+        $this->db->validateSanitizeFloat($budget->totalPrice, "El precio total del presupuesto es inválido");
+        $totalPrice = $budget->totalPrice;
         if($totalPrice < 0)  
-            throw new Exception("El precio total de la venta no puede ser menor a 0");
-        if(!empty($sale->notes))
-            $sale->notes = $this->db->escape($sale->notes);
-        $userId = $_SESSION['user_id'];       
+            throw new Exception("El precio total de la cotización no puede ser menor a 0");
+        if(!empty($budget->notes))
+            $budget->notes = $this->db->escape($budget->notes);
+        $userId = $_SESSION['user_id'];
 
         //QUERY INSERT
-        $this->db->query("INSERT INTO sales (user_id, client_id, total, description) 
-                            VALUES ($userId, $clientId , $totalPrice, '$sale->notes')");
+        $this->db->query("INSERT INTO budgets (user_id, client_id, total, description) 
+                            VALUES ($userId, $clientId, $totalPrice, '$budget->notes')"); 
         $this->db->validateLastQuery();
-        $lastSale = $this->db->getLastInsertId();
-        if(!$lastSale)
-            throw new Exception("Hubo un error al dar de alta la venta");
+        $lastBudget = $this->db->getLastInsertId();
+        if(!$lastBudget)
+            throw new Exception("Hubo un error al dar de alta el presupuesto");
 
-        return $lastSale;
+        return $lastBudget;
     }
 
-    public function newSaleItem($saleItem, $saleId){
-        $this->db->validateSanitizeId($saleId, "El identificador de la venta es inválida");
+    public function newBudgetItem($budgetItem, $budgetId) { 
+        $this->db->validateSanitizeId($budgetId, "El identificador del presupuesto es inválido");
 
-        $prodId = (int)trim($saleItem->product_id);
+        $prodId = (int)trim($budgetItem->product_id);
         $this->db->validateSanitizeId($prodId, "El identificador del producto #$prodId es inválido");
 
-        $salePrice = (float)trim($saleItem->sale_price);
+        $salePrice = (float)trim($budgetItem->sale_price);
         $this->db->validateSanitizeFloat($salePrice, "El precio del producto #$prodId es inválido");
         if($salePrice < 0)  
             throw new Exception("El precio del producto #$prodId no puede ser menor a 0");
 
-        $costPrice = (float)trim($saleItem->cost_price);
+        $costPrice = (float)trim($budgetItem->cost_price);
         $this->db->validateSanitizeFloat($costPrice, "El costo del producto #$prodId es inválido");
         if($costPrice < 0)  
             throw new Exception("El costo del producto #$prodId no puede ser menor a 0");
 
-        $quantity = (float)trim($saleItem->quantity);
+        $quantity = (float)trim($budgetItem->quantity);
         $this->db->validateSanitizeFloat($quantity, "La cantidad del producto #$prodId es inválida");
         if($quantity <= 0)  
             throw new Exception("La cantidad del producto #$prodId no puede ser menor o igual a 0");
@@ -100,31 +96,48 @@ class Sales extends Model{
 
         $totalCost = (float)$costPrice * $quantity;
 
-        $position = (int)trim($saleItem->position);
+        $position = (int)trim($budgetItem->position);
         $this->db->validateSanitizeInt($position, "La posición del producto #$prodId es inválida"); // cambiar por SanitizeId (las posiciones arrancan en 1)
 
         //QUERY INSERT
-        $this->db->query("INSERT INTO sales_items (sale_id, product_id, sale_price, cost_price, quantity, total_price, total_cost, position) 
-                            VALUES ($saleId, $prodId, $salePrice, $costPrice, $quantity,
-                            $totalPrice, $totalCost, $position)"); 
+        $q = "INSERT INTO budgets_items (budget_id, product_id, sale_price, cost_price, quantity, total_price, total_cost, position) 
+                                        VALUES ($budgetId, $prodId, $salePrice, $costPrice, $quantity,
+                                        $totalPrice, $totalCost, $position)";
+        $this->db->query($q); 
         $this->db->validateLastQuery();
-        $lastSaleItem = $this->db->getLastInsertId();
-        if(!$lastSaleItem)
-            throw new Exception("Hubo un error al dar de alta un ítem en el presupuesto " . $saleId);
+        $lastBudgetItem = $this->db->getLastInsertId();
+        if(!$lastBudgetItem)
+            throw new Exception("Hubo un error al dar de alta un ítem en el presupuesto " . $budgetId);
 
-        return $lastSaleItem;
+        return $lastBudgetItem;
     }
 
-    public function newSaleItems($items, $saleId){
+    public function newBudgetItems($items, $budgetId) { 
         $ret = array();
         foreach($items as $k => $item) {
             $item->position = $k;
-            $ret[] = $this->newSaleItem($item, $saleId);
+            $ret[] = $this->newBudgetItem($item, $budgetId);
         }
         return $ret;
     }
 
-    // ---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     public function updateSale($sale){
         //Valido id
         if(!ctype_digit($sale->id)) die ("error 0 updateSale/Sales (modelo)");

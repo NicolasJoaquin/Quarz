@@ -14,7 +14,10 @@ RewriteRule ^viewBuys$ controllers/viewBuys.php
 RewriteRule ^newUser$ controllers/newUser.php
 RewriteRule ^newProduct$ controllers/newProduct.php
 RewriteRule ^newClient$ controllers/newClient.php
-RewriteRule ^newSale$ controllers/newSale.php
+# RewriteRule ^newSale$ controllers/newSale.php
+RewriteRule ^newSale$ controllers/newSaleBudget.php
+RewriteRule ^newBudget$ controllers/newSaleBudget.php
+RewriteRule ^newSaleBudget$ controllers/newSaleBudget.php
 RewriteRule ^newProvider$ controllers/newProvider.php
 RewriteRule ^newBuy$ controllers/newBuy.php
 

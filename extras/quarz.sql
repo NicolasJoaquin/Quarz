@@ -860,3 +860,182 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+
+-- Agregado de campo product_price a la tabla sale_prices
+ SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Base de datos: `quarz`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `sale_prices`
+--
+
+CREATE TABLE `sale_prices` (
+  `sale_price_id` int(10) UNSIGNED NOT NULL,
+  `product_id` int(10) UNSIGNED NOT NULL,
+  `price_list_id` int(10) UNSIGNED NOT NULL,
+  `sale_factor` float UNSIGNED NOT NULL,
+  `product_price` float UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `sale_prices`
+--
+
+INSERT INTO `sale_prices` (`sale_price_id`, `product_id`, `price_list_id`, `sale_factor`, `product_price`) VALUES
+(1, 1, 1, 1.45, 0),
+(2, 2, 1, 1.45, 0),
+(3, 3, 1, 1.45, 0),
+(4, 4, 1, 1.45, 0),
+(5, 5, 1, 1.45, 0),
+(6, 6, 1, 1.45, 0),
+(7, 7, 1, 1.45, 0),
+(8, 8, 1, 1.45, 0),
+(9, 9, 1, 1.45, 0);
+
+--
+-- Índices para tablas volcadas
+--
+
+--
+-- Indices de la tabla `sale_prices`
+--
+ALTER TABLE `sale_prices`
+  ADD PRIMARY KEY (`sale_price_id`),
+  ADD KEY `product_id` (`product_id`),
+  ADD KEY `price_list_id` (`price_list_id`);
+
+--
+-- AUTO_INCREMENT de las tablas volcadas
+--
+
+--
+-- AUTO_INCREMENT de la tabla `sale_prices`
+--
+ALTER TABLE `sale_prices`
+  MODIFY `sale_price_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- Restricciones para tablas volcadas
+--
+
+--
+-- Filtros para la tabla `sale_prices`
+--
+ALTER TABLE `sale_prices`
+  ADD CONSTRAINT `sale_prices_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT `sale_prices_ibfk_2` FOREIGN KEY (`price_list_id`) REFERENCES `price_lists` (`price_list_id`) ON DELETE NO ACTION ON UPDATE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+-- Vista para productos con stock y precios de lista (view_products_list_stock)
+CREATE OR REPLACE VIEW view_products_list_stock
+
+AS SELECT p.product_id, p.description, p.provider_id, prov.name AS provider_name, p.cost_price, sp.product_price AS sale_price, p.packing_unit, s.quantity AS stock_quantity, s.warehouse_id, w.title AS warehouse_name, sp.price_list_id, pl.title AS price_list_name
+
+FROM products AS p JOIN providers AS prov ON p.provider_id = prov.provider_id JOIN stock_items AS s ON p.product_id = s.product_id JOIN sale_prices AS sp ON p.product_id = sp.product_id JOIN warehouses AS w ON s.warehouse_id = w.warehouse_id JOIN price_lists AS pl ON sp.price_list_id = pl.price_list_id
+
+-- Nuevas tablas budgets y budgets_items
+CREATE TABLE `budgets` (
+  `budget_id` int(10) UNSIGNED NOT NULL,
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `client_id` int(10) UNSIGNED NOT NULL,
+  `total` float UNSIGNED NOT NULL,
+  `start_date` timestamp NOT NULL DEFAULT current_timestamp(),
+  `description` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `budgets_items` (
+  `budget_item_id` int(10) UNSIGNED NOT NULL,
+  `budget_id` int(10) UNSIGNED NOT NULL,
+  `product_id` int(10) UNSIGNED NOT NULL,
+  `sale_price` float UNSIGNED NOT NULL,
+  `cost_price` float UNSIGNED NOT NULL,
+  `quantity` int(20) UNSIGNED NOT NULL,
+  `total_price` float UNSIGNED GENERATED ALWAYS AS (`sale_price` * `quantity`) VIRTUAL,
+  `total_cost` float UNSIGNED GENERATED ALWAYS AS (`cost_price` * `quantity`) VIRTUAL,
+  `position` int(10) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Indices de la tabla `budgets`
+--
+ALTER TABLE `budgets`
+  ADD PRIMARY KEY (`budget_id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `client_id` (`client_id`);
+
+--
+-- Indices de la tabla `budgets_items`
+--
+ALTER TABLE `budgets_items`
+  ADD PRIMARY KEY (`budget_item_id`),
+  ADD KEY `budget_id` (`budget_id`),
+  ADD KEY `product_id` (`product_id`);
+
+--
+-- AUTO_INCREMENT de la tabla `budgets`
+--
+ALTER TABLE `budgets`
+  MODIFY `budget_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `budgets_items`
+--
+ALTER TABLE `budgets_items`
+  MODIFY `budget_item_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- Filtros para la tabla `budgets`
+--
+ALTER TABLE `budgets`
+  ADD CONSTRAINT `budgets_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT `budgets_ibfk_2` FOREIGN KEY (`client_id`) REFERENCES `clients` (`client_id`) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `budgets_items`
+--
+ALTER TABLE `budgets_items`
+  ADD CONSTRAINT `budgets_items_ibfk_1` FOREIGN KEY (`budget_id`) REFERENCES `budgets` (`budget_id`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT `budgets_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+-- FK en 'sales' para identificar de qué 'budget' viene (si es que se genera en base a una budget)
+ALTER TABLE `sales`
+  ADD COLUMN budget_id INT(10) UNSIGNED DEFAULT NULL AFTER client_id;
+ALTER TABLE `sales`
+  ADD KEY `budget_id` (`budget_id`);
+ALTER TABLE `sales`
+  ADD CONSTRAINT fk_sales_budgets FOREIGN KEY (budget_id) REFERENCES budgets(budget_id) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+-- Vista view_budgets
+CREATE OR REPLACE VIEW view_budgets AS
+SELECT b.budget_id, b.user_id, u.user AS user_name, b.client_id, c.name AS client_name, b.total, b.start_date, b.description 
+FROM budgets AS b JOIN users AS u ON b.user_id = u.user_id JOIN clients AS c ON b.client_id = c.client_id;
+
+-- Vista view_budgets_items
+CREATE OR REPLACE VIEW view_budgets_items AS
+SELECT bi.budget_item_id, b.budget_id, p.product_id, p.description, bi.sale_price, bi.cost_price, bi.quantity, bi.total_price, bi.total_cost, bi.position
+FROM budgets_items AS bi JOIN budgets AS b ON bi.budget_id = b.budget_id JOIN products AS p ON bi.product_id = p.product_id;
+
+-- Cambio de tipo en tabla budgets_items
+ALTER TABLE `budgets_items` CHANGE `sale_price` `sale_price` DOUBLE(10,2) UNSIGNED NOT NULL, CHANGE `cost_price` `cost_price` DOUBLE(10,2) UNSIGNED NOT NULL, CHANGE `quantity` `quantity` DOUBLE(10,2) UNSIGNED NOT NULL, CHANGE `total_price` `total_price` DOUBLE(10,2) UNSIGNED AS (`sale_price` * `quantity`) VIRTUAL, CHANGE `total_cost` `total_cost` DOUBLE(10,2) UNSIGNED AS (`cost_price` * `quantity`) VIRTUAL;
+-- Cambio de tipo en tabla budgets
+ALTER TABLE `budgets` CHANGE `total` `total` DOUBLE(10,2) UNSIGNED NOT NULL;
+-- Cambio de tipo en tabla stock_items
+ALTER TABLE `stock_items` CHANGE `quantity` `quantity` DOUBLE(10,2) UNSIGNED NOT NULL DEFAULT '0';

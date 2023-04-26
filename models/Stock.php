@@ -33,7 +33,7 @@ class Stock extends Model{
     }
 
     //ALTAS, BAJAS Y MODIFICACIONES------------------------------------------------------------------------------------------------------------------
-    public function updateStock($item){ //FALTA IMPLEMENTACIÓN PARA MÁS DE UN DEPÓSITO
+    public function updateStock($item){ //FALTA IMPLEMENTACIÓN PARA MÁS DE UN DEPÓSITO // FALTA
         //Valido id
         if(!ctype_digit($item->id)) die ("error 0 updateStock/Stock (modelo)");
 
@@ -49,29 +49,107 @@ class Stock extends Model{
         return true;
     }
 
-    public function discountQuantity($item){ //FALTA IMPLEMENTACIÓN PARA MÁS DE UN DEPÓSITO, modificar los nombres de los atributos
-        //Valido id
-        if(!ctype_digit($item->prodId)) die ("error 0 discountQuantity/Stock (modelo)");
 
-        //Valido quantity
-        if(!ctype_digit($item->prodQuantity)) die ("error 1 discountQuantity/Stock (modelo)");
 
-        //QUERY SELECT Y VERIFICACIÓN
-        $selectQuery = "SELECT * FROM stock_items WHERE product_id = '$item->prodId'";
-        $this->db->query($selectQuery);
-        $errno = $this->db->getErrorNo();
-        if($errno !== 0) throw new QueryErrorException($this->db->getError());  
 
-        if(!$stockItem = $this->db->fetch()) die("error 2 discountQuantity/Stock (modelo)"); //estoy aca
-        $newQuantity = $stockItem['quantity'] - $item->prodQuantity;
-        
+
+    public function discountQuantity($item) { //FALTA IMPLEMENTACIÓN PARA MÁS DE UN DEPÓSITO // OK
+        $this->validateItem($item);
+
         //QUERY UPDATE Y VERIFICACIÓN
-        $updateQuery = "UPDATE stock_items SET quantity = '$newQuantity' WHERE product_id = $item->prodId";
+        $updateQuery = "UPDATE stock_items AS s SET s.quantity = s.quantity - $item->quantity WHERE product_id = $item->product_id";
         $this->db->query($updateQuery);
-        $errno = $this->db->getErrorNo();
-        if($errno !== 0) throw new QueryErrorException($this->db->getError());  
+        $this->db->validateLastQuery();
         return true;
     }
+
+    public function discountQuantities($items) { // OK
+        foreach($items as $item) {
+            $this->discountQuantity($item);
+        }
+        return true;
+    }
+
+    public function discountValidatedQuantity($item) { // OK
+        $this->validateItem($item); // Ya se valida en discountQuantity()
+
+        if(!$this->validateStockItem($item->product_id, $item->quantity))
+            throw new Exception("El stock del producto #$item->product_id no es suficiente");
+
+        $this->discountQuantity($item);
+        return true;
+    }
+
+    public function discountValidatedQuantities($items) { // OK
+        $this->validateItems($items); // Ya se valida en discountQuantitites()
+
+        $this->validateStockItems($items);
+    
+        $this->discountQuantities($items);
+
+        return true;
+    }
+
+    //VERIFICADORES------------------------------------------------------------------------------------------------------------------
+    private function validateStockItem($prodId, $quantity) { // OK // Va en private porque hay select sin validación directa
+        // $this->db->validateSanitizeId($prodId, "El identificador del producto es inválido");
+        // $this->db->validateSanitizeFloat($quantity, "La cantidad del producto es inválida");
+        // REVISAR
+        if($quantity <= 0)  
+            throw new Exception("La cantidad del producto #$prodId no puede ser menor o igual a 0, no se puede descontar del stock");
+
+        $query = "SELECT product_id, SUM(quantity) AS total_quantity 
+                    FROM `stock_items` WHERE product_id = $prodId 
+                    GROUP BY product_id";
+        $this->db->query($query);
+        $this->db->validateLastQuery();
+        $stockQuantity = $this->db->fetch()['total_quantity'];
+        if($stockQuantity < $quantity) return false;
+        return true;
+    }
+
+    private function validateStockItems($items) {  //OK // Va en private porque llama a validateStockItem() sin validación directa
+        // $this->validateItems($items);
+        foreach($items as $item) {
+            $quantity = 0;
+            $prodId   = $item->product_id;
+            $prodDesc = $item->description;    
+            foreach($items as $item2) {
+                if($prodId == $item2->product_id) 
+                    $quantity += $item2->quantity;
+            }
+            if(!$this->validateStockItem($prodId, $quantity))
+                throw new Exception("El stock del producto #$prodId- $prodDesc no es suficiente.");
+        }
+        return true;
+    }
+
+    public function validateItem(&$item) { // OK
+        $item->product_id = (int)trim($item->product_id);
+        $this->db->validateSanitizeId($item->product_id, "El identificador del producto #$item->product_id es inválido");
+
+        $item->quantity = (float)trim($item->quantity);
+        $this->db->validateSanitizeFloat($item->quantity, "La cantidad del producto #$item->product_id es inválida");
+
+        return true;
+    }
+
+    public function validateItems(&$items) { // OK
+        foreach($items as $item) {
+            if(!$this->validateItem($item))
+                return false;
+        }
+        return true;
+    }
+
+
+
+
+
+
+
+
+
 
     public function addQuantity($item){ //FALTA IMPLEMENTACIÓN PARA MÁS DE UN DEPÓSITO
         //Valido product_id
@@ -101,26 +179,7 @@ class Stock extends Model{
         return true;
     }
 
-    //VERIFICADORES------------------------------------------------------------------------------------------------------------------
-    public function validateStock($prodId, $prodQuantity){
-        //Valido prodId
-        if(!ctype_digit($prodId)) die ("error 1 validateStock/Stock (modelo)");
-        //Valido prodQuantity
-        if(!ctype_digit($prodQuantity)) die ("error 2 validateStock/Stock (modelo)");
-        
-        $query = "SELECT product_id, SUM(quantity) as total_quantity FROM `stock_items` GROUP BY product_id";
-        $this->db->query($query);
-        $errno = $this->db->getErrorNo();
-        if($errno !== 0) throw new QueryErrorException($this->db->getError()); 
 
-        $items = $this->db->fetchAll();
-        foreach($items as $pos => $item){
-            if($item['product_id'] == $prodId){
-                if($item['total_quantity'] < $prodQuantity) return false;
-            }
-        }
-        return true;
-    }
 }
 
 ?>

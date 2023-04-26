@@ -1,0 +1,29 @@
+tbody {
+   max-height: 400px !important;
+   border-color: black !important;
+   overflow-y: auto !important; 
+}
+
+#totalPrice {
+    background-color: var(--bs-table-bg);
+}
+
+#totalPrice th {
+    display: inline !important;
+}
+
+#addSale {
+    background-color: #F988D9 !important;
+}
+
+#addSale:hover {
+    background-color: #FFADE8 !important;
+}
+
+#addBudget {
+    background-color: #9C8CFF !important;
+}
+
+#addBudget:hover {
+    background-color: #B6ABFB !important;
+}
