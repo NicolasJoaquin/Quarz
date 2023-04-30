@@ -5,19 +5,56 @@ require_once '../controllers/ProductController.php';
 
 session_start();
 
-if(!isset($_SESSION['log'])){
+if(!isset($_SESSION['log'])) {
     header("Location: ./home");
     exit();
 }
 
 $controller = new ProductController();
+if(count($_GET)>0) {
+    if(isset($_GET['getProductsToDashboard'])) {
+        $response = new stdClass();
+        $response->state = 1;
+        try {
+            $response->products   = $controller->getProductsToDashboard();
+            $response->successMsg = "Se consultaron con éxito los productos";
+        }
+        catch (Exception $e) {
+            $response->state = 0;
+            $response->errorMsg = "Hubo un error al consultar los productos: " . $e->getMessage() . " | Intentá de nuevo.";
+            echo json_encode($response);
+            exit;
+        }
+        echo json_encode($response);
+        exit;
+    }
+    if(isset($_GET['getProductsToSelect'])) { // Falta fix, esto lo consume el formulario de ventas y cotizaciones (por ahora)
+        $response = new stdClass();
+        $response->state = 1;
+        try {
+            $response->products   = $controller->get(""); // Falta fix
+            $response->successMsg = "Se consultaron con éxito los productos";
+        }
+        catch (Exception $e) {
+            $response->state = 0;
+            $response->errorMsg = "Hubo un error al consultar los productos: " . $e->getMessage() . " | Intentá de nuevo.";
+            echo json_encode($response);
+            exit;
+        }
+        echo json_encode($response);
+        exit;
+    }
+}
+
+$controller->viewDashboard();
+
 
 if(count($_POST)>0){
-    if(!isset($_SESSION['perm'])) die ("error 0 controllers/viewProducts");
-    if($_SESSION['perm'] != 1){     // MODIFICAR ESTO PARA QUE EL CONTROL SE HAGA EN CONTROLADOR Y NO EN LA RUTA, YO MANDO EL PERMISO Y EL CONTROLLER ME DICE SI PUEDO O NO HACER LO QUE QUIERO
-        echo "No tiene permiso para modificar y actualizar los productos";
-        exit();
-    } 
+    // if(!isset($_SESSION['perm'])) die ("error 0 controllers/newProduct");
+    // if($_SESSION['perm'] != 1) {     // MODIFICAR ESTO PARA QUE EL CONTROL SE HAGA EN CONTROLADOR Y NO EN LA RUTA, YO MANDO EL PERMISO Y EL CONTROLLER ME DICE SI PUEDO O NO HACER LO QUE QUIERO
+    //     echo "No tiene permiso para dar de alta una cotización o venta";
+    //     exit();
+    // } 
     //Quieren modificar/borrar un producto
     if(isset($_POST['delete'])){ // MODIFICAR ACA PARA QUE ME ELIMINE LOS DATOS FORANEOS
         //Quieren borrar un producto
@@ -49,15 +86,6 @@ if(count($_POST)>0){
     }
 }
 
-if(count($_GET)>0){
-    //QUIEREN CONSULTAR LOS PRODUCTOS
-    if(isset($_GET['get'])){
-        $filterValue = "";
-        if(isset($_GET['filterValue'])) $filterValue = $_GET['filterValue'];
-        echo json_encode($controller->get($filterValue));
-        exit();
-    }
-}
 if(!isset($_SESSION['perm'])) die ("error 3 controllers/viewProducts");
 $controller->viewCRUD($_SESSION['perm']);
 

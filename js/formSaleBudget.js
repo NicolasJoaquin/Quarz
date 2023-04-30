@@ -111,8 +111,9 @@ $(document).ready(function() {
     }
     function getProducts() { // OK
         var filterValue = "";
-        $.get("./viewProducts", {get: true, filterColumn: false, filterValue: filterValue, order: false}, function(response) {
-            products = JSON.parse(response);
+        $.get("./viewProducts", {getProductsToSelect: true, filterColumn: false, filterValue: filterValue, order: false}, function(response) {
+            response = JSON.parse(response);
+            products = response.products; // Falta handle de errores
             products.forEach(function(product) {
                 $("#productToPush").append('<option value=' + product.product_id + '>' + product.description + '</option>');
             });

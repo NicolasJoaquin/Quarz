@@ -15,6 +15,39 @@ class ProductController extends Controller{
         $this->views['form'] = new FormNewProduct();        
     }
 
+    // A partir de acá se actualiza el desarrollo 
+    public function getProductsToDashboard() {
+        $products = $this->models['products']->getProductsListStock($_GET['filterDesc']);
+        return $products;
+    }
+    // Hasta acá
+    public function viewDashboard() { // Falta fix
+        if($perm == 1){ //VISTA DE ADMINISTRADOR, PUEDE HACER TODO
+            $this->views['adminCRUD']->render();
+        }else{          //VISTA DE INVITADO
+            $this->views['normalCRUD']->render();
+        }
+    }
+    public function get($filterValue) { // Falta fix, está función la consume el formulario de ventas y cotizaciones
+        // MODIFICAR ACA
+        try{
+            $ret = $this->models['products']->getProductsListStock($filterValue);
+        }
+        catch(QueryErrorException $error){ //ACA HAY QUE VER COMO DEVOLVER Y MOSTRAR ESTE MSG DE ERROR (PROBABLEMENTE CONDICIONAL DESDE FRONT)
+            $msg = "Se produjo un error intentando consultar los productos con el filtro " . $filterValue . ",
+            la base devuelve el siguiente error: " . $error->getErrorMsg();
+            $ret = $msg;
+        }
+        return $ret;
+    }
+
+
+
+
+
+
+
+
     public function new($product){ 
         $ret = true;
         try{
@@ -57,26 +90,7 @@ class ProductController extends Controller{
         return true;
     }
 
-    public function get($filterValue){
-        // MODIFICAR ACA
-        try{
-            $ret = $this->models['products']->getProductsListStock($filterValue);
-        }
-        catch(QueryErrorException $error){ //ACA HAY QUE VER COMO DEVOLVER Y MOSTRAR ESTE MSG DE ERROR (PROBABLEMENTE CONDICIONAL DESDE FRONT)
-            $msg = "Se produjo un error intentando consultar los productos con el filtro " . $filterValue . ",
-            la base devuelve el siguiente error: " . $error->getErrorMsg();
-            $ret = $msg;
-        }
-        return $ret;
-    }
 
-    public function viewCRUD($perm){
-        if($perm == 1){ //VISTA DE ADMINISTRADOR, PUEDE HACER TODO
-            $this->views['adminCRUD']->render();
-        }else{          //VISTA DE INVITADO
-            $this->views['normalCRUD']->render();
-        }
-    }
 
     public function viewForm($perm){
         if($perm == 1){

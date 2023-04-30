@@ -23,6 +23,10 @@
     <?php echo $this->includes ?>
     
     <style>
+      main {
+        width: 80%;
+      }
+
       main > .container {
         padding: 80px 15px 0;
       }

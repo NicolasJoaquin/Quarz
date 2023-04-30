@@ -23,7 +23,8 @@ if(count($_POST)>0) {
         $response->state = 1;
         try {
             $response->successMsg = $controller->newBudget();
-        }catch (Exception $e) {
+        }
+        catch (Exception $e) {
             $response->state = 0;
             $response->errorMsg = "Hubo un error al dar de alta el presupuesto: " . $e->getMessage();
             echo json_encode($response);

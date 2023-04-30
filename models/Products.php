@@ -31,10 +31,10 @@ class Products extends Model{
         return $this->db->fetchAll();
     }
 
-    public function getProductsListStock($filterValue) { // Por ahora sólo depósito Hur. y lista minorista
+    public function getProductsListStock($filterValue) { // Por ahora sólo depósito Hur. y lista minorista FALTA FIX
         // VALIDO FILTRO
         if(!empty($filterValue)){
-            $filterValue = substr($filterValue, 0, 50);
+            $filterValue = substr($filterValue, 0, 100);
             $filterValue = $this->db->escape($filterValue);
             $filterValue = $this->db->escapeWildcards($filterValue);
         }
