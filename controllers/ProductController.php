@@ -10,8 +10,9 @@ require_once '../views/FormNewProduct.php';
 class ProductController extends Controller{
     public function __construct(){
         $this->models['products'] = new Products();
-        $this->views['adminCRUD'] = new ViewProducts();
-        $this->views['normalCRUD'] = new ViewProductsRestricted();
+        // $this->views['adminCRUD'] = new ViewProducts();
+        // $this->views['normalCRUD'] = new ViewProductsRestricted();
+        $this->views['dashboard'] = new ViewProducts(includeJs: "js/viewProducts.js", includeCSS: "css/viewProducts.css");
         $this->views['form'] = new FormNewProduct();        
     }
 
@@ -22,11 +23,7 @@ class ProductController extends Controller{
     }
     // Hasta acá
     public function viewDashboard() { // Falta fix
-        if($perm == 1){ //VISTA DE ADMINISTRADOR, PUEDE HACER TODO
-            $this->views['adminCRUD']->render();
-        }else{          //VISTA DE INVITADO
-            $this->views['normalCRUD']->render();
-        }
+        $this->views['dashboard']->render();
     }
     public function get($filterValue) { // Falta fix, está función la consume el formulario de ventas y cotizaciones
         // MODIFICAR ACA
@@ -40,6 +37,9 @@ class ProductController extends Controller{
         }
         return $ret;
     }
+
+
+
 
 
 

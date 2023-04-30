@@ -49,14 +49,14 @@ if(count($_GET)>0) {
 $controller->viewDashboard();
 
 
-if(count($_POST)>0){
+if(count($_POST)>0) {
     // if(!isset($_SESSION['perm'])) die ("error 0 controllers/newProduct");
     // if($_SESSION['perm'] != 1) {     // MODIFICAR ESTO PARA QUE EL CONTROL SE HAGA EN CONTROLADOR Y NO EN LA RUTA, YO MANDO EL PERMISO Y EL CONTROLLER ME DICE SI PUEDO O NO HACER LO QUE QUIERO
     //     echo "No tiene permiso para dar de alta una cotización o venta";
     //     exit();
     // } 
     //Quieren modificar/borrar un producto
-    if(isset($_POST['delete'])){ // MODIFICAR ACA PARA QUE ME ELIMINE LOS DATOS FORANEOS
+    if(isset($_POST['delete'])) { // MODIFICAR ACA PARA QUE ME ELIMINE LOS DATOS FORANEOS
         //Quieren borrar un producto
         if(!isset($_POST['product_id'])) die("error 1 controllers/viewProducts DELETE");//Valido en controlador  
         // ACA FALTA HACER LA VERIFICACIÓN DE PERMISOS ANTES DE BORRAR
@@ -65,7 +65,7 @@ if(count($_POST)>0){
         exit();
     }
 
-    if(isset($_POST['update'])){
+    if(isset($_POST['update'])) {
         //Quieren modificar un producto
         if(!isset($_POST['product'])) die("error 2 controllers/viewProducts UPDATE");
         // ACA FALTA HACER LA VERIFICACIÓN DE PERMISOS ANTES DE HACER UPDATE
@@ -85,8 +85,5 @@ if(count($_POST)>0){
         }
     }
 }
-
-if(!isset($_SESSION['perm'])) die ("error 3 controllers/viewProducts");
-$controller->viewCRUD($_SESSION['perm']);
 
 ?>
