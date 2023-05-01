@@ -23,6 +23,42 @@ class Products extends Model{
             throw new Exception("Hubo un error al consultar el producto #$id");
         return $product;
     }
+    //ALTAS, BAJAS Y MODIFICACIONES------------------------------------------------------------------------------------------------------------------
+    public function updateProduct($product) {
+        $this->db->validateSanitizeId($product->product_id, "El identificador del producto es inválido");
+
+        $this->db->validateSanitizeFloat($product->cost_price, "El costo del producto es inválido");
+        if($product->cost_price < 0)  
+            throw new Exception("El costo del producto no puede ser menor a 0");
+
+        $this->db->validateSanitizeFloat($product->product_price, "El precio del producto es inválido");
+        if($product->product_price < 0)  
+            throw new Exception("El precio del producto no puede ser menor a 0");
+
+        $this->db->validateSanitizeFloat($product->product_quantity, "La cantidad del producto es inválida");
+        if($product->product_quantity < 0)  
+            throw new Exception("La cantidad del producto no puede ser menor a 0");
+
+        if(!empty($product->cost_price)) {
+            $this->db->query("UPDATE products SET 
+                                cost_price = $product->cost_price
+                                WHERE product_id = $product->product_id");
+            $this->db->validateLastQuery();
+        }
+        if(!empty($product->product_price)) {
+            $this->db->query("UPDATE sale_prices SET 
+                                product_price = $product->product_price
+                                WHERE product_id = $product->product_id AND price_list_id = 1"); // Sólo lista 1 por ahora
+            $this->db->validateLastQuery();
+        }
+        if(!empty($product->product_quantity)) {
+            $this->db->query("UPDATE stock_items SET 
+                                quantity = $product->product_quantity
+                                WHERE product_id = $product->product_id AND warehouse_id = 1"); // Sólo depósito Hurlingham por ahora
+            $this->db->validateLastQuery();
+        }
+        return true;
+    }
     // Hasta acá
     
     public function getAll(){ //MODIFICAR LIMIT
@@ -111,34 +147,6 @@ class Products extends Model{
         return true;
     }
 
-    public function updateProduct($product){
-        //Valido id
-        if(!ctype_digit($product->id)) die ("error 0 updateProduct/Products (modelo)");
-
-        //Valido description
-        if(strlen($product->description) > 50) die ("error 1 updateProduct/Products (modelo)");
-        if(strlen($product->description) < 4) die ("error 2 updateProduct/Products (modelo)");  
-        $product->description = $this->db->escape($product->description);
-
-        //Valido cost_price
-        if(!is_numeric($product->cost_price)) die ("error 3 newProduct/Products (modelo)");
-
-        //Valido packing_unit
-        if(strlen($product->packing_unit) > 255 ) die ("error 4 updateProduct/Products (modelo)");
-        if(strlen($product->packing_unit) < 3 ) die ("error 5 updateProduct/Products (modelo)");  
-        $product->packing_unit = $this->db->escape($product->packing_unit);
-
-        //Valido provider_id
-        if(!ctype_digit($product->provider_id)) die ("error 6 newProduct/Products (modelo)");
-
-         //QUERY UPDATE
-         $this->db->query("UPDATE products
-                            SET description = '$product->description', provider_id = '$product->provider_id', cost_price = '$product->cost_price', packing_unit = '$product->packing_unit'
-                            WHERE product_id = $product->id");
-        $errno = $this->db->getErrorNo();
-        if($errno !== 0) throw new QueryErrorException($this->db->getError());  
-        return true;
-    }
 }
 
 ?>

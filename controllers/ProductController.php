@@ -30,6 +30,29 @@ class ProductController extends Controller{
         $this->views['productDetail']->product = $product;
         $this->views['productDetail']->render();
     }
+    public function modifyProduct() {
+        $product = $this->validateExistProduct();
+        $this->validateNotEmptyProduct($product);
+        $this->models['products']->updateProduct($product);
+        $msg = "Se modificó correctamente el producto #$product->product_id.";
+        return $msg;
+    }
+    public function validateExistProduct() {
+        if(!isset($_POST['product'])) throw new Exception("Envíe un producto");
+        $product = json_decode($_POST['product']);
+        if(!isset($product->product_id)) throw new Exception("Falta el identificador del producto");
+        if(!isset($product->cost_price) && !isset($product->product_price) && !isset($product->product_quantity)) 
+            throw new Exception("Envíe algún dato del producto a modificar");
+        return $product;
+    }
+    public function validateNotEmptyProduct($product) {
+        if(empty($product->product_id)) throw new Exception("El identificador del producto está vacío");
+        if( (empty($product->cost_price) && $product->cost_price != 0) && 
+            (empty($product->product_price) && $product->product_price != 0) && 
+            (empty($product->product_quantity) && $product->product_quantity != 0) ) 
+            throw new Exception("Envíe algún dato del producto a modificar");
+        return true;
+    }
 
     // Hasta acá
     public function get($filterValue) { // Falta fix, está función la consume el formulario de ventas y cotizaciones
