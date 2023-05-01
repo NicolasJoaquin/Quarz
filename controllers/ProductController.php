@@ -4,16 +4,16 @@
 require_once '../fw/fw.php'; //archivo que tiene todos los includes y requires del framework
 require_once '../models/Products.php';
 require_once '../views/ViewProducts.php';
+require_once '../views/ViewProduct.php';
 require_once '../views/ViewProductsRestricted.php';
 require_once '../views/FormNewProduct.php';
 
 class ProductController extends Controller{
     public function __construct(){
-        $this->models['products'] = new Products();
-        // $this->views['adminCRUD'] = new ViewProducts();
-        // $this->views['normalCRUD'] = new ViewProductsRestricted();
-        $this->views['dashboard'] = new ViewProducts(includeJs: "js/viewProducts.js", includeCSS: "css/viewProducts.css");
-        $this->views['form'] = new FormNewProduct();        
+        $this->models['products']     = new Products();
+        $this->views['dashboard']     = new ViewProducts(includeJs: "js/viewProducts.js", includeCSS: "css/viewProducts.css");
+        $this->views['productDetail'] = new ViewProduct(includeJs: "js/viewProduct.js", includeCSS: "css/viewProduct.css");
+        $this->views['form']          = new FormNewProduct();        
     }
 
     // A partir de acá se actualiza el desarrollo 
@@ -21,10 +21,17 @@ class ProductController extends Controller{
         $products = $this->models['products']->getProductsListStock($_GET['filterDesc']);
         return $products;
     }
-    // Hasta acá
-    public function viewDashboard() { // Falta fix
+    public function viewDashboard() { 
         $this->views['dashboard']->render();
     }
+    public function viewProductDetail() { 
+        if(empty($_GET['id'])) throw new Exception("Falta el identificador del producto a consultar");
+        $product = $this->models['products']->getProductDetail($_GET['id']);
+        $this->views['productDetail']->product = $product;
+        $this->views['productDetail']->render();
+    }
+
+    // Hasta acá
     public function get($filterValue) { // Falta fix, está función la consume el formulario de ventas y cotizaciones
         // MODIFICAR ACA
         try{

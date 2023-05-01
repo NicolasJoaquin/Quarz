@@ -26,7 +26,7 @@
         <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-1">
             <button type="button" class="btn btn-outline-secondary btn-sm">Limpiar detalle</button>
         </div>
-        <div class="table-wrapper">
+        <div class="table-wrapper scrolleable mb-2">
             <table class="table table-striped table-hover">
                 <thead class="table-dark">
                     <tr>

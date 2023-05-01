@@ -45,8 +45,8 @@ $(document).ready(function() {
         $("#productsTableBody").empty();
     }
     function viewProduct(prodId) {
-        window.location = "./home";
-        alert("redirección a vista ampliada # " + prodId);
+        window.location = "./viewProduct-" + prodId;
+        // alert("redirección a vista ampliada # " + prodId);
     }  
     // Init
     getFilter();

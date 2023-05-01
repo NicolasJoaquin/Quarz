@@ -6,6 +6,10 @@ RewriteRule ^home$ controllers/home.php
 
 RewriteRule ^viewClients$ controllers/viewClients.php
 RewriteRule ^viewProducts$ controllers/viewProducts.php
+
+RewriteRule ^viewProduct$ controllers/viewProduct.php
+RewriteRule ^viewProduct-([0-9]+)$ controllers/viewProduct.php?id=$1 [NC,L]
+
 RewriteRule ^viewStock$ controllers/viewStock.php
 RewriteRule ^viewSales$ controllers/viewSales.php
 RewriteRule ^viewProviders$ controllers/viewProviders.php

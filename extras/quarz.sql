@@ -1039,3 +1039,7 @@ ALTER TABLE `budgets_items` CHANGE `sale_price` `sale_price` DOUBLE(10,2) UNSIGN
 ALTER TABLE `budgets` CHANGE `total` `total` DOUBLE(10,2) UNSIGNED NOT NULL;
 -- Cambio de tipo en tabla stock_items
 ALTER TABLE `stock_items` CHANGE `quantity` `quantity` DOUBLE(10,2) UNSIGNED NOT NULL DEFAULT '0';
+-- Cambio de tipo en tabla products
+ALTER TABLE `products` CHANGE `cost_price` `cost_price` DOUBLE(10,2) UNSIGNED NOT NULL;
+-- Cambio de tipo en tabla sale_prices
+ALTER TABLE `sale_prices` CHANGE `sale_factor` `sale_factor` DOUBLE(10,2) UNSIGNED NOT NULL, CHANGE `product_price` `product_price` DOUBLE(10,2) UNSIGNED NOT NULL;

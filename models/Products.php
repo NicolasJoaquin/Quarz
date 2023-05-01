@@ -6,6 +6,25 @@ require_once '../fw/fw.php';
 class Products extends Model{
 
     //GETERS------------------------------------------------------------------------------------------------------------------------
+    // Modificado desde acá
+    public function getProductDetail($id) {
+        $this->db->validateSanitizeId($id, "El identificador del producto es inválido");
+        //QUERY INSERT
+        $this->db->query("SELECT prod.product_id, prod.description AS product_name, prov.name AS provider_name,
+                            prod.cost_price, prod.packing_unit, stock.quantity AS product_quantity, prices.product_price 
+                            FROM products AS prod
+                            LEFT JOIN stock_items AS stock ON prod.product_id = stock.product_id 
+                            LEFT JOIN sale_prices AS prices ON prod.product_id = prices.product_id 
+                            LEFT JOIN providers AS prov ON prod.provider_id = prov.provider_id 
+                            WHERE stock.warehouse_id = 1 AND prices.price_list_id = 1 AND prod.product_id = $id"); 
+        $this->db->validateLastQuery();
+        $product = $this->db->fetch();
+        if($this->db->numRows() != 1)
+            throw new Exception("Hubo un error al consultar el producto #$id");
+        return $product;
+    }
+    // Hasta acá
+    
     public function getAll(){ //MODIFICAR LIMIT
         $this->db->query("SELECT *
                             FROM products");

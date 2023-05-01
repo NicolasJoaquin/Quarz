@@ -1,7 +1,12 @@
 tbody {
-   max-height: 400px !important;
+   /* max-height: 400px !important; */
    border-color: black !important;
-   overflow-y: auto !important; 
+   /* overflow-y: auto !important;  */
+}
+
+.scrolleable {
+    height: 350px !important;
+    overflow-y: auto !important; 
 }
 
 #totalPrice {
