@@ -39,8 +39,8 @@ foreach($this->changes as $k => $change) {
 ?>  
                     <tr id="<?php echo $change['stock_change_id'] ?>">
                         <td class="col-md-3"><?php echo !empty($change['user_name']) ? $change['user_name'] : "-" ?></td>
-                        <td class="col-md-2"><?php echo !empty($change['sale_id']) ? sprintf("%'.04d\n", $change['sale_id']) : "-" ?></td>
-                        <td class="col-md-2"><?php echo !empty($change['buy_id']) ? sprintf("%'.04d\n", $change['buy_id']) : "-" ?></td>
+                        <td class="col-md-2"><?php echo !empty($change['sale_id']) ? "#" . sprintf("%'.04d\n", $change['sale_id']) : "-" ?></td>
+                        <td class="col-md-2"><?php echo !empty($change['buy_id']) ? "#" . sprintf("%'.04d\n", $change['buy_id']) : "-" ?></td>
                         <td class="col-md-3"> <?php echo $change['quantity'] ?>
 <?php 
 $qDif = $change['quantity'] - $change['old_quantity'];

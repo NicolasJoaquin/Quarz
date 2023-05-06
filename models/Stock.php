@@ -50,11 +50,11 @@ class Stock extends Model{
         return true;
     }
 
-    public function discountQuantity($item) { //FALTA IMPLEMENTACIÓN PARA MÁS DE UN DEPÓSITO // OK
-        $this->validateItem($item);
+    public function discountQuantity($quantity, $prodId) { //FALTA IMPLEMENTACIÓN PARA MÁS DE UN DEPÓSITO 
+        $this->validateItem($quantity, $prodId);
 
         //QUERY UPDATE Y VERIFICACIÓN
-        $updateQuery = "UPDATE stock_items AS s SET s.quantity = s.quantity - $item->quantity WHERE product_id = $item->product_id";
+        $updateQuery = "UPDATE stock_items AS s SET s.quantity = s.quantity - $quantity WHERE product_id = $prodId";
         $this->db->query($updateQuery);
         $this->db->validateLastQuery();
         return true;
@@ -62,46 +62,68 @@ class Stock extends Model{
 
     public function discountQuantities($items) {
         foreach($items as $item) {
-            $this->discountQuantity($item);
+            $this->discountQuantity($item->quantity, $item->product_id);
         }
         return true;
     }
 
-    public function discountValidatedQuantity($item) { 
-        $this->validateItem($item); // Ya se valida en discountQuantity()
+    public function discountValidatedQuantity($quantity, $prodId) { 
+        if(!$this->validateStockItem($quantity, $prodId))
+            throw new Exception("El stock del producto #$prodId no es suficiente");
 
-        if(!$this->validateStockItem($item->product_id, $item->quantity))
-            throw new Exception("El stock del producto #$item->product_id no es suficiente");
-
-        $this->discountQuantity($item);
+        $this->discountQuantity($quantity, $prodId);
         return true;
     }
 
-    public function discountValidatedQuantities($items) {
-        $this->validateItems($items); // Ya se valida en discountQuantitites()
-
+    public function discountValidatedQuantities($items) { 
         $this->validateStockItems($items);
-    
         $this->discountQuantities($items);
-
         return true;
     }
 
     public function registerStockChanges($saleId) {
-        
+        // Items de la venta
+        $this->db->query("SELECT si.sale_item_id, si.sale_id, si.product_id, si.quantity, s.user_id
+                        FROM sales_items AS si
+                        LEFT JOIN sales AS s ON si.sale_id = s.sale_id
+                        WHERE s.sale_id = $saleId"); 
+        $this->db->validateLastQuery();
+        $salesItems = $this->db->fetchAll();
+        foreach($salesItems as $saleItem) {
+            $saleItemId = $saleItem['sale_item_id'];
+            $prodId     = $saleItem['product_id'];
+            $quantity   = $saleItem['quantity'];
+            $user       = $saleItem['user_id']; 
+            // Stock anterior del producto
+            $this->db->query("SELECT stock_item_id, quantity
+                            FROM stock_items 
+                            WHERE product_id = $prodId AND warehouse_id = 1"); // Sólo depósito 1 por ahora
+            $this->db->validateLastQuery();
+            $stockItem   = $this->db->fetch();
+            $stockItemId = $stockItem['stock_item_id'];
+            $oldQuantity = $stockItem['quantity'];
+
+            $newQuantity = $oldQuantity - $quantity;
+            // Guardar cambio y descontar stock
+            $this->db->query("INSERT INTO stock_changes (user_id, sale_item_id, stock_item_id, quantity, old_quantity) 
+                            VALUES ($user, $saleItemId, $stockItemId, $newQuantity, $oldQuantity)");
+            $this->db->validateLastQuery();
+
+            $this->discountQuantity($quantity, $prodId);
+        }
+        return true;
     }
 
     //VERIFICADORES------------------------------------------------------------------------------------------------------------------
-    public function validateStockItem($prodId, $quantity) { 
-        $this->db->validateSanitizeId($prodId, "El identificador del producto es inválido");
-        $this->db->validateSanitizeFloat($quantity, "La cantidad del producto es inválida");
-        // REVISAR
+    public function validateStockItem($quantity, $prodId) { 
+        $this->validateItem($quantity, $prodId);
+
         if($quantity <= 0)  
             throw new Exception("La cantidad del producto #$prodId no puede ser menor o igual a 0, no se puede descontar del stock");
 
         // $query = "SELECT product_id, SUM(quantity) AS total_quantity 
         //             FROM `stock_items` WHERE product_id = $prodId 
-        //             GROUP BY product_id"; // Esto aplica para todos los depósito, deshabilitado por ahora
+        //             GROUP BY product_id"; // Esto aplica para todos los depósitos, deshabilitado por ahora
         $query = "SELECT product_id, quantity AS total_quantity 
                     FROM stock_items WHERE product_id = $prodId AND warehouse_id = 1
                     GROUP BY product_id"; // Sólo depósito 1
@@ -113,7 +135,6 @@ class Stock extends Model{
     }
 
     public function validateStockItems($items) { 
-        // $this->validateItems($items); // Revisar, los datos ya se validan en validateStockItem()
         foreach($items as $item) {
             $quantity = 0;
             $prodId   = $item->product_id;
@@ -122,25 +143,25 @@ class Stock extends Model{
                 if($prodId == $item2->product_id) 
                     $quantity += $item2->quantity;
             }
-            if(!$this->validateStockItem($prodId, $quantity))
+            if(!$this->validateStockItem($quantity, $prodId))
                 throw new Exception("El stock del producto #$prodId- $prodDesc no es suficiente.");
         }
         return true;
     }
 
-    public function validateItem(&$item) {
-        $item->product_id = (int)trim($item->product_id);
-        $this->db->validateSanitizeId($item->product_id, "El identificador del producto #$item->product_id es inválido");
+    public function validateItem(&$quantity, &$prodId) {
+        $prodId = (int)trim($prodId);
+        $this->db->validateSanitizeId($prodId, "El identificador del producto #$prodId es inválido");
 
-        $item->quantity = (float)trim($item->quantity);
-        $this->db->validateSanitizeFloat($item->quantity, "La cantidad del producto #$item->product_id es inválida");
+        $quantity = (float)trim($quantity);
+        $this->db->validateSanitizeFloat($quantity, "La cantidad del producto #$prodId es inválida");
 
         return true;
     }
 
     public function validateItems(&$items) { 
         foreach($items as $item) {
-            if(!$this->validateItem($item))
+            if(!$this->validateItem($item->quantity, $item->product_id))
                 return false;
         }
         return true;

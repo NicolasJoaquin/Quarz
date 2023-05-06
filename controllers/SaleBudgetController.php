@@ -92,12 +92,10 @@ class SaleBudgetController extends Controller {
     public function newSale() {
         $sale = $this->validateExistSale();
         $this->validateNotEmptySale($sale);
-        //$this->models['stock']->discountValidatedQuantities($sale->items); // Acá arroja excepciones si no hay stock, la venta no se genera
         $this->models['stock']->validateStockItems($sale->items); // Acá arroja excepciones si no hay stock, la venta no se genera
         $sale->id = $this->models['sales']->newSale($sale);
         $this->models['sales']->newSaleItems($sale->items, $sale->id);
-        $this->models['stock']->discountQuantities($sale->id);
-        $this->models['stock']->registerStockChanges($sale->id);
+        $this->models['stock']->registerStockChanges($sale->id); // Acá se hacen los descuentos
         $msg = "Se dió de alta la venta #$sale->id";
         return $msg;
     }
