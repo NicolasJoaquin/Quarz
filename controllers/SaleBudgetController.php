@@ -43,21 +43,6 @@ class SaleBudgetController extends Controller {
         return true;
     }
 
-    // public function validateStockOfProducts($items) {
-    //     foreach($items as $item) {
-    //         $prodId   = $item->product_id;
-    //         $quantity = $item->quantity;
-    //         $prodDesc = $item->description;
-    //         foreach($items as $item2) {
-    //             if($prodId == $item2->product_id)
-    //                 $quantity += $item2->quantity;
-    //         }
-    //         if(!$this->models['stock']->validateStock($prodId, $quantity))
-    //             throw new Exception("El stock del producto $prodDesc no es suficiente");
-    //     }
-    //     return true;
-    // }
-
     public function validateExistBudget() {
         if(!isset($_POST['budget'])) throw new Exception("Envíe una cotización para dar de alta");
         $budget = json_decode($_POST['budget']);
@@ -107,9 +92,12 @@ class SaleBudgetController extends Controller {
     public function newSale() {
         $sale = $this->validateExistSale();
         $this->validateNotEmptySale($sale);
-        $this->models['stock']->discountValidatedQuantities($sale->items); // Acá arroja excepciones si no hay stock, la venta no se genera
+        //$this->models['stock']->discountValidatedQuantities($sale->items); // Acá arroja excepciones si no hay stock, la venta no se genera
+        $this->models['stock']->validateStockItems($sale->items); // Acá arroja excepciones si no hay stock, la venta no se genera
         $sale->id = $this->models['sales']->newSale($sale);
         $this->models['sales']->newSaleItems($sale->items, $sale->id);
+        $this->models['stock']->discountQuantities($sale->id);
+        $this->models['stock']->registerStockChanges($sale->id);
         $msg = "Se dió de alta la venta #$sale->id";
         return $msg;
     }

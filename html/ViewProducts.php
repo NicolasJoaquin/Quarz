@@ -11,15 +11,11 @@
         </p>
     </div>
 </div>
-<!-- COLUMNA DERECHA -->
 <div class="row g-5">
     <div class="col-md-12 col-lg-12 order-md-last">
         <div class="col-sm-12 mb-4">
             <label for="filter" class="form-label">Filtro</label>
             <input type="text" class="form-control" id="filter" placeholder="Filtre por descripción del producto" value="" required="" >
-            <!-- <div class="invalid-feedback">
-                Se requiere un nombre válido.
-            </div> -->
         </div>
         <div class="table-wrapper">
             <table class="table table-striped table-hover">

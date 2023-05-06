@@ -31,13 +31,49 @@ if(count($_POST)>0) {
 }
 
 if(count($_GET)>0) {
-    if(isset($_GET['id'])) {
+    if(isset($_GET['viewProductDetail'])) {
         try {
             $controller->viewProductDetail();
         }
         catch (Exception $e) { 
             $response = new stdClass();
             $response->errorMsg = "Hubo un error al consultar el producto: " . $e->getMessage();
+            echo json_encode($response);
+            header("Location: ./viewProducts");
+        }
+        exit();
+    }
+    if(isset($_GET['viewProductChanges'])) {
+        try {
+            $controller->viewProductChanges();
+        }
+        catch (Exception $e) { 
+            $response = new stdClass();
+            $response->errorMsg = "Hubo un error al consultar los cambios del producto: " . $e->getMessage();
+            echo json_encode($response);
+            header("Location: ./viewProducts");
+        }
+        exit();
+    }
+    if(isset($_GET['viewPriceChanges'])) {
+        try {
+            $controller->viewPriceChanges();
+        }
+        catch (Exception $e) { 
+            $response = new stdClass();
+            $response->errorMsg = "Hubo un error al consultar los cambios del producto: " . $e->getMessage();
+            echo json_encode($response);
+            header("Location: ./viewProducts");
+        }
+        exit();
+    }
+    if(isset($_GET['viewStockChanges'])) {
+        try {
+            $controller->viewStockChanges();
+        }
+        catch (Exception $e) { 
+            $response = new stdClass();
+            $response->errorMsg = "Hubo un error al consultar los cambios del producto: " . $e->getMessage();
             echo json_encode($response);
             header("Location: ./viewProducts");
         }

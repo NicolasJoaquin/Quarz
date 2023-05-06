@@ -1,0 +1,16 @@
+.scrolleable {
+    height: 250px !important;
+    overflow-y: auto !important; 
+}
+
+.container {
+    padding: 50px 15px 0 !important;
+}
+
+.table {
+    margin-bottom: 0% !important;
+}
+
+p {
+    display: inline !important;
+}

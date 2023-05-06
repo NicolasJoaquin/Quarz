@@ -5,9 +5,16 @@ $(document).ready(function() {
     $("#goBack").on("click", function() {
         window.location = "./viewProducts";
     }); 
-    $("#viewMoves").on("click", function() { // Falta fix
-        // window.location = "./viewProducts";
+    $("#viewProductChanges").on("click", function() { 
+        window.location = "./viewProduct-" + product.product_id + "-product-changes";
     }); 
+    $("#viewPriceChanges").on("click", function() { 
+        window.location = "./viewProduct-" + product.product_id + "-price-changes";
+    }); 
+    $("#viewStockChanges").on("click", function() { 
+        window.location = "./viewProduct-" + product.product_id + "-stock-changes";
+    }); 
+
     $("#modifyProduct").on("click", function() { 
         setProduct();
         modifyProduct();

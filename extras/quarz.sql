@@ -1043,3 +1043,76 @@ ALTER TABLE `stock_items` CHANGE `quantity` `quantity` DOUBLE(10,2) UNSIGNED NOT
 ALTER TABLE `products` CHANGE `cost_price` `cost_price` DOUBLE(10,2) UNSIGNED NOT NULL;
 -- Cambio de tipo en tabla sale_prices
 ALTER TABLE `sale_prices` CHANGE `sale_factor` `sale_factor` DOUBLE(10,2) UNSIGNED NOT NULL, CHANGE `product_price` `product_price` DOUBLE(10,2) UNSIGNED NOT NULL;
+-- Cambio de tipo en tabla buys_items
+ALTER TABLE `buys_items` CHANGE `cost_price` `cost_price` DOUBLE(10,2) UNSIGNED NOT NULL, CHANGE `quantity` `quantity` DOUBLE(10,2) UNSIGNED NOT NULL, CHANGE `total_cost` `total_cost` DOUBLE(10,2) UNSIGNED AS (`cost_price` * `quantity`) VIRTUAL;
+
+-- Tablas de movimientos de items en stock, cambios en productos y cambios en items de las listas de precio
+CREATE TABLE `product_changes` (
+  `product_change_id` INT(10) UNSIGNED NOT NULL,
+  `user_id` INT(10) UNSIGNED NOT NULL,
+  `product_id` INT(10) UNSIGNED NOT NULL,
+  `cost_price` DOUBLE(10,2) UNSIGNED NOT NULL,
+  `first_charge` TINYINT(3) UNSIGNED NOT NULL DEFAULT 0,
+  `date` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+ALTER TABLE `product_changes`
+  ADD PRIMARY KEY (`product_change_id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `product_id` (`product_id`);
+ALTER TABLE `product_changes`
+  MODIFY `product_change_id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE `product_changes`
+  ADD CONSTRAINT `product_changes_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT `product_changes_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+CREATE TABLE `stock_changes` (
+  `stock_change_id` INT(10) UNSIGNED NOT NULL,
+  `user_id` INT(10) UNSIGNED DEFAULT NULL,
+  `sale_item_id` INT(10) UNSIGNED DEFAULT NULL,
+  `buy_item_id` INT(10) UNSIGNED DEFAULT NULL,
+  `stock_item_id` INT(10) UNSIGNED NOT NULL,
+  `quantity` DOUBLE(10,2) UNSIGNED NOT NULL,
+  `first_charge` TINYINT(3) UNSIGNED NOT NULL DEFAULT 0,
+  `date` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+ALTER TABLE `stock_changes`
+  ADD PRIMARY KEY (`stock_change_id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `sale_item_id` (`sale_item_id`),
+  ADD KEY `buy_item_id` (`buy_item_id`),
+  ADD KEY `stock_item_id` (`stock_item_id`);
+ALTER TABLE `stock_changes`
+  MODIFY `stock_change_id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE `stock_changes`
+  ADD CONSTRAINT `stock_changes_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT `stock_changes_sale_item` FOREIGN KEY (`sale_item_id`) REFERENCES `sales_items` (`sale_item_id`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT `stock_changes_buy_item` FOREIGN KEY (`buy_item_id`) REFERENCES `buys_items` (`buy_item_id`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT `stock_changes_stock_item` FOREIGN KEY (`stock_item_id`) REFERENCES `stock_items` (`stock_item_id`) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+CREATE TABLE `price_changes` (
+  `price_change_id` INT(10) UNSIGNED NOT NULL,
+  `user_id` INT(10) UNSIGNED NOT NULL,
+  `sale_price_id` INT(10) UNSIGNED NOT NULL,
+  `product_price` DOUBLE(10,2) UNSIGNED NOT NULL,
+  `first_charge` TINYINT(3) UNSIGNED NOT NULL DEFAULT 0,
+  `date` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+ALTER TABLE `price_changes`
+  ADD PRIMARY KEY (`price_change_id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `sale_price_id` (`sale_price_id`);
+ALTER TABLE `price_changes`
+  MODIFY `price_change_id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE `price_changes`
+  ADD CONSTRAINT `price_changes_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT `price_changes_sale_price` FOREIGN KEY (`sale_price_id`) REFERENCES `sale_prices` (`sale_price_id`) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+-- Agregado de columna old_quantity a stock_changes
+ALTER TABLE stock_changes
+  ADD COLUMN old_quantity DOUBLE(10,2) UNSIGNED DEFAULT NULL AFTER quantity;
+-- Agregado de columna old_cost_price a product_changes
+ALTER TABLE product_changes
+  ADD COLUMN old_cost_price DOUBLE(10,2) UNSIGNED DEFAULT NULL AFTER cost_price;
+-- Agregado de columna old_product_price a price_changes
+ALTER TABLE price_changes
+  ADD COLUMN old_product_price DOUBLE(10,2) UNSIGNED DEFAULT NULL AFTER product_price;

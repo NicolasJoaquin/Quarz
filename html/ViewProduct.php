@@ -1,16 +1,3 @@
-
-<!-- <div class="row">
-    <div class="text-right col-md-6">
-        <img class="d-block mx-auto mb-none" src="./extras/quarz-logo.png" alt="" width="72" height="90">
-        <h2 class="text-center">Visualización de productos</h2>
-    </div>
-    <div class="text-right col-md-6 mt-5">
-        <p class="lead">
-            Podés filtrar y ordenar los productos por su nombre. <br>
-            Hacé click en la fila de cualquier producto para ver su detalle o editarlo. <br>
-        </p>
-    </div>
-</div> -->
 <h4>Detalle del producto</h4>
 <div class="row">
     <div class="col-md-2">
@@ -72,10 +59,22 @@
 <hr>
 <h4>Acciones</h4>
 <div class="row">
-    <div class="col-2"> 
-        <button class="btn btn-success" type="button" id="viewMoves">
+    <div class="col-3"> 
+        <button class="btn btn-success" type="button" id="viewProductChanges">
             <i class="bi bi-list-ul"></i>
-            Ver movimientos
+            Ver cambios de costos
+        </button>
+    </div>
+    <div class="col-3"> 
+        <button class="btn btn-success" type="button" id="viewPriceChanges">
+            <i class="bi bi-list-ul"></i>
+            Ver cambios de precios
+        </button>
+    </div>
+    <div class="col-3"> 
+        <button class="btn btn-success" type="button" id="viewStockChanges">
+            <i class="bi bi-list-ul"></i>
+            Ver movimientos de stock
         </button>
     </div>
     <div class="col-2">

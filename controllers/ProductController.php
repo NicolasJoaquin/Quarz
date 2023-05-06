@@ -5,15 +5,25 @@ require_once '../fw/fw.php'; //archivo que tiene todos los includes y requires d
 require_once '../models/Products.php';
 require_once '../views/ViewProducts.php';
 require_once '../views/ViewProduct.php';
+
+require_once '../views/ViewProductChanges.php';
+require_once '../views/ViewPriceChanges.php';
+require_once '../views/ViewStockChanges.php';
+
 require_once '../views/ViewProductsRestricted.php';
 require_once '../views/FormNewProduct.php';
 
 class ProductController extends Controller{
     public function __construct(){
-        $this->models['products']     = new Products();
-        $this->views['dashboard']     = new ViewProducts(includeJs: "js/viewProducts.js", includeCSS: "css/viewProducts.css");
-        $this->views['productDetail'] = new ViewProduct(includeJs: "js/viewProduct.js", includeCSS: "css/viewProduct.css");
-        $this->views['form']          = new FormNewProduct();        
+        $this->models['products']      = new Products();
+        $this->views['dashboard']      = new ViewProducts(includeJs: "js/viewProducts.js", includeCSS: "css/viewProducts.css");
+        $this->views['productDetail']  = new ViewProduct(includeJs: "js/viewProduct.js", includeCSS: "css/viewProduct.css");
+        
+        $this->views['productChanges'] = new ViewProductChanges(includeJs: "js/viewProductChanges.js", includeCSS: "css/viewProductChanges.css");
+        $this->views['priceChanges']   = new ViewPriceChanges(includeJs: "js/viewPriceChanges.js", includeCSS: "css/viewPriceChanges.css");
+        $this->views['stockChanges']   = new ViewStockChanges(includeJs: "js/viewStockChanges.js", includeCSS: "css/viewStockChanges.css");
+        
+        $this->views['form']           = new FormNewProduct();        
     }
 
     // A partir de acá se actualiza el desarrollo 
@@ -25,7 +35,8 @@ class ProductController extends Controller{
         $this->views['dashboard']->render();
     }
     public function viewProductDetail() { 
-        if(empty($_GET['id'])) throw new Exception("Falta el identificador del producto a consultar");
+        if(!isset($_GET['id'])) throw new Exception("Falta el identificador del producto a consultar");
+        if(empty($_GET['id'])) throw new Exception("El identificador del producto a consultar está vacío o es inválido");
         $product = $this->models['products']->getProductDetail($_GET['id']);
         $this->views['productDetail']->product = $product;
         $this->views['productDetail']->render();
@@ -52,6 +63,27 @@ class ProductController extends Controller{
             (empty($product->product_quantity) && $product->product_quantity != 0) ) 
             throw new Exception("Envíe algún dato del producto a modificar");
         return true;
+    }
+    public function viewProductChanges() { 
+        if(!isset($_GET['id'])) throw new Exception("Falta el identificador del producto a consultar");
+        if(empty($_GET['id'])) throw new Exception("El identificador del producto a consultar está vacío o es inválido");
+        $changes = $this->models['products']->getProductChanges($_GET['id']);
+        $this->views['productChanges']->changes = $changes;
+        $this->views['productChanges']->render();
+    }
+    public function viewPriceChanges() { 
+        if(!isset($_GET['id'])) throw new Exception("Falta el identificador del producto a consultar");
+        if(empty($_GET['id'])) throw new Exception("El identificador del producto a consultar está vacío o es inválido");
+        $changes = $this->models['products']->getPriceChanges($_GET['id']);
+        $this->views['priceChanges']->changes = $changes;
+        $this->views['priceChanges']->render();
+    }
+    public function viewStockChanges() { 
+        if(!isset($_GET['id'])) throw new Exception("Falta el identificador del producto a consultar");
+        if(empty($_GET['id'])) throw new Exception("El identificador del producto a consultar está vacío o es inválido");
+        $changes = $this->models['products']->getStockChanges($_GET['id']);
+        $this->views['stockChanges']->changes = $changes;
+        $this->views['stockChanges']->render();
     }
 
     // Hasta acá

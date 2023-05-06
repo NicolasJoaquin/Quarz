@@ -8,7 +8,10 @@ RewriteRule ^viewClients$ controllers/viewClients.php
 RewriteRule ^viewProducts$ controllers/viewProducts.php
 
 RewriteRule ^viewProduct$ controllers/viewProduct.php
-RewriteRule ^viewProduct-([0-9]+)$ controllers/viewProduct.php?id=$1 [NC,L]
+RewriteRule ^viewProduct-([0-9]+)$ controllers/viewProduct.php?id=$1&viewProductDetail=true [NC,L]
+RewriteRule ^viewProduct-([0-9]+)-product-changes$ controllers/viewProduct.php?id=$1&viewProductChanges=true [NC,L]
+RewriteRule ^viewProduct-([0-9]+)-price-changes$ controllers/viewProduct.php?id=$1&viewPriceChanges=true [NC,L]
+RewriteRule ^viewProduct-([0-9]+)-stock-changes$ controllers/viewProduct.php?id=$1&viewStockChanges=true [NC,L]
 
 RewriteRule ^viewStock$ controllers/viewStock.php
 RewriteRule ^viewSales$ controllers/viewSales.php

@@ -32,6 +32,7 @@ class Stock extends Model{
         return $this->db->fetchAll();
     }
 
+    // Modificado desde acá
     //ALTAS, BAJAS Y MODIFICACIONES------------------------------------------------------------------------------------------------------------------
     public function updateStock($item){ //FALTA IMPLEMENTACIÓN PARA MÁS DE UN DEPÓSITO // FALTA
         //Valido id
@@ -49,10 +50,6 @@ class Stock extends Model{
         return true;
     }
 
-
-
-
-
     public function discountQuantity($item) { //FALTA IMPLEMENTACIÓN PARA MÁS DE UN DEPÓSITO // OK
         $this->validateItem($item);
 
@@ -63,14 +60,14 @@ class Stock extends Model{
         return true;
     }
 
-    public function discountQuantities($items) { // OK
+    public function discountQuantities($items) {
         foreach($items as $item) {
             $this->discountQuantity($item);
         }
         return true;
     }
 
-    public function discountValidatedQuantity($item) { // OK
+    public function discountValidatedQuantity($item) { 
         $this->validateItem($item); // Ya se valida en discountQuantity()
 
         if(!$this->validateStockItem($item->product_id, $item->quantity))
@@ -80,7 +77,7 @@ class Stock extends Model{
         return true;
     }
 
-    public function discountValidatedQuantities($items) { // OK
+    public function discountValidatedQuantities($items) {
         $this->validateItems($items); // Ya se valida en discountQuantitites()
 
         $this->validateStockItems($items);
@@ -90,17 +87,24 @@ class Stock extends Model{
         return true;
     }
 
+    public function registerStockChanges($saleId) {
+        
+    }
+
     //VERIFICADORES------------------------------------------------------------------------------------------------------------------
-    private function validateStockItem($prodId, $quantity) { // OK // Va en private porque hay select sin validación directa
-        // $this->db->validateSanitizeId($prodId, "El identificador del producto es inválido");
-        // $this->db->validateSanitizeFloat($quantity, "La cantidad del producto es inválida");
+    public function validateStockItem($prodId, $quantity) { 
+        $this->db->validateSanitizeId($prodId, "El identificador del producto es inválido");
+        $this->db->validateSanitizeFloat($quantity, "La cantidad del producto es inválida");
         // REVISAR
         if($quantity <= 0)  
             throw new Exception("La cantidad del producto #$prodId no puede ser menor o igual a 0, no se puede descontar del stock");
 
-        $query = "SELECT product_id, SUM(quantity) AS total_quantity 
-                    FROM `stock_items` WHERE product_id = $prodId 
-                    GROUP BY product_id";
+        // $query = "SELECT product_id, SUM(quantity) AS total_quantity 
+        //             FROM `stock_items` WHERE product_id = $prodId 
+        //             GROUP BY product_id"; // Esto aplica para todos los depósito, deshabilitado por ahora
+        $query = "SELECT product_id, quantity AS total_quantity 
+                    FROM stock_items WHERE product_id = $prodId AND warehouse_id = 1
+                    GROUP BY product_id"; // Sólo depósito 1
         $this->db->query($query);
         $this->db->validateLastQuery();
         $stockQuantity = $this->db->fetch()['total_quantity'];
@@ -108,8 +112,8 @@ class Stock extends Model{
         return true;
     }
 
-    private function validateStockItems($items) {  //OK // Va en private porque llama a validateStockItem() sin validación directa
-        // $this->validateItems($items);
+    public function validateStockItems($items) { 
+        // $this->validateItems($items); // Revisar, los datos ya se validan en validateStockItem()
         foreach($items as $item) {
             $quantity = 0;
             $prodId   = $item->product_id;
@@ -124,7 +128,7 @@ class Stock extends Model{
         return true;
     }
 
-    public function validateItem(&$item) { // OK
+    public function validateItem(&$item) {
         $item->product_id = (int)trim($item->product_id);
         $this->db->validateSanitizeId($item->product_id, "El identificador del producto #$item->product_id es inválido");
 
@@ -134,13 +138,14 @@ class Stock extends Model{
         return true;
     }
 
-    public function validateItems(&$items) { // OK
+    public function validateItems(&$items) { 
         foreach($items as $item) {
             if(!$this->validateItem($item))
                 return false;
         }
         return true;
     }
+    // Hasta acá
 
 
 
@@ -151,7 +156,7 @@ class Stock extends Model{
 
 
 
-    public function addQuantity($item){ //FALTA IMPLEMENTACIÓN PARA MÁS DE UN DEPÓSITO
+    public function addQuantity($item){ //FALTA IMPLEMENTACIÓN PARA MÁS DE UN DEPÓSITO / Revisar
         //Valido product_id
         if(!ctype_digit($item['product_id'])) die ("error 0 addQuantity/Stock (modelo)");
 
@@ -159,7 +164,7 @@ class Stock extends Model{
         if(!ctype_digit($item['quantity'])) die ("error 1 addQuantity/Stock (modelo)");
 
         
-        $product_id = $item['product_id']; //REVISAR ESTOOOOOOOOOOO
+        $product_id = $item['product_id']; 
         $quantity = $item['quantity'];
 
         //QUERY SELECT Y VERIFICACIÓN
