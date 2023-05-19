@@ -206,6 +206,31 @@ CREATE TRIGGER `add_default_stock_item` AFTER INSERT ON `products` FOR EACH ROW 
 END
 $$
 DELIMITER ;
+-- Pendiente de modificar, hay que agregar usuario a la tabla de productos para tomarlo de ahí y cargarlo en product_changes  
+DELIMITER $$
+CREATE TRIGGER `add_first_product_change` AFTER INSERT ON `products` FOR EACH ROW BEGIN
+    INSERT INTO product_changes (user_id, product_id, cost_price, old_cost_price, first_charge)
+    VALUES (1, NEW.product_id, NEW.cost_price, 0, 1); -- Cambiar 1 por NEW.user_id
+  END
+$$
+DELIMITER ;
+-- Pendiente de modificar, hay que agregar usuario a la tabla sale_prices para tomarlo de ahí y cargarlo en price_changes  
+DELIMITER $$
+CREATE TRIGGER `add_first_price_change` AFTER INSERT ON `sale_prices` FOR EACH ROW BEGIN
+    INSERT INTO price_changes (user_id, sale_price_id, product_price, old_product_price, first_charge)
+    VALUES (1, NEW.sale_price_id, NEW.product_price, 0, 1); -- Cambiar 1 por NEW.user_id
+  END
+$$
+DELIMITER ;
+-- Pendiente de modificar, hay que agregar usuario a la tabla stock_items para tomarlo de ahí y cargarlo en stock_changes  
+DELIMITER $$
+CREATE TRIGGER `add_first_stock_change` AFTER INSERT ON `stock_items` FOR EACH ROW BEGIN
+    INSERT INTO stock_changes (user_id, stock_item_id, quantity, old_quantity, first_charge)
+    VALUES (1, NEW.stock_item_id, NEW.quantity, 0, 1); -- Cambiar 1 por NEW.user_id
+  END
+$$
+DELIMITER ;
+
 
 -- --------------------------------------------------------
 
@@ -1116,3 +1141,11 @@ ALTER TABLE product_changes
 -- Agregado de columna old_product_price a price_changes
 ALTER TABLE price_changes
   ADD COLUMN old_product_price DOUBLE(10,2) UNSIGNED DEFAULT NULL AFTER product_price;
+-- Cambio en trigger add_default_sale_price_item
+DROP TRIGGER IF EXISTS `add_default_sale_price_item`;
+CREATE DEFINER=`root`@`localhost` TRIGGER `add_default_sale_price_item` 
+AFTER INSERT ON `products` 
+FOR EACH ROW 
+  BEGIN 
+    INSERT INTO sale_prices (product_id, price_list_id, sale_factor, product_price) VALUES (NEW.product_id, 1, 1.45, 0); 
+  END

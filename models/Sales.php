@@ -3,35 +3,11 @@
 
 require_once '../fw/fw.php';
 
-class Sales extends Model{
+class Sales extends Model {
     //GETERS------------------------------------------------------------------------------------------------------------------------
     public function getAll(){ //MODIFICAR LIMIT
         $this->db->query("SELECT *
                             FROM sales"); // MODIFICAR PARA VER VISTA
-        return $this->db->fetchAll();
-    }
-
-    public function getSales($filterValue){
-        // VALIDO FILTRO
-        if(!empty($filterValue)){
-            $filterValue = substr($filterValue, 0, 50);
-            $filterValue = $this->db->escape($filterValue);
-            $filterValue = $this->db->escapeWildcards($filterValue);
-        }
-
-        $this->db->query("SELECT *
-                            FROM view_sales as s 
-                            WHERE s.sale_id LIKE '%$filterValue%' OR 
-                                    s.user_name LIKE '%$filterValue%' OR
-                                    s.client_name LIKE '%$filterValue%' OR 
-                                    s.total LIKE '%$filterValue%' OR
-                                    s.start_date LIKE '%$filterValue%' OR
-                                    s.ship_desc LIKE '%$filterValue%' OR
-                                    s.pay_desc LIKE '%$filterValue%' OR
-                                    s.description LIKE '%$filterValue%'"); // MODIFICAR LIMIT ACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-        //VERIFICACIÓN DE LA QUERY Y RETORNO
-        $errno = $this->db->getErrorNo();
-        if($errno !== 0) throw new QueryErrorException($this->db->getError());
         return $this->db->fetchAll();
     }
 
@@ -52,6 +28,111 @@ class Sales extends Model{
 
     //ALTAS, BAJAS Y MODIFICACIONES------------------------------------------------------------------------------------------------------------------
     // A partir de acá se usan nuevas validaciones y sanitizaciones
+    //GETERS------------------------------------------------------------------------------------------------------------------------
+    public function getSales($filters, $orders) {
+        $sqlFilters = "";
+        $sqlOrders = "";
+        // Validación de filtros e inclusión en query
+        if(!empty($filters->saleNumber)) {
+            $this->db->validateSanitizeId($filters->saleNumber, "El número de la venta es erróneo");
+            $sqlFilters .= "WHERE s.sale_id LIKE '%$filters->saleNumber%'";
+        }
+        if(!empty($filters->user)) {
+            $this->db->validateSanitizeString(str: $filters->user, wildcards: true, errorMsg: "El filtro de usuario es erróneo");
+            if(!empty($sqlFilters))
+                $sqlFilters .= " AND ";
+            else
+                $sqlFilters .= "WHERE ";
+            $sqlFilters .= "u.user_name LIKE '%$filters->user%'";
+        }
+        if(!empty($filters->client)) {
+            $this->db->validateSanitizeString(str: $filters->client, wildcards: true, errorMsg: "El filtro de cliente es erróneo");
+            if(!empty($sqlFilters))
+                $sqlFilters .= " AND ";
+            else
+                $sqlFilters .= "WHERE ";
+            $sqlFilters .= "c.name LIKE '%$filters->client%'";
+        }
+        if(!empty($filters->budget)) {
+            $this->db->validateSanitizeId($filters->budget, "El número del presupuesto es erróneo");
+            if(!empty($sqlFilters))
+                $sqlFilters .= " AND ";
+            else
+                $sqlFilters .= "WHERE ";
+            $sqlFilters .= "s.budget_id LIKE '%$filters->budget%'";
+        }
+        if(!empty($filters->fromDate)) {
+            $this->db->validateSanitizeDate(date: $filters->fromDate, format: "Y-m-d H:i:s", errorMsg: "El filtro de fecha de inicio es erróneo");
+            if(!empty($sqlFilters))
+                $sqlFilters .= " AND ";
+            else
+                $sqlFilters .= "WHERE ";
+            $sqlFilters .= "s.start_date >= '$filters->fromDate'";
+        }
+        if(!empty($filters->toDate)) {
+            $this->db->validateSanitizeDate(date: $filters->toDate, format: "Y-m-d H:i:s", errorMsg: "El filtro de fecha de inicio es erróneo");
+            if(!empty($sqlFilters))
+                $sqlFilters .= " AND ";
+            else
+                $sqlFilters .= "WHERE ";
+            $sqlFilters .= "s.start_date <= '$filters->toDate'";
+        }
+        if(!empty($filters->fromDate) && !empty($filters->toDate) && $filters->fromDate > $filters->toDate)
+            throw new Exception("La fecha de inicio no puede ser posterior a la de final");
+        if(!empty($filters->shipment)) {
+            $this->db->validateSanitizeId($filters->shipment, "El filtro de envío es erróneo");
+            if(!empty($sqlFilters))
+                $sqlFilters .= " AND ";
+            else
+                $sqlFilters .= "WHERE ";
+            $sqlFilters .= "s.shipment_state_id = $filters->shipment";
+        }
+        if(!empty($filters->payment)) {
+            $this->db->validateSanitizeId($filters->payment, "El filtro de envío es erróneo");
+            if(!empty($sqlFilters))
+                $sqlFilters .= " AND ";
+            else
+                $sqlFilters .= "WHERE ";
+            $sqlFilters .= "s.payment_state_id = $filters->payment";
+        }
+
+        $sqlOrders = "ORDER BY s.sale_id DESC"; // Provisorio
+        
+        $this->db->query("SELECT s.sale_id, s.user_id, u.user AS user_name, c.name AS client_name, s.budget_id, s.start_date, s.shipment_state_id, ship.title AS ship_name, s.payment_state_id, pay.title AS pay_name
+                            FROM sales AS s 
+                            LEFT JOIN users AS u ON s.user_id = u.user_id
+                            LEFT JOIN shipment_states AS ship ON s.shipment_state_id = ship.shipment_state_id
+                            LEFT JOIN payment_states AS pay ON s.payment_state_id = pay.payment_state_id
+                            LEFT JOIN clients AS c ON s.client_id = c.client_id $sqlFilters $sqlOrders"); // MODIFICAR LIMIT ACA
+        $this->db->validateLastQuery();
+        return $this->db->fetchAll();
+    }
+
+    public function getSaleInfo($saleId) {
+        $this->db->validateSanitizeId($saleId, "El número de venta es erróneo");
+        $query = "SELECT s.sale_id, s.user_id, u.user AS user_name, c.name AS client_name, s.budget_id, s.start_date, s.shipment_state_id, ship.title AS ship_name, s.payment_state_id, pay.title AS pay_name, s.description, s.total
+                FROM sales AS s 
+                LEFT JOIN users AS u ON s.user_id = u.user_id
+                LEFT JOIN shipment_states AS ship ON s.shipment_state_id = ship.shipment_state_id
+                LEFT JOIN payment_states AS pay ON s.payment_state_id = pay.payment_state_id
+                LEFT JOIN clients AS c ON s.client_id = c.client_id 
+                WHERE s.sale_id = $saleId"; 
+        $this->db->query($query);
+        $this->db->validateLastQuery();
+        return $this->db->fetch();
+    }
+    public function getSaletems($saleId) {
+        $this->db->validateSanitizeId($saleId, "El número de venta es erróneo");
+        $query = "SELECT si.product_id, p.description AS product_name, si.sale_price, si.quantity, si.total_price, si.position 
+                FROM sales_items AS si
+                LEFT JOIN products AS p ON si.product_id = p.product_id 
+                WHERE si.sale_id = $saleId";
+        $this->db->query($query);
+        $this->db->validateLastQuery();
+        return $this->db->fetchAll(); 
+    }
+
+    // Altas, bajas y modificaciones
     public function newSale($sale) {
         $this->db->validateSanitizeId($sale->client->client_id, "El identificador del cliente es inválido");
         $clientId = $sale->client->client_id;
@@ -124,7 +205,7 @@ class Sales extends Model{
         return $ret;
     }
 
-    // ---
+    // Hasta acá
     public function updateSale($sale){
         //Valido id
         if(!ctype_digit($sale->id)) die ("error 0 updateSale/Sales (modelo)");

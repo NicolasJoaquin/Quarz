@@ -16,21 +16,18 @@ require_once '../views/FormNewProduct.php';
 class ProductController extends Controller{
     public function __construct(){
         $this->models['products']      = new Products();
-        $this->views['dashboard']      = new ViewProducts(includeJs: "js/viewProducts.js", includeCSS: "css/viewProducts.css");
+        // Poner títulos
+        $this->views['dashboard']      = new ViewProducts(title: "Dashboard productos",includeJs: "js/viewProducts.js", includeCSS: "css/viewProducts.css");
         $this->views['productDetail']  = new ViewProduct(includeJs: "js/viewProduct.js", includeCSS: "css/viewProduct.css");
-        
         $this->views['productChanges'] = new ViewProductChanges(includeJs: "js/viewProductChanges.js", includeCSS: "css/viewProductChanges.css");
         $this->views['priceChanges']   = new ViewPriceChanges(includeJs: "js/viewPriceChanges.js", includeCSS: "css/viewPriceChanges.css");
         $this->views['stockChanges']   = new ViewStockChanges(includeJs: "js/viewStockChanges.js", includeCSS: "css/viewStockChanges.css");
-        
+        // Falta fix
         $this->views['form']           = new FormNewProduct();        
     }
 
     // A partir de acá se actualiza el desarrollo 
-    public function getProductsToDashboard() {
-        $products = $this->models['products']->getProductsListStock($_GET['filterDesc']);
-        return $products;
-    }
+    // Vistas
     public function viewDashboard() { 
         $this->views['dashboard']->render();
     }
@@ -40,29 +37,6 @@ class ProductController extends Controller{
         $product = $this->models['products']->getProductDetail($_GET['id']);
         $this->views['productDetail']->product = $product;
         $this->views['productDetail']->render();
-    }
-    public function modifyProduct() {
-        $product = $this->validateExistProduct();
-        $this->validateNotEmptyProduct($product);
-        $this->models['products']->updateProduct($product);
-        $msg = "Se modificó correctamente el producto #$product->product_id.";
-        return $msg;
-    }
-    public function validateExistProduct() {
-        if(!isset($_POST['product'])) throw new Exception("Envíe un producto");
-        $product = json_decode($_POST['product']);
-        if(!isset($product->product_id)) throw new Exception("Falta el identificador del producto");
-        if(!isset($product->cost_price) && !isset($product->product_price) && !isset($product->product_quantity)) 
-            throw new Exception("Envíe algún dato del producto a modificar");
-        return $product;
-    }
-    public function validateNotEmptyProduct($product) {
-        if(empty($product->product_id)) throw new Exception("El identificador del producto está vacío");
-        if( (empty($product->cost_price) && $product->cost_price != 0) && 
-            (empty($product->product_price) && $product->product_price != 0) && 
-            (empty($product->product_quantity) && $product->product_quantity != 0) ) 
-            throw new Exception("Envíe algún dato del producto a modificar");
-        return true;
     }
     public function viewProductChanges() { 
         if(!isset($_GET['id'])) throw new Exception("Falta el identificador del producto a consultar");
@@ -85,7 +59,36 @@ class ProductController extends Controller{
         $this->views['stockChanges']->changes = $changes;
         $this->views['stockChanges']->render();
     }
-
+    // Getters
+    public function getProductsToDashboard() {
+        $products = $this->models['products']->getProductsListStock($_GET['filterDesc']);
+        return $products;
+    }
+    // Validadores
+    public function validateExistProduct() {
+        if(!isset($_POST['product'])) throw new Exception("Envíe un producto");
+        $product = json_decode($_POST['product']);
+        if(!isset($product->product_id)) throw new Exception("Falta el identificador del producto");
+        if(!isset($product->cost_price) && !isset($product->product_price) && !isset($product->product_quantity)) 
+            throw new Exception("Envíe algún dato del producto a modificar");
+        return $product;
+    }
+    public function validateNotEmptyProduct($product) {
+        if(empty($product->product_id)) throw new Exception("El identificador del producto está vacío");
+        if( (empty($product->cost_price) && $product->cost_price != 0) && 
+            (empty($product->product_price) && $product->product_price != 0) && 
+            (empty($product->product_quantity) && $product->product_quantity != 0) ) 
+            throw new Exception("Envíe algún dato del producto a modificar");
+        return true;
+    }
+    // Altas y modificaciones
+    public function modifyProduct() {
+        $product = $this->validateExistProduct();
+        $this->validateNotEmptyProduct($product);
+        $this->models['products']->updateProduct($product);
+        $msg = "Se modificó correctamente el producto #$product->product_id.";
+        return $msg;
+    }
     // Hasta acá
     public function get($filterValue) { // Falta fix, está función la consume el formulario de ventas y cotizaciones
         // MODIFICAR ACA

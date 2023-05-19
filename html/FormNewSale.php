@@ -117,6 +117,9 @@ $(document).ready(function (){
         return ret; 
     }
 
+
+    // ACA
+
     function validateForm(){
         if($("#saleDetailClientId").val().length === 0){
             alert("Asigne un cliente al pedido");

@@ -1,4 +1,3 @@
-
 <div class="text-center">
     <img class="d-block mx-auto mb-4" src="./extras/quarz-logo.png" alt="" width="72" height="90">
     <h2>Formulario de nueva venta o cotización</h2>
@@ -13,46 +12,51 @@
     <div class="col-md-7 col-lg-7 order-md-last">
         <h4 class="d-flex justify-content-between align-items-center mb-3">
             <span class="text-primary">Detalle de venta</span>
-            <!-- <input class="form-control" type="text" value="Disabled readonly input" aria-label="Disabled input example" disabled readonly> -->
             <span class="badge bg-primary rounded-pill" id="quantityOfItems">0</span>
         </h4>
         <div class="col-sm-12 mb-4">
             <label for="firstName" class="form-label">Cliente</label>
             <input type="text" class="form-control" id="client" placeholder="Ingrese un cliente" value="" required="" readonly disabled>
-            <!-- <div class="invalid-feedback">
-                Se requiere un nombre válido.
-            </div> -->
         </div>
         <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-1">
             <button type="button" class="btn btn-outline-secondary btn-sm">Limpiar detalle</button>
         </div>
-        <div class="table-wrapper scrolleable mb-2">
-            <table class="table table-striped table-hover">
+        <div class="table-wrapper">
+            <table class="table table-striped table-hover mb-none">
                 <thead class="table-dark">
                     <tr>
-                        <th scope="col">Pos.</th>
+                        <th scope="col" class="col-md-1">Pos.</th>
                         <!-- <th scope="col">Cod.</th> -->
-                        <th scope="col">Descripción</th>
-                        <th scope="col">Costo</th>
-                        <th scope="col">Precio de venta</th>
-                        <th scope="col">Cantidad</th>
-                        <th scope="col">Total</th>
-                        <th scope="col">Editar</th>
-                        <th scope="col">Borrar</th>
+                        <th scope="col" class="col-md-2">Desc.</th>
+                        <th scope="col" class="col-md-2">Costo</th>
+                        <th scope="col" class="col-md-2">Precio</th>
+                        <th scope="col" class="col-md-1">Cant.</th>
+                        <th scope="col" class="col-md-2">Total</th>
+                        <th scope="col" class="col-md-2">Acciones</th>
                     </tr>
                 </thead>
+            </table>
+        </div>
+        <div class="table-wrapper scrolleable mb-none">
+            <table class="table table-striped table-hover">
                 <tbody id="detailTableBody">
                 </tbody>
+            </table>
+        </div>
+        <div class="table-wrapper mb-2">
+            <table class="table table-striped table-hover mb-none">
                 <tfoot class="table-dark">
                     <tr>
-                        <th scope="row" colspan="6">Total</th>
-                        <th scope="row" colspan="3" id="totalPrice" name="totalPrice"></th>
+                        <th scope="row" class="col-md-10">Total</th>
+                        <th scope="row" class="col-md-2" id="totalPrice" name="totalPrice"></th>
                     </tr>
                 </tfoot>
             </table>
         </div>
-        <button class="w-100 btn btn-lg" id="addBudget" type="submit">Agregar cotización</button>
-        <button class="w-100 btn btn-lg" id="addSale" type="submit">Agregar venta</button>
+        <div class="row">
+            <button class="w-100 btn btn-lg" id="addBudget" type="submit">Agregar cotización</button>
+            <button class="w-100 btn btn-lg" id="addSale" type="submit">Agregar venta</button>
+        </div>
     </div>
     <!-- COLUMNA IZQUIERDA -->
     <div class="col-md-5 col-lg-5">
@@ -66,7 +70,7 @@
                 </div>
             </div>
             <hr class="my-4">
-            <div class="row g-3">
+            <div class="row g-3 prod-to-add">
                 <div class="col-sm-12 mb-3">
                     <label for="productToPush" class="form-label">Producto a agregar</label>
                     <select class="form-select" name="productToPush" id="productToPush">
@@ -75,9 +79,6 @@
                 <div class="col-md-4">
                     <label for="productCostToPush" class="form-label">Costo</label>
                     <input type="number" class="form-control" id="productCostToPush" name="productCostToPush" placeholder="">
-                    <!-- <div class="invalid-feedback">
-                        Selecciona un país válido.
-                    </div> -->
                 </div>
                 <div class="col-md-4">
                     <label for="productPriceToPush" class="form-label">Precio</label>

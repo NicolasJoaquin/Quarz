@@ -156,18 +156,18 @@ $(document).ready(function() {
         $("#quantityOfItems").append(budget.items.length);        
         budget.items.forEach(function(item, i) {
             $("#detailTableBody").append('<tr id=filaItem_' + i + '></tr>');
-            $("#filaItem_"+ i).append('<th scope="row">' + i + '</th>');
-            $("#filaItem_"+ i).append('<td>' + item.description + '</td>');
-            $("#filaItem_"+ i).append('<td>' + item.cost_price + '</td>');
-            $("#filaItem_"+ i).append('<td>' + item.sale_price + '</td>');
-            $("#filaItem_"+ i).append('<td>' + item.quantity + '</td>');
-            $("#filaItem_"+ i).append('<td>' + item.total_price + '</td>');
+            $("#filaItem_"+ i).append('<th scope="row" class="col-md-1">' + i + '</th>');
+            $("#filaItem_"+ i).append('<td class="col-md-2">' + item.description + '</td>');
+            $("#filaItem_"+ i).append('<td class="col-md-2">' + item.cost_price + '</td>');
+            $("#filaItem_"+ i).append('<td class="col-md-2">' + item.sale_price + '</td>');
+            $("#filaItem_"+ i).append('<td class="col-md-1">' + item.quantity + '</td>');
+            $("#filaItem_"+ i).append('<td class="col-md-2">' + item.total_price + '</td>');
 
-            $("#filaItem_"+ i).append('<td><button type="button" class="btn btn-outline-info" id="edit' + i + '">Editar</button></td>');
+            $("#filaItem_"+ i).append('<td class="col-md-2"><button type="button" class="btn btn-outline-info mr-1" id="edit' + i + '"><i class="bi bi-pencil-fill"></i></button><button type="button" class="btn btn-outline-danger" id="delete' + i + '"><i class="bi bi-trash3-fill"></i></button></td>');
             $("#edit"+ i).click(function() {
                 renderDetail();
             });
-            $("#filaItem_"+ i).append('<td><button type="button" class="btn btn-outline-danger" id="delete' + i + '">Borrar</button></td>');
+            // $("#filaItem_"+ i).append('<td class="col-md-1"><button type="button" class="btn btn-outline-danger" id="delete' + i + '"><i class="bi bi-trash3-fill"></i></button></td>');
             $("#delete"+ i).click(function() {
                 budget.items.splice(i, 1);
                 renderDetail();

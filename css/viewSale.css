@@ -1,0 +1,9 @@
+label {
+    width: 100% !important;
+}
+
+textarea.desc-detail {
+    width: 100% !important; 
+    max-height: 80px !important; 
+    overflow-y: scroll;
+}

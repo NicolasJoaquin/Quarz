@@ -4,7 +4,6 @@
 require_once '../controllers/ProductController.php';
 
 session_start();
-
 if(!isset($_SESSION['log'])) {
     header("Location: ./home");
     exit();
@@ -45,7 +44,6 @@ if(count($_GET)>0) {
         exit;
     }
 }
-
 $controller->viewDashboard();
 
 

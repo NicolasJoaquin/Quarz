@@ -5,8 +5,16 @@ tbody {
 }
 
 .scrolleable {
-    height: 350px !important;
+    height: 270px !important;
     overflow-y: auto !important; 
+}
+
+.table {
+    margin-bottom: 0% !important;
+}
+
+.prod-to-add input{
+    padding: 0rem !important;
 }
 
 #totalPrice {

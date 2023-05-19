@@ -1,15 +1,39 @@
 <?php 
 //controllers/viewSales.php
 
-require_once '../controllers/SaleController.php';
+require_once '../controllers/SaleBudgetController.php';
 
 session_start(); 
-if(!isset($_SESSION['log'])){
+if(!isset($_SESSION['log'])) {
     header("Location: ./home");
     exit();
 }
 
-$controller = new SaleController();
+$controller = new SaleBudgetController();
+if(count($_GET)>0) {
+    if(isset($_GET['getSalesToDashboard'])) {
+        $response = new stdClass();
+        $response->state = 1;
+        try {
+            $response->sales   = $controller->getSalesToDashboard();
+            $response->successMsg = "Se consultaron con éxito las ventas.";
+        }
+        catch (Exception $e) {
+            $response->state = 0;
+            $response->errorMsg = "Hubo un error al consultar las ventas: " . $e->getMessage() . " | Intentá de nuevo.";
+            echo json_encode($response);
+            exit;
+        }
+        echo json_encode($response);
+        exit;
+    }
+}
+$controller->viewDashboard();
+exit;
+
+// Fixeado de acá para arriba
+
+
 
 if(count($_POST)>0){
     if(isset($_POST['delete'])){
@@ -49,7 +73,7 @@ if(count($_GET)>0){
         //QUIEREN CONSULTAR LAS VENTAS
         if(!isset($_GET['filterValue'])) die("error 3 controllers/viewSales GET");
         $filterValue = $_GET['filterValue'];
-        echo json_encode($controller->getSales($filterValue));
+        // echo json_encode($controller->getSales($filterValue));
         exit();
     }
 

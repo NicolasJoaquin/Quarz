@@ -132,7 +132,59 @@ class Database {
         return true;
     }
 
+    // Validación y sanitización de strings
+    public function sanitizeString($str, $wildcards = false) {
+        $str = htmlspecialchars(trim($str));
+        $str = $this->escape($str);
+        if($wildcards) {
+            $str = $this->escapeWildcards($str);
+        }
+        return $str;
+    }
 
+    public function validateString($str, $maxLen = 100, $minLen = 0) {
+        if(strlen($str) < $minLen)
+            return false;
+        substr($str, 0, $maxLen);
+        return true;
+    }
+
+    public function validateSanitizeString(&$str, $errorMsg = "El texto es inválido", $maxLen = 100, $minLen = 0, $wildcards = false) {
+        $str = $this->sanitizeString(str: $str, wildcards: $wildcards);
+        if(!$this->validateString(str: $str, maxLen: $maxLen, minLen: $minLen))
+            throw new Exception($errorMsg);
+        return true;
+    }
+
+    // Validación y sanitización de fechas
+    public function sanitizeDate($date, $format = "Y-m-d", $replaceSeparators = true, $separator = '-') { // Revisar seguridad !!
+        if($replaceSeparators) {
+            if(empty(trim($separator))) throw new Exception("Envíe un separador válido para sanitizar la fecha");
+            $date = str_replace('/', $separator, $date); // Soporta fechas enviadas sólo con separadores '/'
+        }
+        $timestamp = strtotime($date);
+        $sanitizedDate = date($format, $timestamp);
+        
+        return $sanitizedDate;
+    }
+
+    public function validateDate($date, $format = "Y-m-d") {
+        $unixBaseDate = "";
+        if($format == "Y-m-d")
+            $unixBaseDate = "1970-01-01";
+        if($format == "Y-m-d H:i:s") // Timestamp
+            $unixBaseDate = "1970-01-01 00:00:00";
+        if($date == $unixBaseDate || !$date)
+            return false;
+        return true;
+    }
+        
+    public function validateSanitizeDate(&$date, $format = "Y-m-d", $errorMsg = "La fecha es inválida", $replaceSeparators = true, $separator = '-') {
+        $date = $this->sanitizeDate($date, $format, $replaceSeparators, $separator);
+        if(!$this->validateDate($date, $format))
+            throw new Exception($errorMsg);
+        return true;
+    }
 
 }
 

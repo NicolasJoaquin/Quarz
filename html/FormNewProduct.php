@@ -1,94 +1,154 @@
-<?php 
-// html/FormNewClient.php
-require_once '../views/StdHeader.php'; 
-require_once '../views/StdFooter.php';
+<div class="col-md-7 col-lg-8">
+    <h4 class="mb-3">Billing address</h4>
+    <form class="needs-validation" novalidate>
+        <div class="row g-3">
+            <div class="col-sm-6">
+                <label for="firstName" class="form-label">First name</label>
+                <input type="text" class="form-control" id="firstName" placeholder="" value="" required>
+                <div class="invalid-feedback">
+                    Valid first name is required.
+                </div>
+            </div>
 
-$header = new StdHeader("Nuevo Producto");
-$header->render();
+            <div class="col-sm-6">
+                <label for="lastName" class="form-label">Last name</label>
+                <input type="text" class="form-control" id="lastName" placeholder="" value="" required>
+                <div class="invalid-feedback">
+                    Valid last name is required.
+                </div>
+            </div>
 
-?>
-<h1>Formulario de alta de producto</h1>
-<form action="./newProduct" method="POST">
-    <label for="description">Ingrese la descripción: </label>
-    <input type="text" name="description" id="description"> <br>
+            <div class="col-12">
+                <label for="username" class="form-label">Username</label>
+                <div class="input-group has-validation">
+                    <span class="input-group-text">@</span>
+                    <input type="text" class="form-control" id="username" placeholder="Username" required>
+                    <div class="invalid-feedback">
+                        Your username is required.
+                    </div>
+                </div>
+            </div>
 
-    <label for="cost_price">Ingrese el costo: </label>
-    <input type="number" name="cost_price" id="cost_price"> <br>
+            <div class="col-12">
+                <label for="email" class="form-label">Email <span class="text-muted">(Optional)</span></label>
+                <input type="email" class="form-control" id="email" placeholder="you@example.com">
+                <div class="invalid-feedback">
+                    Please enter a valid email address for shipping updates.
+                </div>
+            </div>
 
-    <label for="packing_unit">Ingrese la unidad de empaque/venta: </label>
-    <input type="text" name="packing_unit" id="packing_unit"> <br>
+            <div class="col-12">
+                <label for="address" class="form-label">Address</label>
+                <input type="text" class="form-control" id="address" placeholder="1234 Main St" required>
+                <div class="invalid-feedback">
+                    Please enter your shipping address.
+                </div>
+            </div>
 
-    <label for="provider">Seleccione un proveedor: </label> <br>
-    <select name="provider" id="provider">
+            <div class="col-12">
+                <label for="address2" class="form-label">Address 2 <span class="text-muted">(Optional)</span></label>
+                <input type="text" class="form-control" id="address2" placeholder="Apartment or suite">
+            </div>
 
-    </select> <br>
+            <div class="col-md-5">
+                <label for="country" class="form-label">Country</label>
+                <select class="form-select" id="country" required>
+                    <option value="">Choose...</option>
+                    <option>United States</option>
+                </select>
+                <div class="invalid-feedback">
+                    Please select a valid country.
+                </div>
+            </div>
 
-    <input type="button" name="submit" id="submit" value="Crear">
-</form>
+            <div class="col-md-4">
+                <label for="state" class="form-label">State</label>
+                <select class="form-select" id="state" required>
+                    <option value="">Choose...</option>
+                    <option>California</option>
+                </select>
+                <div class="invalid-feedback">
+                    Please provide a valid state.
+                </div>
+            </div>
 
-<script>
-    $(document).ready(function (){
-        function locate(url){
-            $(location).attr('href',url);
-        }
+            <div class="col-md-3">
+                <label for="zip" class="form-label">Zip</label>
+                <input type="text" class="form-control" id="zip" placeholder="" required>
+                <div class="invalid-feedback">
+                    Zip code required.
+                </div>
+            </div>
+        </div>
 
-        function getProviders(){
-            //NO HACE FALTA HACER CLEAN
-            $.get("./viewProviders", {get: true, filterValue: ""}, function(response) { //PODER AGREGAR FILTROS ACA
-                response = JSON.parse(response);
-                response.forEach(function(provider) {
-                    $("#provider").append('<option value=' + provider['provider_id'] + '>' + provider['name'] + '</option>');
-                });
-            });
-        }
+        <hr class="my-4">
 
-        function getProductData(){
-            var product = {description : $("#description").val().trim(), cost_price : $("#cost_price").val().trim(),
-                            packing_unit : $("#packing_unit").val().trim(), provider_id : $("#provider").val().trim()};
-            return product;
-        }
-        
-        function validateForm(){
-            if($("#description").val().length < 4){ 
-                alert("La descripción del producto debe tener más de 4 caracteres");
-                return false;
-            }
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="same-address">
+            <label class="form-check-label" for="same-address">Shipping address is the same as my billing address</label>
+        </div>
 
-            if($("#cost_price").val().length === 0){
-                alert("Debe ingresar el costo del producto");
-                return false;
-            }
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="save-info">
+            <label class="form-check-label" for="save-info">Save this information for next time</label>
+        </div>
 
-            if($("#packing_unit").val().length < 3){
-                alert("La unidad de empaque del producto debe tener más de 3 caracteres");
-                return false;
-            }
+        <hr class="my-4">
 
-            if($("#provider").val() == null || $("#provider").val().trim() == ""){
-                alert("Debe asignar un proveedor al producto");
-                return false;
-            }
-            return true;
-        }
+        <h4 class="mb-3">Payment</h4>
 
-        $("#submit").click(function(){
-            if(validateForm()){
-                var product = getProductData();
-                product = JSON.stringify(product);
-                $.post("./newProduct", {new: true, product: product}, function(response){
-                    // VER QUE PONGO ACÁ
-                    alert(response);
-                    console.log(response);
-                    locate("");
-                });
-            }
-        });
+        <div class="my-3">
+            <div class="form-check">
+                <input id="credit" name="paymentMethod" type="radio" class="form-check-input" checked required>
+                <label class="form-check-label" for="credit">Credit card</label>
+            </div>
+            <div class="form-check">
+                <input id="debit" name="paymentMethod" type="radio" class="form-check-input" required>
+                <label class="form-check-label" for="debit">Debit card</label>
+            </div>
+            <div class="form-check">
+                <input id="paypal" name="paymentMethod" type="radio" class="form-check-input" required>
+                <label class="form-check-label" for="paypal">PayPal</label>
+            </div>
+        </div>
 
-        getProviders();
-    });
-</script>   
+        <div class="row gy-3">
+            <div class="col-md-6">
+                <label for="cc-name" class="form-label">Name on card</label>
+                <input type="text" class="form-control" id="cc-name" placeholder="" required>
+                <small class="text-muted">Full name as displayed on card</small>
+                <div class="invalid-feedback">
+                    Name on card is required
+                </div>
+            </div>
 
-<?php
-$footer = new StdFooter();
-$footer->render();
-?>
+            <div class="col-md-6">
+                <label for="cc-number" class="form-label">Credit card number</label>
+                <input type="text" class="form-control" id="cc-number" placeholder="" required>
+                <div class="invalid-feedback">
+                    Credit card number is required
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <label for="cc-expiration" class="form-label">Expiration</label>
+                <input type="text" class="form-control" id="cc-expiration" placeholder="" required>
+                <div class="invalid-feedback">
+                    Expiration date required
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <label for="cc-cvv" class="form-label">CVV</label>
+                <input type="text" class="form-control" id="cc-cvv" placeholder="" required>
+                <div class="invalid-feedback">
+                    Security code required
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-4">
+
+        <button class="w-100 btn btn-primary btn-lg" type="submit">Continue to checkout</button>
+    </form>
+</div>

@@ -73,11 +73,11 @@ class PruebaController extends Controller{
         }
     }
 
-    public function viewForm($perm){
-        if($perm == 1){
+    public function viewForm(){
+        if(isset($_SESSION['perm']) && $_SESSION['perm'] == 1)
             $this->views['form']->render();
-        }else {
-            echo "No tiene acceso al alta de proveedores";
+        else {
+            echo "No tiene acceso a la carga de ventas";
             exit();
         }
     }

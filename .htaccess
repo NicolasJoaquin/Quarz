@@ -14,7 +14,10 @@ RewriteRule ^viewProduct-([0-9]+)-price-changes$ controllers/viewProduct.php?id=
 RewriteRule ^viewProduct-([0-9]+)-stock-changes$ controllers/viewProduct.php?id=$1&viewStockChanges=true [NC,L]
 
 RewriteRule ^viewStock$ controllers/viewStock.php
+
 RewriteRule ^viewSales$ controllers/viewSales.php
+RewriteRule ^viewSale-([0-9]+)$ controllers/viewSale.php?id=$1&viewSaleDetail=true [NC,L]
+
 RewriteRule ^viewProviders$ controllers/viewProviders.php
 RewriteRule ^viewBuys$ controllers/viewBuys.php
 

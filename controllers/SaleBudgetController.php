@@ -5,7 +5,12 @@ require_once '../fw/fw.php'; //archivo que tiene todos los includes y requires d
 require_once '../models/Sales.php';
 require_once '../models/Budgets.php';
 require_once '../models/Stock.php';
+
 require_once '../views/FormNewSaleBudget.php';
+require_once '../views/ViewSales.php';
+require_once '../views/ViewSale.php';
+
+
 // require_once '../views/ViewBudgets.php';
 
 class SaleBudgetController extends Controller {
@@ -13,14 +18,42 @@ class SaleBudgetController extends Controller {
         $this->models['sales']   = new Sales();
         $this->models['budgets'] = new Budgets();
         $this->models['stock']   = new Stock();
-        $this->views['form']     = new FormNewSaleBudget(title: "Nueva venta o cotización", includeJs: "./js/formSaleBudget.js", includeCSS: "./css/formSaleBudget.css");
+
+        $this->views['dashboard']     = new ViewSales(title: "Dashboard ventas", includeJs: "js/viewSales.js", includeCSS: "css/viewSales.css");
+        $this->views['form']          = new FormNewSaleBudget(title: "Nueva venta o cotización", includeJs: "./js/formSaleBudget.js", includeCSS: "./css/formSaleBudget.css");
+        $this->views['saleDetail']    = new ViewSale(includeJs: "js/viewSale.js", includeCSS: "css/viewSale.css");
+
         // $this->views['view']     = new ViewBudgets();
     }
-
+    // Vistas
     public function viewForm(){
         $this->views['form']->render();
     }
+    public function viewDashboard() { 
+        $this->views['dashboard']->render();
+    }
+    public function viewSaleDetail() { 
+        if(!isset($_GET['id'])) throw new Exception("Falta el identificador de la venta a consultar");
+        if(empty($_GET['id'])) throw new Exception("El identificador de la venta a consultar está vacío o es inválido");
+        $sale        = new stdClass();
+        $sale->info  = $this->models['sales']->getSaleInfo($_GET['id']);
+        $sale->items = $this->models['sales']->getSaleItems($_GET['id']);
+        $this->views['saleDetail']->sale = $sale;
+        $this->views['saleDetail']->render();
+    }
+    // Getters
+    public function getSalesToDashboard() {
+        $filters = new stdClass();
+        $orders  = new stdClass();
+        if(!empty($_GET['filters']))
+            $filters = json_decode($_GET['filters']);
+        if(!empty($_GET['orders']))
+            $orders = json_decode($_GET['orders']);
+        $sales = $this->models['sales']->getSales($filters, $orders);
+        return $sales;
+    }
 
+    // Validadores
     public function validateExistItems($items) {
         foreach($items as $k => $item) {
             if(!isset($item->cost_price)) throw new Exception("Falta el precio de costo del ítem #$k");
@@ -31,7 +64,6 @@ class SaleBudgetController extends Controller {
         }
         return true;
     }
-
     public function validateNotEmptyItems($items) {
         foreach($items as $k => $item) {
             // if(empty($item->cost_price)) throw new Exception("Falta el precio de costo del ítem #$k");
@@ -42,7 +74,6 @@ class SaleBudgetController extends Controller {
         }
         return true;
     }
-
     public function validateExistBudget() {
         if(!isset($_POST['budget'])) throw new Exception("Envíe una cotización para dar de alta");
         $budget = json_decode($_POST['budget']);
@@ -53,7 +84,6 @@ class SaleBudgetController extends Controller {
         if(!isset($budget->totalPrice)) throw new Exception("Falta el precio total de la cotización");
         return $budget;
     }
-
     public function validateNotEmptyBudget($budget) {
         if(empty($budget->items) || count($budget->items) == 0) throw new Exception("Envíe ítems para dar de alta en la cotización");
         $this->validateNotEmptyItems($budget->items);
@@ -61,7 +91,6 @@ class SaleBudgetController extends Controller {
         if(empty($budget->totalPrice) && $budget->totalPrice != 0) throw new Exception("Envíe el precio total de la cotización");
         return true;
     }
-
     public function validateExistSale() {
         if(!isset($_POST['sale'])) throw new Exception("Envíe una venta para dar de alta");
         $sale = json_decode($_POST['sale']);
@@ -72,14 +101,13 @@ class SaleBudgetController extends Controller {
         if(!isset($sale->totalPrice)) throw new Exception("Falta el precio total de la venta");
         return $sale;
     }
-
     public function validateNotEmptySale($sale) {
         if(empty($sale->items) || count($sale->items) == 0) throw new Exception("Envíe ítems para dar de alta en la venta");
         $this->validateNotEmptyItems($sale->items);
         if(empty($sale->client->client_id)) throw new Exception("Envíe el identificador del cliente para dar de alta la venta");
         return true;
     }
-
+    // Altas y modificaciones
     public function newBudget() {
         $budget = $this->validateExistBudget();
         $this->validateNotEmptyBudget($budget);
@@ -88,7 +116,6 @@ class SaleBudgetController extends Controller {
         $msg = "Se dió de alta la cotización #$budget->id";
         return $msg;
     }
-
     public function newSale() {
         $sale = $this->validateExistSale();
         $this->validateNotEmptySale($sale);
@@ -100,7 +127,7 @@ class SaleBudgetController extends Controller {
         return $msg;
     }
 
-
+    // Fixeado de acá para arriba
 
 
 
@@ -139,17 +166,6 @@ class SaleBudgetController extends Controller {
         return true;
     }
 
-    public function getSales($filterValue){
-        try{
-            $ret = $this->models['sales']->getSales($filterValue);
-        }
-        catch(QueryErrorException $error){ //ACA HAY QUE VER COMO DEVOLVER Y MOSTRAR ESTE MSG DE ERROR (PROBABLEMENTE CONDICIONAL DESDE FRONT)
-            $msg = "Se produjo un error intentando consultar el stock con el filtro " . $filterValue . ",
-            la base devuelve el siguiente error: " . $error->getErrorMsg();
-            $ret = $msg;
-        }
-        return $ret;
-    }
 
     public function getSaleItems($saleId){
         //EN ESTO FALTAN EXCEPCIONES
