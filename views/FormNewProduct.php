@@ -4,9 +4,6 @@
 require_once '../fw/fw.php';
 
 class FormNewProduct extends View {
-    public function __construct(){
-
-    }
 }
 
 ?>

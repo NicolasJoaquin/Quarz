@@ -1149,3 +1149,81 @@ FOR EACH ROW
   BEGIN 
     INSERT INTO sale_prices (product_id, price_list_id, sale_factor, product_price) VALUES (NEW.product_id, 1, 1.45, 0); 
   END
+
+-- Agregado de campos en budgets
+ALTER TABLE budgets
+  ADD COLUMN version INT(10) UNSIGNED NOT NULL DEFAULT 1 AFTER description,
+  ADD COLUMN init_version_id INT(10) UNSIGNED DEFAULT NULL,
+  ADD COLUMN active TINYINT(3) UNSIGNED NOT NULL DEFAULT 1;
+ALTER TABLE budgets
+  ADD CONSTRAINT budgets_init_version FOREIGN KEY (init_version_id) REFERENCES budgets (budget_id) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+-- Nueva tabla metodos de envío
+CREATE TABLE `shipment_methods` (
+  `shipment_method_id` INT(10) UNSIGNED NOT NULL,
+  `title` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+ALTER TABLE `shipment_methods`
+  ADD PRIMARY KEY (`shipment_method_id`);
+ALTER TABLE `shipment_methods`
+  MODIFY `shipment_method_id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+INSERT INTO `shipment_methods` (`shipment_method_id`, `title`) VALUES
+(1, 'Retira por local'),
+(2, 'Correo argentino'),
+(3, 'Motomensajería');
+
+-- Nueva tabla metodos de pago
+CREATE TABLE `payment_methods` (
+  `payment_method_id` INT(10) UNSIGNED NOT NULL,
+  `title` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+ALTER TABLE `payment_methods`
+  ADD PRIMARY KEY (`payment_method_id`);
+ALTER TABLE `payment_methods`
+  MODIFY `payment_method_id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+INSERT INTO `payment_methods` (`payment_method_id`, `title`) VALUES
+(1, 'Efectivo'),
+(2, 'Transferencia bancaria'),
+(3, 'Mercado Pago'),
+(4, 'Débito'),
+(5, 'Crédito');
+
+-- Agregado de dependencias en cotizaciones, ventas y compras
+ALTER TABLE budgets
+  ADD COLUMN subtotal DOUBLE(10,2) UNSIGNED NOT NULL,
+  ADD COLUMN discount DOUBLE(10,2) UNSIGNED DEFAULT NULL,
+  ADD COLUMN tax DOUBLE(10,2) UNSIGNED DEFAULT NULL,
+  ADD COLUMN ship DOUBLE(10,2) UNSIGNED DEFAULT NULL,
+  ADD COLUMN shipment_method_id INT(10) UNSIGNED DEFAULT NULL,
+  ADD COLUMN payment_method_id INT(10) UNSIGNED DEFAULT NULL;
+ALTER TABLE budgets
+  ADD CONSTRAINT budgets_shipment_method FOREIGN KEY (shipment_method_id) REFERENCES shipment_methods (shipment_method_id) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT budgets_payment_method FOREIGN KEY (payment_method_id) REFERENCES payment_methods (payment_method_id) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+ALTER TABLE sales
+  ADD COLUMN active TINYINT(3) UNSIGNED NOT NULL DEFAULT 1,
+  ADD COLUMN subtotal DOUBLE(10,2) UNSIGNED NOT NULL,
+  ADD COLUMN discount DOUBLE(10,2) UNSIGNED DEFAULT NULL,
+  ADD COLUMN tax DOUBLE(10,2) UNSIGNED DEFAULT NULL,
+  ADD COLUMN ship DOUBLE(10,2) UNSIGNED DEFAULT NULL,
+  ADD COLUMN shipment_method_id INT(10) UNSIGNED DEFAULT NULL,
+  ADD COLUMN payment_method_id INT(10) UNSIGNED DEFAULT NULL;
+ALTER TABLE sales
+  ADD CONSTRAINT sales_shipment_method FOREIGN KEY (shipment_method_id) REFERENCES shipment_methods (shipment_method_id) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT sales_payment_method FOREIGN KEY (payment_method_id) REFERENCES payment_methods (payment_method_id) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+ALTER TABLE buys
+  ADD COLUMN active TINYINT(3) UNSIGNED NOT NULL DEFAULT 1,
+  ADD COLUMN subtotal DOUBLE(10,2) UNSIGNED NOT NULL,
+  ADD COLUMN discount DOUBLE(10,2) UNSIGNED DEFAULT NULL,
+  ADD COLUMN tax DOUBLE(10,2) UNSIGNED DEFAULT NULL,
+  ADD COLUMN ship DOUBLE(10,2) UNSIGNED DEFAULT NULL,
+  ADD COLUMN shipment_method_id INT(10) UNSIGNED DEFAULT NULL,
+  ADD COLUMN payment_method_id INT(10) UNSIGNED DEFAULT NULL;
+ALTER TABLE buys
+  ADD CONSTRAINT buys_shipment_method FOREIGN KEY (shipment_method_id) REFERENCES shipment_methods (shipment_method_id) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT buys_payment_method FOREIGN KEY (payment_method_id) REFERENCES payment_methods (payment_method_id) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+-- Agregado de descuento, recargo y precio de envio en cotizaciones, ventas y compras
+ALTER TABLE sales CHANGE total total DOUBLE(10,2) UNSIGNED NOT NULL;
+ALTER TABLE buys CHANGE total total DOUBLE(10,2) UNSIGNED NOT NULL;

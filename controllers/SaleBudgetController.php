@@ -9,6 +9,8 @@ require_once '../models/Stock.php';
 require_once '../views/FormNewSaleBudget.php';
 require_once '../views/ViewSales.php';
 require_once '../views/ViewSale.php';
+require_once '../views/ViewBudgets.php';
+// require_once '../views/ViewBudget.php';
 
 
 // require_once '../views/ViewBudgets.php';
@@ -19,9 +21,10 @@ class SaleBudgetController extends Controller {
         $this->models['budgets'] = new Budgets();
         $this->models['stock']   = new Stock();
 
-        $this->views['dashboard']     = new ViewSales(title: "Dashboard ventas", includeJs: "js/viewSales.js", includeCSS: "css/viewSales.css");
-        $this->views['form']          = new FormNewSaleBudget(title: "Nueva venta o cotización", includeJs: "./js/formSaleBudget.js", includeCSS: "./css/formSaleBudget.css");
-        $this->views['saleDetail']    = new ViewSale(includeJs: "js/viewSale.js", includeCSS: "css/viewSale.css");
+        $this->views['dashboard']       = new ViewSales(title: "Dashboard ventas", includeJs: "js/viewSales.js", includeCSS: "css/viewSales.css");
+        $this->views['budgetDashboard'] = new ViewBudgets(title: "Dashboard cotizaciones", includeJs: "js/viewBudgets.js", includeCSS: "css/viewBudgets.css");
+        $this->views['form']            = new FormNewSaleBudget(title: "Nueva venta o cotización", includeJs: "./js/formSaleBudget.js", includeCSS: "./css/formSaleBudget.css");
+        $this->views['saleDetail']      = new ViewSale(includeJs: "js/viewSale.js", includeCSS: "css/viewSale.css");
 
         // $this->views['view']     = new ViewBudgets();
     }
@@ -32,24 +35,44 @@ class SaleBudgetController extends Controller {
     public function viewDashboard() { 
         $this->views['dashboard']->render();
     }
+    public function viewBudgetDashboard() { 
+        $this->views['budgetDashboard']->render();
+    }
+
     public function viewSaleDetail() { 
-        if(!isset($_GET['id'])) throw new Exception("Falta el identificador de la venta a consultar");
+        // if(!isset($_GET['id'])) throw new Exception("Falta el identificador de la venta a consultar");
         if(empty($_GET['id'])) throw new Exception("El identificador de la venta a consultar está vacío o es inválido");
         $sale        = new stdClass();
+        // ACA FALTA VERIFICAR QUE LA VENTA EXISTA Y ESTÉ ACTIVA PARA PODER VERLA
         $sale->info  = $this->models['sales']->getSaleInfo($_GET['id']);
         $sale->items = $this->models['sales']->getSaleItems($_GET['id']);
         $this->views['saleDetail']->sale = $sale;
         $this->views['saleDetail']->render();
     }
     // Getters
-    public function getSalesToDashboard() {
-        $filters = new stdClass();
-        $orders  = new stdClass();
+    public function getBudgetsToDashboard() {
+        $filters   = new stdClass();
+        $orders    = new stdClass();
+        $budgets   = new stdClass();
         if(!empty($_GET['filters']))
             $filters = json_decode($_GET['filters']);
         if(!empty($_GET['orders']))
             $orders = json_decode($_GET['orders']);
-        $sales = $this->models['sales']->getSales($filters, $orders);
+        $budgets = $this->models['budgets']->getBudgets($filters, $orders);
+        // $budgets->total   = $this->models['budgets']->getTotalOfSales($filters);
+        return $budgets;
+    }
+
+    public function getSalesToDashboard() {
+        $filters = new stdClass();
+        $orders  = new stdClass();
+        $sales   = new stdClass();
+        if(!empty($_GET['filters']))
+            $filters = json_decode($_GET['filters']);
+        if(!empty($_GET['orders']))
+            $orders = json_decode($_GET['orders']);
+        $sales->sales = $this->models['sales']->getSales($filters, $orders);
+        $sales->total = $this->models['sales']->getTotalOfSales($filters);
         return $sales;
     }
 
@@ -74,13 +97,13 @@ class SaleBudgetController extends Controller {
         }
         return true;
     }
-    public function validateExistBudget() {
+    public function validateExistBudget() { // Revisar, se podría pasar todo a validateNotEmptyBudget
         if(!isset($_POST['budget'])) throw new Exception("Envíe una cotización para dar de alta");
         $budget = json_decode($_POST['budget']);
         if(!isset($budget->client->client_id)) throw new Exception("Falta el cliente de la cotización");
         if(!isset($budget->items)) throw new Exception("Faltan los ítems de la cotización");
         $this->validateExistItems($budget->items);
-        if(!isset($budget->notes)) throw new Exception("Faltan las notas de la cotización");
+        if(!isset($budget->subtotalPrice)) throw new Exception("Falta el precio subtotal de la cotización");
         if(!isset($budget->totalPrice)) throw new Exception("Falta el precio total de la cotización");
         return $budget;
     }
@@ -88,6 +111,7 @@ class SaleBudgetController extends Controller {
         if(empty($budget->items) || count($budget->items) == 0) throw new Exception("Envíe ítems para dar de alta en la cotización");
         $this->validateNotEmptyItems($budget->items);
         if(empty($budget->client->client_id)) throw new Exception("Envíe el identificador del cliente para dar de alta la cotización");
+        if(empty($budget->subtotalPrice) && $budget->subtotalPrice != 0) throw new Exception("Envíe el precio subtotal de la cotización");
         if(empty($budget->totalPrice) && $budget->totalPrice != 0) throw new Exception("Envíe el precio total de la cotización");
         return true;
     }
@@ -97,7 +121,7 @@ class SaleBudgetController extends Controller {
         if(!isset($sale->client->client_id)) throw new Exception("Falta el cliente de la venta");
         if(!isset($sale->items)) throw new Exception("Faltan los ítems de la venta");
         $this->validateExistItems($sale->items);
-        if(!isset($sale->notes)) throw new Exception("Faltan las notas de la venta");
+        if(!isset($sale->subtotalPrice)) throw new Exception("Falta el precio subtotal de la venta");
         if(!isset($sale->totalPrice)) throw new Exception("Falta el precio total de la venta");
         return $sale;
     }
@@ -105,11 +129,13 @@ class SaleBudgetController extends Controller {
         if(empty($sale->items) || count($sale->items) == 0) throw new Exception("Envíe ítems para dar de alta en la venta");
         $this->validateNotEmptyItems($sale->items);
         if(empty($sale->client->client_id)) throw new Exception("Envíe el identificador del cliente para dar de alta la venta");
+        if(empty($sale->subtotalPrice) && $sale->subtotalPrice != 0) throw new Exception("Envíe el precio subtotal de la venta");
+        if(empty($sale->totalPrice) && $sale->totalPrice != 0) throw new Exception("Envíe el precio total de la venta");
         return true;
     }
     // Altas y modificaciones
     public function newBudget() {
-        $budget = $this->validateExistBudget();
+        $budget = $this->validateExistBudget(); // Revisar
         $this->validateNotEmptyBudget($budget);
         $budget->id = $this->models['budgets']->newBudget($budget);
         $this->models['budgets']->newBudgetItems($budget->items, $budget->id);

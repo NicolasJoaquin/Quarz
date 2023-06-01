@@ -10,8 +10,8 @@ require_once '../views/ViewProductChanges.php';
 require_once '../views/ViewPriceChanges.php';
 require_once '../views/ViewStockChanges.php';
 
-require_once '../views/ViewProductsRestricted.php';
 require_once '../views/FormNewProduct.php';
+require_once '../views/ViewProductsRestricted.php';
 
 class ProductController extends Controller{
     public function __construct(){
@@ -22,12 +22,15 @@ class ProductController extends Controller{
         $this->views['productChanges'] = new ViewProductChanges(includeJs: "js/viewProductChanges.js", includeCSS: "css/viewProductChanges.css");
         $this->views['priceChanges']   = new ViewPriceChanges(includeJs: "js/viewPriceChanges.js", includeCSS: "css/viewPriceChanges.css");
         $this->views['stockChanges']   = new ViewStockChanges(includeJs: "js/viewStockChanges.js", includeCSS: "css/viewStockChanges.css");
-        // Falta fix
-        $this->views['form']           = new FormNewProduct();        
+        $this->views['form']           = new FormNewProduct(title: "Nuevo producto", includeJs: "js/formNewProduct.js");        
     }
 
     // A partir de acá se actualiza el desarrollo 
     // Vistas
+    public function viewForm(){
+        $this->views['form']->render();
+    }
+
     public function viewDashboard() { 
         $this->views['dashboard']->render();
     }
@@ -69,7 +72,7 @@ class ProductController extends Controller{
         if(!isset($_POST['product'])) throw new Exception("Envíe un producto");
         $product = json_decode($_POST['product']);
         if(!isset($product->product_id)) throw new Exception("Falta el identificador del producto");
-        if(!isset($product->cost_price) && !isset($product->product_price) && !isset($product->product_quantity)) 
+        if(!isset($product->cost_price) && !isset($product->product_price) && !isset($product->product_quantity)) // Falta fix para que sea universal
             throw new Exception("Envíe algún dato del producto a modificar");
         return $product;
     }
@@ -82,6 +85,19 @@ class ProductController extends Controller{
         return true;
     }
     // Altas y modificaciones
+    public function newProduct() {
+        if(empty($_POST['product'])) throw new Exception("Envíe el producto para dar de alta");
+        $product = json_decode($_POST['product']);
+        if(empty($product->desc)) throw new Exception("Envíe la descripción del producto para dar de alta");
+        if(empty($product->packingUnit)) throw new Exception("Envíe la unidad de empaque para dar de alta");
+        if(empty($product->provider)) throw new Exception("Envíe el proveedor para dar de alta");
+        if(empty($product->costPrice)) $product->costPrice = 0;
+        if(empty($product->salePrice)) $product->salePrice = 0;
+        if(empty($product->quantity))  $product->quantity = 0;
+        $newProdId = $this->models['products']->newProduct($product);
+        $msg = "Se dió de alta correctamente el producto #" . sprintf("%'.04d\n", $newProdId) . " $product->desc";
+        return $msg;
+    }
     public function modifyProduct() {
         $product = $this->validateExistProduct();
         $this->validateNotEmptyProduct($product);
@@ -157,14 +173,6 @@ class ProductController extends Controller{
 
 
 
-    public function viewForm($perm){
-        if($perm == 1){
-            $this->views['form']->render();
-        }else {
-            echo "No tiene acceso al alta de productos";
-            exit();
-        }
-    }
 }
 
 ?>

@@ -11,26 +11,26 @@ class Budgets extends Model {
         return $this->db->fetchAll();
     }
 
-    public function getBudgets($filterValue) {
-        // VALIDO FILTRO
-        if(!empty($filterValue)) {
-            $filterValue = substr($filterValue, 0, 50);
-            $filterValue = $this->db->escape($filterValue);
-            $filterValue = $this->db->escapeWildcards($filterValue);
-        }
+    // public function getBudgets($filterValue) {
+    //     // VALIDO FILTRO
+    //     if(!empty($filterValue)) {
+    //         $filterValue = substr($filterValue, 0, 50);
+    //         $filterValue = $this->db->escape($filterValue);
+    //         $filterValue = $this->db->escapeWildcards($filterValue);
+    //     }
 
-        $this->db->query("SELECT *
-                            FROM view_budgets as b 
-                            WHERE b.budget_id LIKE '%$filterValue%' OR 
-                                    b.user_name LIKE '%$filterValue%' OR
-                                    b.client_name LIKE '%$filterValue%' OR 
-                                    b.total LIKE '%$filterValue%' OR
-                                    b.start_date LIKE '%$filterValue%' OR
-                                    b.description LIKE '%$filterValue%'"); // MODIFICAR LIMIT ACA
-        //VERIFICACIÓN DE LA QUERY Y RETORNO
-        $this->db->validateLastQuery();
-        return $this->db->fetchAll();
-    }
+    //     $this->db->query("SELECT *
+    //                         FROM view_budgets as b 
+    //                         WHERE b.budget_id LIKE '%$filterValue%' OR 
+    //                                 b.user_name LIKE '%$filterValue%' OR
+    //                                 b.client_name LIKE '%$filterValue%' OR 
+    //                                 b.total LIKE '%$filterValue%' OR
+    //                                 b.start_date LIKE '%$filterValue%' OR
+    //                                 b.description LIKE '%$filterValue%'"); // MODIFICAR LIMIT ACA
+    //     //VERIFICACIÓN DE LA QUERY Y RETORNO
+    //     $this->db->validateLastQuery();
+    //     return $this->db->fetchAll();
+    // }
 
     public function getBudgetItems($budgetId) {
         //Valido $budgetId
@@ -46,23 +46,236 @@ class Budgets extends Model {
         return $this->db->fetchAll();
     }
 
-    //ALTAS, BAJAS Y MODIFICACIONES------------------------------------------------------------------------------------------------------------------
     // A partir de acá se usan nuevas validaciones y sanitizaciones
-    public function newBudget($budget) { 
+        // VALIDACIONES Y SANITIZACIONES
+        // public function validateFilters(&$filters) {
+
+        // }
+
+        //GETERS------------------------------------------------------------------------------------------------------------------------
+        public function getBudgets($filters, $orders) {
+            $sqlFilters = "";
+            $sqlOrders = "";
+            // Validación de filtros e inclusión en query
+            if(!empty($filters->budgetNumber)) {
+                $this->db->validateSanitizeId($filters->budgetNumber, "El número de la cotización es erróneo");
+                $sqlFilters .= "WHERE b.budget_id LIKE '%$filters->budgetNumber%'";
+            }
+            if(!empty($filters->user)) {
+                $this->db->validateSanitizeString(str: $filters->user, wildcards: true, errorMsg: "El filtro de usuario es erróneo");
+                if(!empty($sqlFilters))
+                    $sqlFilters .= " AND ";
+                else
+                    $sqlFilters .= "WHERE ";
+                $sqlFilters .= "u.user_name LIKE '%$filters->user%'";
+            }
+            if(!empty($filters->client)) {
+                $this->db->validateSanitizeString(str: $filters->client, wildcards: true, errorMsg: "El filtro de cliente es erróneo");
+                if(!empty($sqlFilters))
+                    $sqlFilters .= " AND ";
+                else
+                    $sqlFilters .= "WHERE ";
+                $sqlFilters .= "c.name LIKE '%$filters->client%'";
+            }
+
+            // ACÁ VA EL FILTRO DE ACTIVIDAD DE LA COTIZACIÓN (REGULADO POR TIEMPO)
+            // SE EVITAN FILTROS DE VERSIONES POR EL MOMENTO
+            
+            if(!empty($filters->fromDate)) {
+                $this->db->validateSanitizeDate(date: $filters->fromDate, format: "Y-m-d H:i:s", errorMsg: "El filtro de fecha de inicio es erróneo");
+                if(!empty($sqlFilters))
+                    $sqlFilters .= " AND ";
+                else
+                    $sqlFilters .= "WHERE ";
+                $sqlFilters .= "b.start_date >= '$filters->fromDate'";
+            }
+            if(!empty($filters->toDate)) {
+                $this->db->validateSanitizeDate(date: $filters->toDate, format: "Y-m-d H:i:s", errorMsg: "El filtro de fecha de inicio es erróneo");
+                if(!empty($sqlFilters))
+                    $sqlFilters .= " AND ";
+                else
+                    $sqlFilters .= "WHERE ";
+                $sqlFilters .= "b.start_date <= '$filters->toDate'";
+            }
+            if(!empty($filters->fromDate) && !empty($filters->toDate) && $filters->fromDate > $filters->toDate)
+                throw new Exception("La fecha de inicio no puede ser posterior a la de final");
+            // FALTA AGREGAR ESTE FILTRO A DASHBOARD DE VENTAS (MÉTODOS DE ENVÍO Y PAGO)
+            if(!empty($filters->shipmentMethod)) {
+                $this->db->validateSanitizeId($filters->shipmentMethod, "El filtro de medio de envío es erróneo");
+                if(!empty($sqlFilters))
+                    $sqlFilters .= " AND ";
+                else
+                    $sqlFilters .= "WHERE ";
+                $sqlFilters .= "b.shipment_method_id = $filters->shipmentMethod";
+            }
+            if(!empty($filters->paymentMethod)) {
+                $this->db->validateSanitizeId($filters->paymentMethod, "El filtro de medio de pago es erróneo");
+                if(!empty($sqlFilters))
+                    $sqlFilters .= " AND ";
+                else
+                    $sqlFilters .= "WHERE ";
+                $sqlFilters .= "b.payment_method_id = $filters->paymentMethod";
+            }
+
+            if(!empty($filters->subtotal)) { // Revisar validación (por ahora string)
+                $this->db->validateSanitizeString(str: $filters->subtotal, wildcards: true, errorMsg: "El filtro de subtotal es erróneo");
+                if(!empty($sqlFilters))
+                    $sqlFilters .= " AND ";
+                else
+                    $sqlFilters .= "WHERE ";
+                $sqlFilters .= "b.subtotal LIKE '%$filters->subtotal%'";
+            }
+            if(!empty($filters->total)) { // Revisar validación (por ahora string)
+                $this->db->validateSanitizeString(str: $filters->total, wildcards: true, errorMsg: "El filtro de total es erróneo");
+                if(!empty($sqlFilters))
+                    $sqlFilters .= " AND ";
+                else
+                    $sqlFilters .= "WHERE ";
+                $sqlFilters .= "b.total LIKE '%$filters->total%'";
+            }
+            // Activo (alta/baja lógica)
+            if(!empty($sqlFilters))
+                $sqlFilters .= " AND ";
+            else
+                $sqlFilters .= "WHERE ";
+            $sqlFilters .= "b.active = 1";
+    
+            $sqlOrders = "ORDER BY b.budget_id DESC"; // Provisorio
+
+            $return = new stdClass();
+
+            $query = "SELECT b.budget_id, b.user_id, u.user AS user_name, c.name AS client_name, b.start_date, b.shipment_method_id, 
+                        shipMet.title AS ship_method_name, b.payment_method_id, payMet.title AS pay_method_name, b.subtotal, 
+                        b.total, b.description AS notes
+                    FROM budgets AS b 
+                    LEFT JOIN users AS u ON b.user_id = u.user_id
+                    LEFT JOIN shipment_methods AS shipMet ON b.shipment_method_id = shipMet.shipment_method_id
+                    LEFT JOIN payment_methods AS payMet ON b.payment_method_id = payMet.payment_method_id
+                    LEFT JOIN clients AS c ON b.client_id = c.client_id $sqlFilters $sqlOrders"; // MODIFICAR LIMIT ACA
+            
+            $this->db->query($query); 
+            $this->db->validateLastQuery();
+            $return->budgets = $this->db->fetchAll();
+
+            $querySubtotal = "SELECT SUM(b.subtotal) AS subtotal
+                            FROM budgets AS b 
+                            LEFT JOIN users AS u ON b.user_id = u.user_id
+                            LEFT JOIN shipment_methods AS shipMet ON b.shipment_method_id = shipMet.shipment_method_id
+                            LEFT JOIN payment_methods AS payMet ON b.payment_method_id = payMet.payment_method_id
+                            LEFT JOIN clients AS c ON b.client_id = c.client_id $sqlFilters $sqlOrders"; // MODIFICAR LIMIT ACA
+            $this->db->query($querySubtotal); 
+            $this->db->validateLastQuery();
+            $return->subtotal = $this->db->fetch()['subtotal'];
+
+            $queryShips = "SELECT SUM(b.ship) AS ships
+                            FROM budgets AS b 
+                            LEFT JOIN users AS u ON b.user_id = u.user_id
+                            LEFT JOIN shipment_methods AS shipMet ON b.shipment_method_id = shipMet.shipment_method_id
+                            LEFT JOIN payment_methods AS payMet ON b.payment_method_id = payMet.payment_method_id
+                            LEFT JOIN clients AS c ON b.client_id = c.client_id $sqlFilters $sqlOrders"; // MODIFICAR LIMIT ACA
+            $this->db->query($queryShips); 
+            $this->db->validateLastQuery();
+            $return->ships = $this->db->fetch()['ships'];
+
+
+            $queryTotal = "SELECT SUM(b.total) AS total
+                            FROM budgets AS b 
+                            LEFT JOIN users AS u ON b.user_id = u.user_id
+                            LEFT JOIN shipment_methods AS shipMet ON b.shipment_method_id = shipMet.shipment_method_id
+                            LEFT JOIN payment_methods AS payMet ON b.payment_method_id = payMet.payment_method_id
+                            LEFT JOIN clients AS c ON b.client_id = c.client_id $sqlFilters $sqlOrders"; // MODIFICAR LIMIT ACA
+            $this->db->query($queryTotal); 
+            $this->db->validateLastQuery();
+            $return->total = $this->db->fetch()['total'];
+
+            return $return;
+        }
+    
+    //ALTAS, BAJAS Y MODIFICACIONES------------------------------------------------------------------------------------------------------------------
+    public function newBudget($budget, $initVersion = true) { 
+        $query   = "";
+        $columns = "";
+        $values  = "";
+        if(!$initVersion) {
+            $this->db->validateSanitizeId($budget->init_version, "El identificador de la versión inicial es inválido");
+            $querySelect = "SELECT version FROM budgets WHERE init_version_id = $budget->init_version ORDER BY version DESC LIMIT 1"; // Nro. de última versión de esta cotización
+            $this->db->query($querySelect);
+            $this->db->validateLastQuery();
+            $lastVersion = $this->db->fetch()['version'];
+            $lastVersion++;
+            $columns .= "init_version_id, version"; 
+            $values .= "$budget->init_version, $lastVersion"; 
+        }
+
+        if(!empty($columns) && !empty($values)) {
+            $columns .= ", ";
+            $values  .= ", ";
+        }
+        $columns .= "user_id";
+        $values  .= $_SESSION['user_id'];
+
         $this->db->validateSanitizeId($budget->client->client_id, "El identificador del cliente es inválido");
-        $clientId = $budget->client->client_id;
+        $columns .= ", client_id";
+        $values  .= ", " . $budget->client->client_id;
+
+        $this->db->validateSanitizeFloat($budget->subtotalPrice, "El precio subtotal del presupuesto es inválido");
+        if($budget->subtotalPrice < 0)  
+            throw new Exception("El precio subtotal de la cotización no puede ser menor a 0");
+        $columns .= ", subtotal";
+        $values  .= ", " . $budget->subtotalPrice;
+
+        if(!empty($budget->discount)) {
+            $this->db->validateSanitizeFloat($budget->discount, "El descuento del presupuesto es inválido");
+            if($budget->discount < 0)  
+                throw new Exception("El descuento de la cotización no puede ser menor a 0");
+            $columns .= ", discount";
+            $values  .= ", " . $budget->discount;
+        }
+
+        if(!empty($budget->tax)) {
+            $this->db->validateSanitizeFloat($budget->tax, "Los recargos o impuestos del presupuesto son inválidos");
+            if($budget->tax < 0)  
+                throw new Exception("Los recargos o impuestos de la cotización no pueden ser menor a 0");
+            $columns .= ", tax";
+            $values  .= ", " . $budget->tax;
+        }
+
+        if(!empty($budget->ship)) {
+            $this->db->validateSanitizeFloat($budget->ship, "El precio de envío del presupuesto es inválido");
+            if($budget->ship < 0)  
+                throw new Exception("El precio de envío de la cotización no pueden ser menor a 0");
+            $columns .= ", ship";
+            $values  .= ", " . $budget->ship;
+        }
 
         $this->db->validateSanitizeFloat($budget->totalPrice, "El precio total del presupuesto es inválido");
-        $totalPrice = $budget->totalPrice;
-        if($totalPrice < 0)  
+        if($budget->totalPrice < 0)  
             throw new Exception("El precio total de la cotización no puede ser menor a 0");
-        if(!empty($budget->notes))
-            $budget->notes = $this->db->escape($budget->notes);
-        $userId = $_SESSION['user_id'];
+        $columns .= ", total";
+        $values  .= ", " . $budget->totalPrice;
+
+        if(!empty($budget->shipMethod->shipment_method_id)) {
+            $this->db->validateSanitizeId($budget->shipMethod->shipment_method_id, "El medio de envío del presupuesto es inválido");
+            $columns .= ", shipment_method_id";
+            $values  .= ", " . $budget->shipMethod->shipment_method_id;
+        }
+
+        if(!empty($budget->payMethod->payment_method_id)) {
+            $this->db->validateSanitizeId($budget->payMethod->payment_method_id, "El medio de pago del presupuesto es inválido");
+            $columns .= ", payment_method_id";
+            $values  .= ", " . $budget->payMethod->payment_method_id;
+        }
+
+        if(!empty($budget->notes)) {
+            $this->db->validateSanitizeString(str: $budget->notes, errorMsg: "Las notas son inválidas", maxLen: 350);
+            $columns .= ", description";
+            $values  .= ", '" . $budget->notes . "'";
+        }
+
+        $query = "INSERT INTO budgets ($columns) VALUES ($values)";
 
         //QUERY INSERT
-        $this->db->query("INSERT INTO budgets (user_id, client_id, total, description) 
-                            VALUES ($userId, $clientId, $totalPrice, '$budget->notes')"); 
+        $this->db->query($query); 
         $this->db->validateLastQuery();
         $lastBudget = $this->db->getLastInsertId();
         if(!$lastBudget)

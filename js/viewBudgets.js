@@ -1,23 +1,18 @@
 $(document).ready(function() {
-    var sales      = new Object(),
-        total      = 0, 
-        filters    = new Object(),
-        orders     = new Object(),
-        shipStates = new Object(),
-        payStates  = new Object();
+    var budgets     = new Object(),
+        total       = 0, 
+        filters     = new Object(),
+        orders      = new Object(),
+        shipMethods = new Object(),
+        payMethods  = new Object();
 
-    // Eventos
-    // $("th input").on("keyup", function() {
-    //     getFilters();
-    //     getSales();
-    // });   
     $("th input").on("change", function() {
         getFilters();
-        getSales();
+        getBudgets();
     });     
     $("th select").on("change", function() {
         getFilters();
-        getSales();
+        getBudgets();
     });     
     $(".orders th").on("click", function() {
         // var values = ["desc", "asc"];
@@ -37,31 +32,32 @@ $(document).ready(function() {
             icon.addClass(descIconClass);
         }
         getOrders();
-        getSales();
+        getBudgets();
     });    
 
     // Funciones 
     // Filtros y órdenes
     function getFilters() {
-        filters.saleNumber = $.trim($("#saleNumberFilter").val());
-        filters.user       = $.trim($("#userFilter").val());
-        filters.client     = $.trim($("#clientFilter").val());
-        filters.budget     = $.trim($("#budgetFilter").val());
-        filters.fromDate   = $.trim($("#fromDateFilter").val());
-        filters.toDate     = $.trim($("#toDateFilter").val());
-        filters.shipment   = $.trim($("#shipmentFilter").val());
-        filters.payment    = $.trim($("#paymentFilter").val());
+        filters.budgetNumber   = $.trim($("#budgetNumberFilter").val());
+        filters.user           = $.trim($("#userFilter").val());
+        filters.client         = $.trim($("#clientFilter").val());
+        filters.fromDate       = $.trim($("#fromDateFilter").val());
+        filters.toDate         = $.trim($("#toDateFilter").val());
+        filters.shipmentMethod = $.trim($("#shipmentFilter").val());
+        filters.paymentMethod  = $.trim($("#paymentFilter").val());
+        filters.subtotal       = $.trim($("#subtotalFilter").val());
+        filters.total          = $.trim($("#totalFilter").val());
         console.log(filters);
-
     }
     function getOrders() {
-        orders.sale     = $.trim($("#saleOrder").val());
+        orders.budget   = $.trim($("#budgetOrder").val());
         orders.user     = $.trim($("#userOrder").val());
         orders.client   = $.trim($("#clientOrder").val());
-        orders.budget   = $.trim($("#budgetOrder").val());
         orders.date     = $.trim($("#dateOrder").val());
         orders.shipment = $.trim($("#shipmentOrder").val());
         orders.payment  = $.trim($("#paymentOrder").val());
+        orders.subtotal = $.trim($("#subtotalOrder").val());
+        orders.total    = $.trim($("#totalOrder").val());
         console.log(orders);
     }
 
@@ -100,13 +96,15 @@ $(document).ready(function() {
     }
 
     // Ventas
-    function getSales() { 
+    function getBudgets() { 
         jsonFilters = JSON.stringify(filters);
         jsonOrders  = JSON.stringify(orders);
-        $.get("./viewSales", {getSalesToDashboard: true, filters: jsonFilters, orders: jsonOrders}, function(response) {
+        $.get("./viewBudgets", {getBudgetsToDashboard: true, filters: jsonFilters, orders: jsonOrders}, function(response) {
             response = JSON.parse(response);
-            sales = response.sales.sales;
-            total = response.sales.total;
+            budgets  = response.budgets.budgets;
+            subtotal = response.budgets.subtotal;
+            ships    = response.budgets.ships;
+            total    = response.budgets.total;
             if(response.state == 1) {
                 renderTable();
                 console.log(response.successMsg); 
@@ -119,21 +117,21 @@ $(document).ready(function() {
     }
     function renderTable() { 
         clearTable();
-        sales.forEach(function(sale) {
-            $("#salesTableBody").append('<tr id="saleRow_' + sale.sale_id + '"></tr>');
-            $("#saleRow_"+ sale.sale_id).append('<th class="col-md-1" scope="row">' + sale.sale_id + '</th>');
-            $("#saleRow_"+ sale.sale_id).append('<td class="col-md-2">' + sale.user_name + '</td>');
-            $("#saleRow_"+ sale.sale_id).append('<td class="col-md-2">' + sale.client_name + '</td>');
-            $("#saleRow_"+ sale.sale_id).append('<td class="col-md-1">' + sale.budget_id + '</td>');
-            $("#saleRow_"+ sale.sale_id).append('<td class="col-md-2">' + sale.start_date + '</td>');
-            $("#saleRow_"+ sale.sale_id).append('<td class="col-md-2">' + sale.ship_name + '</td>');
-            $("#saleRow_"+ sale.sale_id).append('<td class="col-md-2">' + sale.pay_name + '</td>');
+        sales.forEach(function(sale) { // ACA
+            $("#budgetsTableBody").append('<tr id="saleRow_' + sale.sale_id + '"></tr>');
+            $("#budgetRow_"+ sale.sale_id).append('<th class="col-md-1" scope="row">' + sale.sale_id + '</th>');
+            $("#budgetRow_"+ sale.sale_id).append('<td class="col-md-2">' + sale.user_name + '</td>');
+            $("#budgetRow_"+ sale.sale_id).append('<td class="col-md-2">' + sale.client_name + '</td>');
+            $("#budgetRow_"+ sale.sale_id).append('<td class="col-md-1">' + sale.budget_id + '</td>');
+            $("#budgetRow_"+ sale.sale_id).append('<td class="col-md-2">' + sale.start_date + '</td>');
+            $("#budgetRow_"+ sale.sale_id).append('<td class="col-md-2">' + sale.ship_name + '</td>');
+            $("#budgetRow_"+ sale.sale_id).append('<td class="col-md-2">' + sale.pay_name + '</td>');
 
-            $("#saleRow_"+ sale.sale_id).append('<td class="col-md-2"> $' + sale.total + '</td>');
-            $("#saleRow_"+ sale.sale_id).append('<td class="col-md-2">' + sale.notes + '</td>');
+            $("#budgetRow_"+ sale.sale_id).append('<td class="col-md-2"> $' + sale.total + '</td>');
+            $("#budgetRow_"+ sale.sale_id).append('<td class="col-md-2">' + sale.notes + '</td>');
 
 
-            $("#saleRow_"+ sale.sale_id).click(function() { // Revisar
+            $("#budgetRow_"+ sale.sale_id).click(function() { // Revisar
                 viewSale(sale.sale_id);
             });
         });

@@ -5,7 +5,7 @@ tbody {
 }
 
 .scrolleable {
-    height: 270px !important;
+    height: 300px !important;
     overflow-y: auto !important; 
 }
 
@@ -39,4 +39,12 @@ tbody {
 
 #addBudget:hover {
     background-color: #B6ABFB !important;
+}
+
+thead tr, tfoot tr, tfoot th, thead th {
+    border-radius: 0.3rem;
+}
+
+tfoot tr {
+    display: flex !important;
 }

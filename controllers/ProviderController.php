@@ -13,6 +13,10 @@ class ProviderController extends Controller{
         $this->views['form'] = new FormNewProvider();
     }
 
+    public function getAll() {
+        return $this->models['providers']->getAll();
+    }
+
     public function new($provider){
         $ret = true;
         try{

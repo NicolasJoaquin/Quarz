@@ -79,6 +79,67 @@ class Products extends Model{
     }
 
     //ALTAS, BAJAS Y MODIFICACIONES------------------------------------------------------------------------------------------------------------------
+    public function newProduct($product) {
+        $this->db->validateSanitizeString($product->desc, "La descripción del producto es inválida");
+        $this->db->validateSanitizeString($product->packingUnit, "La unidad de empaque del producto es inválida");
+        $this->db->validateSanitizeId($product->provider, "El proveedor es inválido");
+        $this->db->validateSanitizeFloat($product->costPrice, "El costo del producto es inválido");
+        if($product->costPrice < 0)  // Pasar a validación desde Database
+            throw new Exception("El costo del producto no puede ser menor a 0"); 
+        $this->db->validateSanitizeFloat($product->salePrice, "El precio de venta del producto es inválido");
+        if($product->salePrice < 0)  // Pasar a validación desde Database
+            throw new Exception("El precio de venta del producto no puede ser menor a 0"); 
+        $this->db->validateSanitizeFloat($product->quantity, "La cantidad del producto es inválida");
+        if($product->quantity < 0)  // Pasar a validación desde Database
+            throw new Exception("La cantidad del producto no puede ser menor a 0"); 
+
+        $this->db->query("INSERT INTO products (description, provider_id, cost_price, packing_unit) 
+                    VALUES ('$product->desc', $product->provider, $product->costPrice, '$product->packingUnit')");
+        $this->db->validateLastQuery();
+        $lastProd = $this->db->getLastInsertId();
+        if(!$lastProd)
+            throw new Exception("Hubo un error al dar de alta el producto");
+        // A partir de acá falta fix
+        if($product->salePrice > 0) {
+            $this->db->query("UPDATE sale_prices SET 
+                        product_price = $product->salePrice
+                        WHERE price_list_id = 1 AND product_id = $lastProd"); // Por ahora sólo lista 1
+            $this->db->validateLastQuery();
+
+            $this->db->query("SELECT sale_price_id 
+                        FROM sale_prices 
+                        WHERE price_list_id = 1 AND product_id = $lastProd");
+            $this->db->validateLastQuery();
+
+            $salePriceId = $this->db->fetch()['sale_price_id']; // Provisorio, falta fix
+
+            $this->db->query("UPDATE price_changes SET 
+                        product_price = $product->salePrice
+                        WHERE first_charge = 1 AND sale_price_id = $salePriceId"); // Provisorio, falta fix
+            $this->db->validateLastQuery();
+        }
+        if($product->quantity > 0) {
+            $this->db->query("UPDATE stock_items SET 
+                        quantity = $product->quantity
+                        WHERE warehouse_id = 1 AND product_id = $lastProd"); // Por ahora sólo depósito 1
+            $this->db->validateLastQuery();
+
+            $this->db->query("SELECT stock_item_id
+                        FROM stock_items 
+                        WHERE warehouse_id = 1 AND product_id = $lastProd");
+            $this->db->validateLastQuery();
+            $stockItemId = $this->db->fetch()['stock_item_id']; // Provisorio, falta fix
+
+            $this->db->query("UPDATE stock_changes SET 
+                        quantity = $product->quantity
+                        WHERE first_charge = 1 AND stock_item_id = $stockItemId"); // Provisorio, falta fix
+            $this->db->validateLastQuery();
+        }
+
+        return $lastProd;
+    }
+
+    
     public function updateProduct($product) {
         $this->db->validateSanitizeId($product->product_id, "El identificador del producto es inválido");
 
@@ -177,7 +238,8 @@ class Products extends Model{
                             FROM view_products as p 
                             WHERE p.product_id LIKE '%$filterValue%' OR 
                                     p.description LIKE '%$filterValue%' OR
-                                    p.packing_unit LIKE '%$filterValue%'"); // MODIFICAR LIMIT
+                                    p.packing_unit LIKE '%$filterValue%'
+                            ORDER BY product_id"); // MODIFICAR LIMIT
         //VERIFICACIÓN DE LA QUERY Y RETORNO
         $errno = $this->db->getErrorNo();
         if($errno !== 0) throw new QueryErrorException($this->db->getError());
@@ -196,7 +258,8 @@ class Products extends Model{
                             FROM view_products_list_stock as p 
                             WHERE p.product_id LIKE '%$filterValue%' OR 
                                     p.description LIKE '%$filterValue%' OR
-                                    p.packing_unit LIKE '%$filterValue%'"); // MODIFICAR LIMIT Y FILTROS
+                                    p.packing_unit LIKE '%$filterValue%'
+                            ORDER BY product_id DESC"); // MODIFICAR LIMIT Y FILTROS
         //VERIFICACIÓN DE LA QUERY Y RETORNO
         $errno = $this->db->getErrorNo();
         if($errno !== 0) throw new QueryErrorException($this->db->getError());
@@ -204,32 +267,6 @@ class Products extends Model{
     }
 
     //ALTAS, BAJAS Y MODIFICACIONES------------------------------------------------------------------------------------------------------------------
-    public function newProduct($product){
-        //Valido description
-        if(strlen($product->description) > 255 ) die ("error 1 newProduct/Products (modelo)");
-        if(strlen($product->description) < 4 ) die ("error 2 newProduct/Products (modelo)");  
-        $product->description = $this->db->escape($product->description);
-
-        //Valido cost_price
-        if(!is_numeric($product->cost_price)) die ("error 3 newProduct/Products (modelo)");
-
-        //Valido packing_unit
-        if(strlen($product->packing_unit) > 255 ) die ("error 4 newProduct/Products (modelo)");
-        if(strlen($product->packing_unit) < 3 ) die ("error 5 newProduct/Products (modelo)");  
-        $product->packing_unit = $this->db->escape($product->packing_unit);
-
-        //Valido provider_id
-        if(!ctype_digit($product->provider_id)) die ("error 6 newProduct/Products (modelo)");
-
-        //QUERY INSERT
-        $this->db->query("INSERT INTO products (description, provider_id, cost_price, packing_unit) 
-                            VALUES ('$product->description', '$product->provider_id', '$product->cost_price', '$product->packing_unit')");
-
-        //VERIFICACIÓN DE LA QUERY Y RETORNO
-        $errno = $this->db->getErrorNo();
-        if($errno !== 0) throw new QueryErrorException($this->db->getError());  
-        return true;
-    }
 
     public function deleteProductById($id){
         //Valido id

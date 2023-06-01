@@ -5,6 +5,9 @@ RewriteEngine on
 RewriteRule ^home$ controllers/home.php
 
 RewriteRule ^viewClients$ controllers/viewClients.php
+RewriteRule ^viewShipmentMethods$ controllers/viewShipmentMethods.php
+RewriteRule ^viewPaymentMethods$ controllers/viewPaymentMethods.php
+
 RewriteRule ^viewProducts$ controllers/viewProducts.php
 
 RewriteRule ^viewProduct$ controllers/viewProduct.php
@@ -15,8 +18,10 @@ RewriteRule ^viewProduct-([0-9]+)-stock-changes$ controllers/viewProduct.php?id=
 
 RewriteRule ^viewStock$ controllers/viewStock.php
 
-RewriteRule ^viewSales$ controllers/viewSales.php
-RewriteRule ^viewSale-([0-9]+)$ controllers/viewSale.php?id=$1&viewSaleDetail=true [NC,L]
+RewriteRule ^viewSales$             controllers/viewSales.php
+RewriteRule ^viewSale-([0-9]+)$     controllers/viewSale.php?id=$1&viewSaleDetail=true [NC,L]
+RewriteRule ^viewBudgets$           controllers/viewBudgets.php
+RewriteRule ^viewBudget-([0-9]+)$   controllers/viewBudget.php?id=$1&viewBudgetDetail=true [NC,L]
 
 RewriteRule ^viewProviders$ controllers/viewProviders.php
 RewriteRule ^viewBuys$ controllers/viewBuys.php

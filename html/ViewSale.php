@@ -31,6 +31,16 @@
         <label class="form-label rounded text-bg-secondary fs-6" for="payDetail"><strong>Estado de pago</strong></label>
         <p id="payDetail" class="rounded text-bg-light fs-6"><?php echo $this->sale->info['pay_name'] ?></p>
     </div>
+    <div class="col-md-3">
+        <label class="form-label rounded text-bg-secondary fs-6" for="shipMethodDetail"><strong>Medio de envío</strong></label>
+        <p id="shipMethodDetail" class="rounded text-bg-light fs-6"><?php echo $this->sale->info['ship_method_name'] ?></p>
+    </div>
+    <div class="col-md-3">
+        <label class="form-label rounded text-bg-secondary fs-6" for="payMethodDetail"><strong>Medio de pago</strong></label>
+        <p id="payMethodDetail" class="rounded text-bg-light fs-6"><?php echo $this->sale->info['pay_method_name'] ?></p>
+    </div>
+</div>
+<div class="row">
     <div class="col-md-6">
         <label class="form-label rounded text-bg-secondary fs-6" for="descDetail"><strong>Notas</strong></label>
         <textarea disabled readonly id="descDetail" class="rounded text-bg-light fs-6 desc-detail"><?php echo $this->sale->info['description'] ?></textarea>
@@ -76,6 +86,18 @@ foreach($this->sale->items as $i) {
     <div class="table-wrapper">
         <table class="table table-striped table-hover mb-none">
             <tfoot class="table-dark">
+                <tr>
+                    <th scope="col" class="col-md-10"><div class="d-flex bd-highlight">Subotal</div></th>
+                    <th scope="col" class="col-md-2"><div class="d-flex bd-highlight"><?php echo "$" . $this->sale->info["subtotal"] ?></div></th>
+                </tr>
+                <tr>
+                    <th scope="col" class="col-md-2"><div class="d-flex bd-highlight">Descuento</div></th>
+                    <th scope="col" class="col-md-2"><div class="d-flex bd-highlight"><?php echo !empty($this->sale->info["discount"]) ? "-$" . $this->sale->info["discount"] : "<em>Sin descuento</em>" ?></div></th>
+                    <th scope="col" class="col-md-2"><div class="d-flex bd-highlight">Recargo</div></th>
+                    <th scope="col" class="col-md-2"><div class="d-flex bd-highlight"><?php echo !empty($this->sale->info["tax"]) ? "$" . $this->sale->info["tax"] : "<em>Sin recargos</em>" ?></div></th>
+                    <th scope="col" class="col-md-2"><div class="d-flex bd-highlight">Envío</div></th>
+                    <th scope="col" class="col-md-2"><div class="d-flex bd-highlight"><?php echo !empty($this->sale->info["ship"]) ? "$" . $this->sale->info["ship"] : "<em>Sin costo de envío</em>" ?></div></th>
+                </tr>
                 <tr>
                     <th scope="col" class="col-md-10"><div class="d-flex bd-highlight">Total</div></th>
                     <th scope="col" class="col-md-2"><div class="d-flex bd-highlight"><?php echo "$" . $this->sale->info["total"] ?></div></th>

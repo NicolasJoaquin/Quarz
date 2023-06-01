@@ -1,12 +1,19 @@
-<div class="text-center">
-    <img class="d-block mx-auto mb-4" src="./extras/quarz-logo.png" alt="" width="72" height="90">
-    <h2>Formulario de nueva venta o cotización</h2>
-    <p class="lead">
-        Agregá una nueva venta o cotización. <br>
-        Las ventas no podrán darse de alta si hay productos faltantes en el stock. <br>
-        Si te falta stock, agregá una cotización y cuando tengas disponibilidad la pasas a venta.
-    </p>
+<div class="row mb-3">
+    <div class="text-right col-md-6">
+        <img class="d-block mx-auto mb-none" src="./extras/quarz-logo.png" alt="" width="72" height="90">
+        <h2 class="text-center">Formulario de nueva venta o cotización</h2>
+    </div>
+    <div class="text-right col-md-6 mt-5">
+        <p>
+            <ul class="lead">
+                <li>Agregá una nueva venta o cotización</li>
+                <li>Las ventas no podrán darse de alta si hay productos faltantes en el stock</li>
+                <li>Si te falta stock, agregá una cotización y cuando tengas disponibilidad la pasas a venta</li>
+            </ul>
+        </p>
+    </div>
 </div>
+
 <!-- COLUMNA DERECHA -->
 <div class="row g-5">
     <div class="col-md-7 col-lg-7 order-md-last">
@@ -45,15 +52,41 @@
         </div>
         <div class="table-wrapper mb-2">
             <table class="table table-striped table-hover mb-none">
-                <tfoot class="table-dark">
-                    <tr>
+                <tfoot>
+                    <tr class="table-secondary">
+                        <th scope="row" class="col-md-10">Subtotal</th>
+                        <th scope="row" class="col-md-2" id="subtotalPriceDetail" name="subtotalPriceDetail"></th>
+                    </tr>
+                    <tr class="table-secondary">
+                        <th scope="row" class="col-md-8">Descuento</th>
+                        <th scope="row" class="col-md-2" id="discountPercDetail" name="discountPercDetail"></th>
+                        <th scope="row" class="col-md-2" id="discountValDetail" name="discountValDetail"></th>
+                    </tr>
+                    <tr class="table-secondary">
+                        <th scope="row" class="col-md-8">Recargos / Impuestos</th>
+                        <th scope="row" class="col-md-2" id="taxPercDetail" name="taxPercDetail"></th>
+                        <th scope="row" class="col-md-2" id="taxValDetail" name="taxValDetail"></th>
+                    </tr>
+                    <tr class="table-secondary">
+                        <th scope="row" class="col-md-10">Envío</th>
+                        <th scope="row" class="col-md-2" id="shipDetail" name="shipDetail"></th>
+                    </tr>
+                    <tr class="table-secondary">
+                        <th scope="row" class="col-md-8">Medio de envío</th>
+                        <th scope="row" class="col-md-4" id="shipMethodDetail" name="shipMethodDetail"></th>
+                    </tr>
+                    <tr class="table-dark">
+                        <th scope="row" class="col-md-8">Medio de pago</th>
+                        <th scope="row" class="col-md-4" id="payMethodDetail" name="payMethodDetail"></th>
+                    </tr>
+                    <tr class="table-dark">
                         <th scope="row" class="col-md-10">Total</th>
-                        <th scope="row" class="col-md-2" id="totalPrice" name="totalPrice"></th>
+                        <th scope="row" class="col-md-2" id="totalPriceDetail" name="totalPriceDetail"></th>
                     </tr>
                 </tfoot>
             </table>
         </div>
-        <div class="row">
+        <div class="row mb-5">
             <button class="w-100 btn btn-lg" id="addBudget" type="submit">Agregar cotización</button>
             <button class="w-100 btn btn-lg" id="addSale" type="submit">Agregar venta</button>
         </div>
@@ -109,9 +142,52 @@
                 </div>
             </div>
             <hr class="my-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="discount" class="form-label">Descuento</label>
+                    <div class="col-md-12 input-group">
+                        <select name="discountType" id="discountType" class="form-select">
+                            <option value="1">$</option>
+                            <option value="2" selected>%</option>
+                        </select>
+                        <input type="number" class="form-control" id="discount" value="0.00">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label for="tax" class="form-label">Recargos / Impuestos</label>
+                    <div class="col-md-12 input-group">
+                        <select name="taxType" id="taxType" class="form-select">
+                            <option value="1">$</option>
+                            <option value="2" selected>%</option>
+                        </select>
+                        <input type="number" class="form-control" id="tax" value="0.00">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label for="ship" class="form-label">Envío</label>
+                    <div class="col-md-12 input-group">
+                        <select name="shipMethod" id="shipMethod" class="form-select">
+                        </select>
+                        <span class="input-group-text">$</span>
+                        <input type="number" class="form-control col-md-10" id="ship" value="0.00">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label for="payMethod" class="form-label">Medio de pago</label>
+                    <select name="payMethod" id="payMethod" class="form-select">
+                        <option value="1">$</option>
+                        <option value="2" selected>%</option>
+                    </select>
+                </div>
+            </div>
+            <hr class="my-4">
             <h4 class="mb-3">Agregá notas a la venta</h4>
             <div class="col-md-12 mb-5">
-                <textarea class="form-control" placeholder="Notas..." id="notes" name="notes"></textarea>
+                <textarea class="form-control" placeholder="Notas..." id="notes" name="notes" rows="4"></textarea>
             </div>
         </form>
     </div>

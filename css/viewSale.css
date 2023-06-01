@@ -7,3 +7,6 @@ textarea.desc-detail {
     max-height: 80px !important; 
     overflow-y: scroll;
 }
+tr {
+    display: flex !important;
+}
