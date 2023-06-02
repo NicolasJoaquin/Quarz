@@ -8,6 +8,10 @@ abstract class Controller{
     public function __construct(){
         
     }
+
+    // public function dateToNormal($date) { // Pendiente de desarrollo
+
+    // }
 }
     
 ?>

@@ -117,40 +117,39 @@ $(document).ready(function() {
     }
     function renderTable() { 
         clearTable();
-        sales.forEach(function(sale) { // ACA
-            $("#budgetsTableBody").append('<tr id="saleRow_' + sale.sale_id + '"></tr>');
-            $("#budgetRow_"+ sale.sale_id).append('<th class="col-md-1" scope="row">' + sale.sale_id + '</th>');
-            $("#budgetRow_"+ sale.sale_id).append('<td class="col-md-2">' + sale.user_name + '</td>');
-            $("#budgetRow_"+ sale.sale_id).append('<td class="col-md-2">' + sale.client_name + '</td>');
-            $("#budgetRow_"+ sale.sale_id).append('<td class="col-md-1">' + sale.budget_id + '</td>');
-            $("#budgetRow_"+ sale.sale_id).append('<td class="col-md-2">' + sale.start_date + '</td>');
-            $("#budgetRow_"+ sale.sale_id).append('<td class="col-md-2">' + sale.ship_name + '</td>');
-            $("#budgetRow_"+ sale.sale_id).append('<td class="col-md-2">' + sale.pay_name + '</td>');
+        budgets.forEach(function(budget) { 
+            $("#budgetsTableBody").append('<tr id="budgetRow_' + budget.budget_id + '"></tr>');
+            $("#budgetRow_"+ budget.budget_id).append('<th class="col-md-1" scope="row">' + budget.budget_id + '</th>');
+            $("#budgetRow_"+ budget.budget_id).append('<td class="col-md-2">' + budget.user_name + '</td>');
+            $("#budgetRow_"+ budget.budget_id).append('<td class="col-md-2">' + budget.client_name + '</td>');
+            $("#budgetRow_"+ budget.budget_id).append('<td class="col-md-1">' + budget.start_date + '</td>');
+            $("#budgetRow_"+ budget.budget_id).append('<td class="col-md-2">' + budget.ship_method_name + '</td>');
+            $("#budgetRow_"+ budget.budget_id).append('<td class="col-md-2">' + budget.pay_method_name + '</td>');
+            $("#budgetRow_"+ budget.budget_id).append('<td class="col-md-1"> $' + budget.subtotal + '</td>');
+            $("#budgetRow_"+ budget.budget_id).append('<td class="col-md-1"> $' + budget.total + '</td>');
 
-            $("#budgetRow_"+ sale.sale_id).append('<td class="col-md-2"> $' + sale.total + '</td>');
-            $("#budgetRow_"+ sale.sale_id).append('<td class="col-md-2">' + sale.notes + '</td>');
-
-
-            $("#budgetRow_"+ sale.sale_id).click(function() { // Revisar
-                viewSale(sale.sale_id);
+            $("#budgetRow_"+ budget.budget_id).click(function() { 
+                viewBudget(budget.budget_id);
             });
         });
+        $("#subtotal").html("$" + subtotal);
+        $("#ships").html("$" + ships);
         $("#total").html("$" + total);
     }
     function clearTable() {     
-        $("#salesTableBody").empty();
+        $("#budgetsTableBody").empty();
     }
-    function viewSale(saleId) {
-        window.location = "./viewSale-" + saleId;
+    function viewBudget(budgetId) {
+        window.location = "./viewBudget-" + budgetId;
         // alert("redirección a vista ampliada # " + prodId);
     }  
 
     // Estados de pago y envío
-    function getShipmentStates() { 
-        $.get("./controllers/viewShipmentStates.php", {getShipmentStatesToSelect: true}, function(response) {
+    function getShipmentMethods() { 
+        $.get("./controllers/viewShipmentMethods.php", {getShipmentMethodsToSelect: true}, function(response) {
             response = JSON.parse(response);
             if(response.state == 1) {
-                shipStates = response.shipStates;
+                shipMethods = response.shipMethods;
                 renderShipSelect();
                 console.log(response.successMsg); 
             }
@@ -160,11 +159,11 @@ $(document).ready(function() {
             }
         });
     }
-    function getPaymentStates() { 
-        $.get("./controllers/viewPaymentStates.php", {getPaymentStatesToSelect: true}, function(response) {
+    function getPaymentMethods() { 
+        $.get("./controllers/viewPaymentMethods.php", {getPaymentMethodsToSelect: true}, function(response) {
             response = JSON.parse(response);
             if(response.state == 1) {
-                payStates = response.payStates;
+                payMethods = response.payMethods;
                 renderPaySelect();
                 console.log(response.successMsg); 
             }
@@ -174,14 +173,14 @@ $(document).ready(function() {
             }
         });
     }
-    function renderShipSelect() { // Falta fix
-        shipStates.forEach(function(state) {
-            $("#shipmentFilter").append('<option value="'+ state.shipment_state_id +'">'+ state.title +'</option>');
+    function renderShipSelect() { 
+        shipMethods.forEach(function(method) {
+            $("#shipmentFilter").append('<option value="'+ method.shipment_method_id +'">'+ method.title +'</option>');
         });
     }    
-    function renderPaySelect() { // Falta fix
-        payStates.forEach(function(state) {
-            $("#paymentFilter").append('<option value="'+ state.payment_state_id +'">'+ state.title +'</option>');
+    function renderPaySelect() { 
+        payMethods.forEach(function(method) {
+            $("#paymentFilter").append('<option value="'+ method.payment_method_id +'">'+ method.title +'</option>');
         });
     }    
 
@@ -189,7 +188,7 @@ $(document).ready(function() {
     setDate();
     getFilters();
     getOrders();
-    getSales();
-    getShipmentStates();
-    getPaymentStates();
+    getBudgets();
+    getShipmentMethods();
+    getPaymentMethods();
 });
