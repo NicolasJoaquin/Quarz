@@ -1227,3 +1227,63 @@ ALTER TABLE buys
 -- Agregado de descuento, recargo y precio de envio en cotizaciones, ventas y compras
 ALTER TABLE sales CHANGE total total DOUBLE(10,2) UNSIGNED NOT NULL;
 ALTER TABLE buys CHANGE total total DOUBLE(10,2) UNSIGNED NOT NULL;
+
+-- Sin efecto
+-- Agregado de campo ultima_version en budgets
+ALTER TABLE budgets
+  ADD COLUMN last_version TINYINT(3) UNSIGNED NOT NULL DEFAULT 1;
+
+-- Clave compuesta en budgets (id + versión) para poder hacer cotizaciones con números sucesivos
+ALTER TABLE budgets 
+DROP PRIMARY KEY,
+ADD PRIMARY KEY (budget_id, version);
+
+-- Fix init_version_id
+ALTER TABLE budgets
+  DROP COLUMN init_version_id;
+ALTER TABLE budgets
+  ADD COLUMN init_version INT(10) UNSIGNED DEFAULT NULL,
+ALTER TABLE budgets
+  ADD CONSTRAINT budgets_init_version FOREIGN KEY (init_version_id) REFERENCES budgets (budget_id) ON DELETE NO ACTION ON UPDATE CASCADE;
+-- End: Sin efecto
+
+-- Fix en budgets, se busca tener una tabla para las cotizaciones y otra para los verionados 
+CREATE TABLE budget_versions (
+  budget_version_id INT(10) UNSIGNED NOT NULL,
+  init_budget_id INT(10) UNSIGNED NOT NULL,
+  old_budget_id INT(10) UNSIGNED NOT NULL,
+  new_budget_id INT(10) UNSIGNED NOT NULL,
+  budget_number INT(10) UNSIGNED NOT NULL,
+  version INT(10) UNSIGNED NOT NULL DEFAULT 1,
+  active TINYINT(3) UNSIGNED NOT NULL DEFAULT 1,
+  last_version TINYINT(3) UNSIGNED NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+ALTER TABLE budget_versions
+  ADD PRIMARY KEY (budget_version_id),
+  ADD KEY init_budget_id (init_budget_id),
+  ADD KEY old_budget_id (old_budget_id),
+  ADD KEY new_budget_id (new_budget_id);
+ALTER TABLE budget_versions
+  MODIFY budget_version_id INT(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE budget_versions
+  ADD CONSTRAINT budget_version_init FOREIGN KEY (init_budget_id) REFERENCES budgets (budget_id) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT budget_version_old FOREIGN KEY (old_budget_id) REFERENCES budgets (budget_id) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT budget_version_new FOREIGN KEY (new_budget_id) REFERENCES budgets (budget_id) ON DELETE NO ACTION ON UPDATE CASCADE;
+ALTER TABLE budget_versions
+  DROP INDEX new_budget_id, 
+  ADD UNIQUE new_budget_id (new_budget_id) USING BTREE;
+ALTER TABLE budget_versions
+  ADD CONSTRAINT budget_version_number_version UNIQUE (budget_number, version);
+-- Elimino las columnas de budgets que van a estar en budgets_versions
+ALTER TABLE budgets 
+  DROP PRIMARY KEY, 
+  ADD PRIMARY KEY (budget_id) USING BTREE;
+ALTER TABLE budgets 
+  DROP INDEX budgets_init_version;
+ALTER TABLE budgets 
+  DROP CONSTRAINT budgets_init_version;
+ALTER TABLE budgets
+  DROP version,
+  DROP init_version_id,
+  DROP last_version;
+

@@ -22,7 +22,7 @@
             <span class="badge bg-primary rounded-pill" id="quantityOfItems">0</span>
         </h4>
         <div class="col-sm-12 mb-4">
-            <label for="firstName" class="form-label">Cliente</label>
+            <label for="client" class="form-label">Cliente</label>
             <input type="text" class="form-control" id="client" placeholder="Ingrese un cliente" value="" required="" readonly disabled>
         </div>
         <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-1">

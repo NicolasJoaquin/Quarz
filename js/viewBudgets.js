@@ -101,6 +101,7 @@ $(document).ready(function() {
         jsonOrders  = JSON.stringify(orders);
         $.get("./viewBudgets", {getBudgetsToDashboard: true, filters: jsonFilters, orders: jsonOrders}, function(response) {
             response = JSON.parse(response);
+            // console.log(response);
             budgets  = response.budgets.budgets;
             subtotal = response.budgets.subtotal;
             ships    = response.budgets.ships;
@@ -119,7 +120,7 @@ $(document).ready(function() {
         clearTable();
         budgets.forEach(function(budget) { 
             $("#budgetsTableBody").append('<tr id="budgetRow_' + budget.budget_id + '"></tr>');
-            $("#budgetRow_"+ budget.budget_id).append('<th class="col-md-1" scope="row">' + budget.budget_id + '</th>');
+            $("#budgetRow_"+ budget.budget_id).append('<th class="col-md-1" scope="row">' + budget.budget_number + '</th>');
             $("#budgetRow_"+ budget.budget_id).append('<td class="col-md-2">' + budget.user_name + '</td>');
             $("#budgetRow_"+ budget.budget_id).append('<td class="col-md-2">' + budget.client_name + '</td>');
             $("#budgetRow_"+ budget.budget_id).append('<td class="col-md-1">' + budget.start_date + '</td>');
@@ -129,7 +130,7 @@ $(document).ready(function() {
             $("#budgetRow_"+ budget.budget_id).append('<td class="col-md-1"> $' + budget.total + '</td>');
 
             $("#budgetRow_"+ budget.budget_id).click(function() { 
-                viewBudget(budget.budget_id);
+                viewBudget(budget.budget_number);
             });
         });
         $("#subtotal").html("$" + subtotal);

@@ -10,8 +10,7 @@ require_once '../views/FormNewSaleBudget.php';
 require_once '../views/ViewSales.php';
 require_once '../views/ViewSale.php';
 require_once '../views/ViewBudgets.php';
-// require_once '../views/ViewBudget.php';
-
+require_once '../views/ViewBudget.php';
 
 // require_once '../views/ViewBudgets.php';
 
@@ -25,9 +24,11 @@ class SaleBudgetController extends Controller {
         $this->views['budgetDashboard'] = new ViewBudgets(title: "Dashboard cotizaciones", includeJs: "js/viewBudgets.js", includeCSS: "css/viewBudgets.css");
         $this->views['form']            = new FormNewSaleBudget(title: "Nueva venta o cotización", includeJs: "./js/formSaleBudget.js", includeCSS: "./css/formSaleBudget.css");
         $this->views['saleDetail']      = new ViewSale(includeJs: "js/viewSale.js", includeCSS: "css/viewSale.css");
+        $this->views['budgetDetail']    = new ViewBudget(includeJs: "js/viewBudget.js", includeCSS: "css/viewBudget.css");
 
         // $this->views['view']     = new ViewBudgets();
     }
+
     // Vistas
     public function viewForm(){
         $this->views['form']->render();
@@ -35,22 +36,40 @@ class SaleBudgetController extends Controller {
     public function viewDashboard() { 
         $this->views['dashboard']->render();
     }
-    public function viewBudgetDashboard() { 
+    public function viewBudgetDashboard() { // OK
         $this->views['budgetDashboard']->render();
     }
-
+    public function viewBudgetDetail() { // OK
+        /* Se toma el id que viene desde el fornt para filtrar por budget_number (budget_versions) */
+        if(empty($_GET['id'])) throw new Exception("El número de la cotización a consultar está vacío o es inválido");
+        $budget = new stdClass();
+        if(!$this->models['budgets']->existNumber($_GET['id'])) { 
+            header("Location: ./viewBudgets");
+            exit();
+        }
+        /* Se trae como cotización principal, siempre la última versión */
+        $budget->info       = $this->models['budgets']->getLastVersionBudgetInfo($_GET['id']);
+        $budget->items      = $this->models['budgets']->getLastVersionBudgetItems($_GET['id']);
+        /* Se traen las versiones menos la última (por default true en el modelo) */
+        $budget->versions   = $this->models['budgets']->getBudgetVersions($_GET['id']); 
+        $this->views['budgetDetail']->budget = $budget;
+        $this->views['budgetDetail']->render();
+    }
     public function viewSaleDetail() { 
-        // if(!isset($_GET['id'])) throw new Exception("Falta el identificador de la venta a consultar");
         if(empty($_GET['id'])) throw new Exception("El identificador de la venta a consultar está vacío o es inválido");
-        $sale        = new stdClass();
-        // ACA FALTA VERIFICAR QUE LA VENTA EXISTA Y ESTÉ ACTIVA PARA PODER VERLA
+        $sale = new stdClass();
+        if(!$this->models['sales']->exist($_GET['id'])){
+            header("Location: ./viewSales");
+            exit();
+        }
         $sale->info  = $this->models['sales']->getSaleInfo($_GET['id']);
         $sale->items = $this->models['sales']->getSaleItems($_GET['id']);
         $this->views['saleDetail']->sale = $sale;
         $this->views['saleDetail']->render();
     }
+
     // Getters
-    public function getBudgetsToDashboard() {
+    public function getBudgetsToDashboard() { // OK
         $filters   = new stdClass();
         $orders    = new stdClass();
         $budgets   = new stdClass();
@@ -59,10 +78,8 @@ class SaleBudgetController extends Controller {
         if(!empty($_GET['orders']))
             $orders = json_decode($_GET['orders']);
         $budgets = $this->models['budgets']->getBudgets($filters, $orders);
-        // $budgets->total   = $this->models['budgets']->getTotalOfSales($filters);
         return $budgets;
     }
-
     public function getSalesToDashboard() {
         $filters = new stdClass();
         $orders  = new stdClass();
@@ -133,13 +150,15 @@ class SaleBudgetController extends Controller {
         if(empty($sale->totalPrice) && $sale->totalPrice != 0) throw new Exception("Envíe el precio total de la venta");
         return true;
     }
+
     // Altas y modificaciones
     public function newBudget() {
-        $budget = $this->validateExistBudget(); // Revisar
+        $budget = $this->validateExistBudget();
         $this->validateNotEmptyBudget($budget);
-        $budget->id = $this->models['budgets']->newBudget($budget);
+        $budget->id     = $this->models['budgets']->newBudget($budget);
+        $budget->number = $this->models['budgets']->newBudgetFirstVersion($budget->id); 
         $this->models['budgets']->newBudgetItems($budget->items, $budget->id);
-        $msg = "Se dió de alta la cotización #$budget->id";
+        $msg = "Se dió de alta la cotización #$budget->number";
         return $msg;
     }
     public function newSale() {

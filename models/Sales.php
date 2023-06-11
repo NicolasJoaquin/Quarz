@@ -235,7 +235,7 @@ class Sales extends Model {
         $this->db->validateLastQuery();
         return $this->db->fetch();
     }
-    public function getSaleItems($saleId) { // ACA
+    public function getSaleItems($saleId) { 
         $this->db->validateSanitizeId($saleId, "El número de venta es erróneo");
         $query = "SELECT si.product_id, p.description, si.sale_price, si.quantity, si.total_price, si.position 
                 FROM sales_items AS si
@@ -245,6 +245,17 @@ class Sales extends Model {
         $this->db->validateLastQuery();
         return $this->db->fetchAll(); 
     }
+    // VALIDACIONES
+    public function exist($id) {
+        $this->db->validateSanitizeId($id, "El número de venta es erróneo");
+        $query = "SELECT s.sale_id 
+                FROM sales AS s
+                WHERE s.sale_id = $id";
+        $this->db->query($query);
+        $this->db->validateLastQuery();
+        return (!empty($this->db->fetch()) ? true : false);
+    }
+
 
     // Altas, bajas y modificaciones
     public function newSale($sale) {

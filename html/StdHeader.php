@@ -184,6 +184,7 @@
                   <li><a class="dropdown-item" href="./newSale">Nueva venta</a></li>
                   <li><a class="dropdown-item" href="./viewSales">Ver ventas</a></li>
                   <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="./viewBudgets">Ver cotizaciones</a></li>
                 </ul>
               </li>
               <li class="nav-item dropdown">
