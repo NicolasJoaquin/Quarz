@@ -18,10 +18,13 @@ RewriteRule ^viewProduct-([0-9]+)-stock-changes$ controllers/viewProduct.php?id=
 
 RewriteRule ^viewStock$ controllers/viewStock.php
 
-RewriteRule ^viewSales$             controllers/viewSales.php
-RewriteRule ^viewSale-([0-9]+)$     controllers/viewSale.php?id=$1&viewSaleDetail=true [NC,L]
-RewriteRule ^viewBudgets$           controllers/viewBudgets.php
-RewriteRule ^viewBudget-([0-9]+)$   controllers/viewBudget.php?id=$1&viewBudgetDetail=true [NC,L]
+RewriteRule ^viewSales$                     controllers/viewSales.php
+RewriteRule ^viewSale-([0-9]+)$             controllers/viewSale.php?id=$1&viewSaleDetail=true [NC,L]
+RewriteRule ^viewBudgets$                   controllers/viewBudgets.php
+RewriteRule ^viewBudget$                    controllers/viewBudget.php [NC,L]
+RewriteRule ^viewBudget-([0-9]+)$           controllers/viewBudget.php?number=$1&viewBudgetDetail=true [NC,L]
+RewriteRule ^viewBudget-([0-9]+)-([0-9]+)$  controllers/viewBudget.php?number=$1&version=$2&viewBudgetDetail=true [NC,L]
+RewriteRule ^newBudgetVersion-([0-9]+)$     controllers/viewBudget.php?number=$1&newBudgetVersion=true [NC,L]
 
 RewriteRule ^viewProviders$ controllers/viewProviders.php
 RewriteRule ^viewBuys$ controllers/viewBuys.php

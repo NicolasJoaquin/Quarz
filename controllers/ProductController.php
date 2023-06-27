@@ -18,7 +18,7 @@ class ProductController extends Controller{
         $this->models['products']      = new Products();
         // Poner títulos
         $this->views['dashboard']      = new ViewProducts(title: "Dashboard productos",includeJs: "js/viewProducts.js", includeCSS: "css/viewProducts.css");
-        $this->views['productDetail']  = new ViewProduct(includeJs: "js/viewProduct.js", includeCSS: "css/viewProduct.css");
+        $this->views['productDetail']  = new ViewProduct(includeJs: "js/viewProduct.js", includeCSS: "css/stdCustom.css");
         $this->views['productChanges'] = new ViewProductChanges(includeJs: "js/viewProductChanges.js", includeCSS: "css/viewProductChanges.css");
         $this->views['priceChanges']   = new ViewPriceChanges(includeJs: "js/viewPriceChanges.js", includeCSS: "css/viewPriceChanges.css");
         $this->views['stockChanges']   = new ViewStockChanges(includeJs: "js/viewStockChanges.js", includeCSS: "css/viewStockChanges.css");

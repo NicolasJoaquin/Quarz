@@ -491,8 +491,12 @@ $(document).ready(function() {
     });
 
     // Init
-    $('#clientToPush').select2();
-    $('#productToPush').select2();
+    $('#clientToPush').select2({
+        theme: 'classic',
+    });
+    $('#productToPush').select2({
+        theme: 'classic',
+    });
     getClients();
     getShipmentMethods();
     getPaymentMethods();

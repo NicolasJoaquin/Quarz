@@ -33,6 +33,21 @@ if(count($_POST)>0) {
         echo json_encode($response);
         exit;
     } 
+    if(isset($_POST['newBudgetVersion'])) {
+        $response = new stdClass();
+        $response->state = 1;
+        try {
+            $response->successMsg = $controller->newBudgetVersion();
+        }
+        catch (Exception $e) {
+            $response->state = 0;
+            $response->errorMsg = "Hubo un error al dar de alta el presupuesto: " . $e->getMessage();
+            echo json_encode($response);
+            exit;
+        }
+        echo json_encode($response);
+        exit;
+    } 
     if(isset($_POST['newSale'])) {
         $response = new stdClass();
         $response->state = 1;

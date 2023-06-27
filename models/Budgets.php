@@ -18,7 +18,19 @@ class Budgets extends Model {
         $this->db->validateLastQuery();
         return $this->db->fetch()['last_number'];
     }
-    
+    public function getLastBudgetVersion($number) { // OK
+        $query = "SELECT MAX(version) AS last_version FROM budget_versions WHERE budget_number = $number";
+        $this->db->query($query);
+        $this->db->validateLastQuery();
+        return $this->db->fetch()['last_version'];
+    }
+    public function getLastBudgetVersionData($number) { // OK
+        $query = "SELECT init_budget_id, old_budget_id, new_budget_id, budget_number, version 
+                FROM budget_versions WHERE last_version = 1 AND budget_number = $number";
+        $this->db->query($query);
+        $this->db->validateLastQuery();
+        return $this->db->fetch();
+    }
     public function getBudgets($filters, $orders, $onlyLastVersions = true) { // OK
         $sqlFilters = "";
         $sqlOrders = "";
@@ -172,7 +184,7 @@ class Budgets extends Model {
     public function getBudgetInfo($id) { // OK
         $this->db->validateSanitizeId($id, "El identificador de la cotización es erróneo");
         $query = "SELECT bv.init_budget_id, bv.old_budget_id, bv.budget_number, bv.version, bv.last_version, 
-                        b.budget_id, b.user_id, u.user AS user_name, c.name AS client_name, 
+                        b.budget_id, b.user_id, b.client_id, u.user AS user_name, c.name AS client_name, 
                         b.start_date, b.shipment_method_id, b.payment_method_id, b.description, b.subtotal, 
                         b.discount, b.tax, b.ship, sm.title AS ship_method_name, pm.title AS pay_method_name, 
                         b.total
@@ -192,10 +204,11 @@ class Budgets extends Model {
     /* Recibe el id de la cotización (PK de budgets) */
     public function getBudgetItems($id) { // OK
         $this->db->validateSanitizeId($id, "El identificador de la cotización es erróneo");
-        $query = "SELECT bi.product_id, p.description, bi.sale_price, bi.quantity, bi.total_price, bi.position 
+        $query = "SELECT bi.product_id, p.description, bi.sale_price, bi.quantity, bi.total_price, bi.position, bi.cost_price, si.quantity AS stock_quantity
                 FROM budgets_items AS bi
                 LEFT JOIN products AS p ON bi.product_id = p.product_id 
-                WHERE bi.budget_id = $id"; // Falta ver si le corresponde campo active a cada ítem
+                LEFT JOIN stock_items AS si ON bi.product_id = si.product_id
+                WHERE bi.budget_id = $id AND si.warehouse_id = 1"; // Falta ver si le corresponde campo active a cada ítem / Falta implementar más de 1 depósito
         $this->db->query($query);
         $this->db->validateLastQuery();
         if(!$this->db->numRows())
@@ -215,8 +228,26 @@ class Budgets extends Model {
         return $this->db->fetch()['new_budget_id'];
     }
     /* Recibe el número de la cotización (budget_numer de budget_versions) */
+    private function getNumberVersionBudgetId($number, $version) { // OK
+        $this->db->validateSanitizeId($number, "El número de cotización es erróneo");
+        $this->db->validateSanitizeId($version, "La versión de la cotización es errónea");
+        $query = "SELECT bv.new_budget_id, bv.budget_number, bv.version
+                FROM budget_versions AS bv 
+                WHERE bv.active = 1 AND bv.version = $version AND bv.budget_number = $number"; // Revisar si aplica LIMIT 1 o es redundante
+        $this->db->query($query);
+        $this->db->validateLastQuery();
+        if(!$this->db->numRows())
+            return false;
+        return $this->db->fetch()['new_budget_id'];
+    }
+    /* Recibe el número de la cotización (budget_numer de budget_versions) */
     public function getLastVersionBudgetInfo($number) { // OK
         $budgetId = $this->getLastVersionBudgetId($number);
+        return $this->getBudgetInfo($budgetId);
+    }
+    /* Recibe el número y la versión de la cotización (budget_numer y version de budget_versions) */
+    public function getNumberVersionBudgetInfo($number, $version) { // OK
+        $budgetId = $this->getNumberVersionBudgetId($number, $version);
         return $this->getBudgetInfo($budgetId);
     }
     /* Recibe el número de la cotización (budget_numer de budget_versions) */
@@ -224,9 +255,14 @@ class Budgets extends Model {
         $budgetId = $this->getLastVersionBudgetId($number);
         return $this->getBudgetItems($budgetId);
     }
+    /* Recibe el número y la versión de la cotización (budget_numer y version de budget_versions) */
+    public function getNumberVersionBudgetItems($number, $version) { // OK
+        $budgetId = $this->getNumberVersionBudgetId($number, $version);
+        return $this->getBudgetItems($budgetId);
+    }
     /* Recibe el número de la cotización (budget_numer de budget_versions) */
     /* También se consulta el nro. de versión para usarlo como array key en getBudgetVersions */
-    private function getBudgetVersionsIds($number, $withLastVersion = false) { // OK
+    public function getBudgetVersionsIds($number, $withLastVersion = true) { // OK
         $this->db->validateSanitizeId($number, "El número de cotización es erróneo");
         $lastVersionFilter = "";
         if(!$withLastVersion)
@@ -241,7 +277,7 @@ class Budgets extends Model {
         return $this->db->fetchAll(); 
     }
     /* Recibe el número de la cotización (budget_numer de budget_versions) */
-    public function getBudgetVersions($number, $withLastVersion = false) { // OK
+    public function getBudgetVersions($number, $withLastVersion = false) { // Revisar $withLastVersion
         $versions = array();
         foreach($this->getBudgetVersionsIds($number, $withLastVersion) as $k => $v) {
             $versions[$v['version']] = new stdClass();
@@ -252,25 +288,44 @@ class Budgets extends Model {
     }
 
     // VALIDACIONES
+    /* Recibe el número de la cotización y su versión (budget_numer + version de budget_versions) */
+    public function existNumberVersion($number, $version) { // OK
+        $this->db->validateSanitizeId($number, "El número de cotización es erróneo");
+        $this->db->validateSanitizeId($version, "El número de versión de la cotización es erróneo");
+        $query = "SELECT bv.budget_number, bv.budget_version_id, bv.version
+                FROM budget_versions AS bv
+                WHERE bv.active = 1 AND bv.budget_number = $number AND bv.version = $version";
+        $this->db->query($query);
+        $this->db->validateLastQuery();
+        if(empty($this->db->numRows())) 
+            return false;
+        
+        $budget = $this->db->fetch();
+        $ret = array(
+            'number'  => $budget['budget_number'],
+            'version' => $budget['version'],
+        );
+        return $ret;
+    }
     /* Recibe el número de la cotización (budget_numer de budget_versions) */
     public function existNumber($number) { // OK
         $this->db->validateSanitizeId($number, "El número de cotización es erróneo");
-        $query = "SELECT bv.budget_number, bv.budget_version_id
+        $query = "SELECT bv.budget_number, bv.budget_version_id, bv.version
                 FROM budget_versions AS bv
-                WHERE bv.budget_number = $number";
+                WHERE bv.active = 1 AND last_version = 1 AND bv.budget_number = $number";
         $this->db->query($query);
         $this->db->validateLastQuery();
-        return (!empty($this->db->numRows()) ? true : false);
+        return (empty($this->db->numRows()) ? false : $this->db->fetch());
     }
     /* Recibe el id de la cotización (PK de budgets) */
     public function exist($id) { // OK
         $this->db->validateSanitizeId($id, "El identificador de la cotización es erróneo");
         $query = "SELECT b.budget_id
                 FROM budgets AS b
-                WHERE b.budget_id = $id";
+                WHERE b.active = 1 AND b.budget_id = $id";
         $this->db->query($query);
         $this->db->validateLastQuery();
-        return (!empty($this->db->numRows()) ? true : false);
+        return (empty($this->db->numRows()) ? false : $this->db->fetch()['budget_id']);
     }
 
     //ALTAS, BAJAS Y MODIFICACIONES------------------------------------------------------------------------------------------------------------------
@@ -360,6 +415,24 @@ class Budgets extends Model {
         $this->db->query($query); 
         $this->db->validateLastQuery();
         return $lastBudgetNumber;
+    }
+    public function newBudgetLastVersion($budgetId, $number) { // ACA
+        $this->db->validateSanitizeId($budgetId, "El identificador del presupuesto es inválido");
+        $this->db->validateSanitizeId($number, "El numero del presupuesto es inválido");
+        $lastBudgetVersion = $this->getLastBudgetVersionData($number); 
+        /* Datos de la nueva versión */
+        $init       = $lastBudgetVersion['init_budget_id'];
+        $old        = $lastBudgetVersion['new_budget_id'];
+        $version    = $lastBudgetVersion['version']+1;
+        $queryInsert = "INSERT INTO budget_versions (init_budget_id, old_budget_id, new_budget_id, budget_number, version) 
+                VALUES ($init, $old, $budgetId, $number, $version)";
+        $this->db->query($queryInsert); 
+        $this->db->validateLastQuery();
+        $queryUpdate = "UPDATE budget_versions SET 
+                    last_version = 0 WHERE new_budget_id = $old";
+        $this->db->query($queryUpdate); 
+        $this->db->validateLastQuery();
+        return $version;
     }
     public function newBudgetItem($budgetItem, $budgetId) { // OK
         $this->db->validateSanitizeId($budgetId, "El identificador del presupuesto es inválido");

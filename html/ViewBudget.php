@@ -3,7 +3,7 @@
     <div class="col-md-2">
         <label class="form-label rounded text-bg-secondary fs-6" for="codDetail"><strong>#</strong></label>
         <p id="codDetail" class="rounded text-bg-light fs-6"><?php echo sprintf("%'.04d\n", $this->budget->info['budget_number']) ?></p>
-        <input type="hidden" name="budgetId" id="budgetId" value="<?php echo $this->budget->info['budget_number'] ?>">
+        <input type="hidden" name="budgetNumber" id="budgetNumber" value="<?php echo $this->budget->info['budget_number'] ?>">
     </div>
     <div class="col-md-2">
         <label class="form-label rounded text-bg-secondary fs-6" for="versionDetail"><strong>Versión</strong></label>
@@ -33,7 +33,7 @@
     </div>
     <div class="col-md-6">
         <label class="form-label rounded text-bg-secondary fs-6" for="descDetail"><strong>Notas</strong></label>
-        <textarea disabled readonly id="descDetail" class="rounded text-bg-light fs-6 desc-detail"><?php echo $this->budget->info['description'] ?></textarea>
+        <textarea disabled readonly id="descDetail" class="rounded text-bg-light fs-6 text-desc"><?php echo $this->budget->info['description'] ?></textarea>
     </div>
 </div>
 <hr>
@@ -108,33 +108,55 @@ foreach($this->budget->items as $i) {
 <h4>Acciones</h4>
 <div class="row">
     <div class="col-2">
-        <button class="btn btn-primary mb-3" type="button" id="goBack">
+        <a class="btn btn-primary mb-3" type="button" id="goBack" href="viewBudgets">
             <i class="bi bi-arrow-bar-left"></i>
             Volver
-        </button>
+        </a>
     </div>
+<?php
+if($this->budget->info['last_version']) {
+?>
+    <div class="col-2">
+        <a class="btn btn-success mb-3" type="button" id="newVersion" href="newBudgetVersion-<?php echo $this->budget->info['budget_number'] ?>">
+            <i class="bi bi-plus-lg"></i>
+            Nueva versión
+        </a>
+    </div>
+<?php
+}
+?>
 </div>
 <hr>
-<!-- ACA -->
 <h4>Versiones</h4>
 <div class="row">
     <div class="row d-flex bd-highlight">
         <nav class="mb-none">
             <ul class="pagination">
+<?php
+if($this->budget->info['version'] != 1) {
+?>
                 <li class="page-item">
-                    <a class="page-link" href="#" aria-label="Previous">
+                    <a class="page-link" href="<?php echo "./viewBudget-" . $this->budget->info['budget_number'] . "-" . $this->budget->info['version']-1 ?>" aria-label="Previous">
                         <span aria-hidden="true">&laquo;</span>
                     </a>
                 </li>
-                <li class="page-item"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
+<?php
+}
+foreach($this->budget->versionsIds as $v) {
+?>
+                <li class="page-item<?php echo ($v['version'] == $this->budget->info['version']) ? " active" : "" ?>"><a class="page-link" href="<?php echo "./viewBudget-" . $this->budget->info['budget_number'] . "-" . $v['version'] ?>"><?php echo $v['version'] ?></a></li>
+<?php
+}
+if(!$this->budget->info['last_version']) {
+?>
                 <li class="page-item">
-                    <a class="page-link" href="#" aria-label="Next">
+                    <a class="page-link" href="<?php echo "./viewBudget-" . $this->budget->info['budget_number'] . "-" . $this->budget->info['version']+1 ?>" aria-label="Next">
                         <span aria-hidden="true">&raquo;</span>
                     </a>
                 </li>
+<?php
+}
+?>
             </ul>
         </nav>
     </div>
