@@ -138,13 +138,13 @@ class Stock extends Model{
         foreach($items as $item) {
             $quantity = 0;
             $prodId   = $item->product_id;
-            $prodDesc = $item->description;    
+            // $prodDesc = $item->description;    
             foreach($items as $item2) {
                 if($prodId == $item2->product_id) 
                     $quantity += $item2->quantity;
             }
             if(!$this->validateStockItem($quantity, $prodId))
-                throw new Exception("El stock del producto #$prodId- $prodDesc no es suficiente.");
+                throw new Exception("El stock del producto #$prodId no es suficiente.");
         }
         return true;
     }

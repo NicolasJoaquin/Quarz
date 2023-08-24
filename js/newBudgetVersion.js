@@ -115,7 +115,6 @@ $(document).ready(function() {
                 updateLastItemPosition();
                 updateBudget();
                 renderBudget();
-                console.log(budget);
             });
         });
     }
@@ -359,7 +358,7 @@ $(document).ready(function() {
         }   
         updateTotalItemToEdit();  
     }); 
-    $("#itemToEditQuantity").change(function() { K
+    $("#itemToEditQuantity").change(function() { 
         var val = parseFloat($.trim($("#itemToEditQuantity").val())).toFixed(2);
         $("#itemToEditQuantity").val(val);
         itemToEdit.quantity = val;
@@ -388,7 +387,6 @@ $(document).ready(function() {
             updateBudget(); 
             renderBudget();
             updateLastItemPosition();
-            console.log(budget);
         }
     });
     $("#itemToAddCost").change(function() { 
@@ -422,7 +420,6 @@ $(document).ready(function() {
     }); 
     $("#desc").change(function() { 
         budget.notes = $.trim($("#desc").val());
-        console.log(budget);
     });
     $("#discount").change(function() { 
         updateBudget();

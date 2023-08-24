@@ -1,8 +1,3 @@
-.scrolleable {
-    height: 310px !important;
-    overflow-y: auto !important; 
-}
-
 .container {
     padding: 50px 15px 0 !important;
 }
@@ -23,6 +18,20 @@ tr.filters th {
     height: 55px !important;
 }
 
-tfoot tr {
-    display: flex !important;
+select.ms-auto {
+    width: 30%;
+}
+
+i, li.page-item {
+    cursor: pointer;
+}
+
+i.text-primary {
+    margin: 0.5rem;
+}
+
+.popover-body a {
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    margin-bottom: 0.15em;
 }

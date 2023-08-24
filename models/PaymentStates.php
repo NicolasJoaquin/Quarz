@@ -10,6 +10,12 @@ class PaymentStates extends Model{
                             FROM payment_states"); // MODIFICAR PARA VER VISTA
         return $this->db->fetchAll();
     }
+    public function getLastStep() {
+        $query = "SELECT * FROM payment_states WHERE last_step = 1"; 
+        $this->db->query($query);
+        $this->db->validateLastQuery();
+        return $this->db->fetch();    
+    }
 }
 
 ?>

@@ -29,7 +29,10 @@
     </div>
     <div class="col-md-3">
         <label class="form-label rounded text-bg-secondary fs-6" for="payDetail"><strong>Estado de pago</strong></label>
-        <p id="payDetail" class="rounded text-bg-light fs-6"><?php echo $this->sale->info['pay_name'] ?></p>
+        <p id="payDetail" class="rounded text-bg-light fs-6 d-flex bd-highlight">
+            <?php echo $this->sale->info['pay_name'] ?>
+            <button type="button" class="btn btn-success btn-sm ms-auto" data-bs-toggle="modal" data-bs-target="#payStatesChanges"><i class="bi bi-clock-history"></i> Ver cambios</button>    
+        </p>
     </div>
     <div class="col-md-3">
         <label class="form-label rounded text-bg-secondary fs-6" for="shipMethodDetail"><strong>Medio de envío</strong></label>
@@ -87,25 +90,148 @@ foreach($this->sale->items as $i) {
         <table class="table table-striped table-hover mb-none">
             <tfoot class="table-dark">
                 <tr>
-                    <th scope="col" class="col-md-10"><div class="d-flex bd-highlight">Subotal</div></th>
-                    <th scope="col" class="col-md-2"><div class="d-flex bd-highlight"><?php echo "$" . $this->sale->info["subtotal"] ?></div></th>
+                    <td colspan="10">Subotal</td>
+                    <td colspan="2">
+                        <span class="d-flex bd-highlight" ><?php echo "$" . $this->sale->info["subtotal"] ?></span>
+                    </td>
                 </tr>
                 <tr>
-                    <th scope="col" class="col-md-2"><div class="d-flex bd-highlight">Descuento</div></th>
-                    <th scope="col" class="col-md-2"><div class="d-flex bd-highlight"><?php echo !empty($this->sale->info["discount"]) ? "-$" . $this->sale->info["discount"] : "<em>Sin descuento</em>" ?></div></th>
-                    <th scope="col" class="col-md-2"><div class="d-flex bd-highlight">Recargo</div></th>
-                    <th scope="col" class="col-md-2"><div class="d-flex bd-highlight"><?php echo !empty($this->sale->info["tax"]) ? "$" . $this->sale->info["tax"] : "<em>Sin recargos</em>" ?></div></th>
-                    <th scope="col" class="col-md-2"><div class="d-flex bd-highlight">Envío</div></th>
-                    <th scope="col" class="col-md-2"><div class="d-flex bd-highlight"><?php echo !empty($this->sale->info["ship"]) ? "$" . $this->sale->info["ship"] : "<em>Sin costo de envío</em>" ?></div></th>
+                    <td colspan="2">Descuento</td>
+                    <td colspan="2">
+                        <span class="d-flex bd-highlight">
+                            <?php echo !empty($this->sale->info["discount"]) ? "-$" . $this->sale->info["discount"] : "<em>Sin descuento</em>" ?>
+                        </span>
+                    </td>
+                    <td colspan="2">Recargo</td>
+                    <td colspan="2">
+                        <span class="d-flex bd-highlight">
+                            <?php echo !empty($this->sale->info["tax"]) ? "$" . $this->sale->info["tax"] : "<em>Sin recargos</em>" ?>
+                        </span>
+                    </td>
+                    <td colspan="2">Envío</td>
+                    <td colspan="2">
+                        <span class="d-flex bd-highlight">
+                            <?php echo !empty($this->sale->info["ship"]) ? "$" . $this->sale->info["ship"] : "<em>Sin costo de envío</em>" ?>
+                        </span>
+                    </td>
                 </tr>
                 <tr>
-                    <th scope="col" class="col-md-10"><div class="d-flex bd-highlight">Total</div></th>
-                    <th scope="col" class="col-md-2"><div class="d-flex bd-highlight"><?php echo "$" . $this->sale->info["total"] ?></div></th>
+                    <td colspan="10">Total</td>
+                    <td colspan="2">
+                        <span class="d-flex bd-highlight" ><?php echo "$" . $this->sale->info["total"] ?></span>
+                    </td>
                 </tr>
             </tfoot>
+
         </table>
     </div>
 </div>
+<!-- Modal (Historial de cambios en los estados de pago) -->
+<div class="modal fade modal-lg" id="payStatesChanges" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog ">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Historial de cambios > Estados de pago</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <section class="timeline">
+                    <!-- <h3>Viernes, 5 Junio 2017</h3> -->
+                    <ul>
+                        <li class="first-child">
+                            <span class="timeline-date">9:30</span>
+                            <span class="titulo">Registro y acrehhditaciones</span>
+                        </li>
+                        <!-- <li>
+                            <span class="timeline-date">10:00</span>
+                            <span class="titulo">Presentación</span>
+                        </li>
+                        <li>
+                            <span class="timeline-date">10:00</span>
+                            <span class="titulo">Presentación</span>
+                        </li>
+                        <li>
+                            <span class="timeline-date">10:00</span>
+                            <span class="titulo">Presentación</span>
+                        </li>
+                        <li>
+                            <span class="timeline-date">10:00</span>
+                            <span class="titulo">Presentación</span>
+                        </li>
+                        <li>
+                            <span class="timeline-date">10:00</span>
+                            <span class="titulo">Presentación</span>
+                        </li>
+                        <li>
+                            <span class="timeline-date">10:00</span>
+                            <span class="titulo">Presentación</span>
+                        </li>
+                        <li>
+                            <span class="timeline-date">10:00</span>
+                            <span class="titulo">Presentación</span>
+                        </li>
+                        <li>
+                            <span class="timeline-date">10:00</span>
+                            <span class="titulo">Presentación</span>
+                        </li>
+                        <li>
+                            <span class="timeline-date">10:00</span>
+                            <span class="titulo">Presentación</span>
+                        </li>
+                        <li>
+                            <span class="timeline-date">10:00</span>
+                            <span class="titulo">Presentación</span>
+                        </li>
+                        <li>
+                            <span class="timeline-date">10:00</span>
+                            <span class="titulo">Presentación</span>
+                        </li> -->
+                        <li>
+                            <span class="timeline-date">10:00</span>
+                            <span class="titulo">Presentación</span>
+                        </li>
+                        <li>
+                            <span class="timeline-date">10:00</span>
+                            <span class="titulo">Presentación</span>
+                        </li>
+                        <li>
+                            <span class="timeline-date">10:00</span>
+                            <span class="titulo">Presentación</span>
+                        </li>
+
+                        <!-- ===== -->
+                        <!-- <li>
+                            <span class="hora">10:30</span>
+                            <div class="charla">
+                                <a href="detallePonente.html" title=”Ficha de Nombre del Ponente”><img src="./extras/quarz-logo.png" alt="Nombre del ponente"></a>
+                                <a href="detallePonente.html" class="link" title=”Ficha de Nombre del Ponente”>Valentín Morales</a>Cómo dar una charla de UX sin que te dé la risa
+                            </div>
+                        </li> -->
+                        <!-- ===== -->
+                        <!-- <li class="cafe">
+                            <span class="hora">12:00</span>
+                            <span class="titulo">Café</span>
+                        </li> -->
+                    </ul>
+                </section>
+
+                <!-- <section class="timeline">
+                    <ul>
+
+                </section> -->
+
+                <!-- <p>
+                    ¿Estás seguro de pasar la cotización #<?php echo sprintf("%'.04d\n", $this->budget->info['budget_number']) ?> > v<?php echo sprintf("%'.02d\n", $this->budget->info['version']) ?> a venta?
+                </p> -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <!-- <button type="button" class="btn btn-success" id="newBudgetToSaleConfirm"><i class="bi bi-bag-check"></i> Confirmar</button> -->
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- <div class="row mt-2">
     <div class="d-grid gap-2 col-2 text-right"> 
         <button class="btn btn-success" type="button" id="modifyProduct">

@@ -1287,3 +1287,78 @@ ALTER TABLE budgets
   DROP init_version_id,
   DROP last_version;
 
+-- Agregado de next_step y last_step a estados de envío y pago
+ALTER TABLE shipment_states
+  ADD COLUMN next_step INT(10) UNSIGNED DEFAULT NULL,
+  ADD COLUMN last_step TINYINT(3) UNSIGNED DEFAULT 0;
+ALTER TABLE shipment_states
+  ADD KEY next_step (next_step);
+ALTER TABLE shipment_states
+  ADD CONSTRAINT shipment_states_next_step FOREIGN KEY (next_step) REFERENCES shipment_states (shipment_state_id) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+ALTER TABLE payment_states
+  ADD COLUMN next_step INT(10) UNSIGNED DEFAULT NULL,
+  ADD COLUMN last_step TINYINT(3) UNSIGNED DEFAULT 0;
+ALTER TABLE payment_states
+  ADD KEY next_step (next_step);
+ALTER TABLE payment_states
+  ADD CONSTRAINT payment_states_next_step FOREIGN KEY (next_step) REFERENCES payment_states (payment_state_id) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+-- Agregado de tablas sales_payment_states_changes y sales_shipment_states_changes
+CREATE TABLE sales_payment_states_changes (
+  id INT(10) UNSIGNED NOT NULL,
+  sale_id INT(10) UNSIGNED NOT NULL,
+  old_state_id INT(10) UNSIGNED NOT NULL,
+  new_state_id INT(10) UNSIGNED NOT NULL,
+  active TINYINT(3) UNSIGNED NOT NULL DEFAULT 1,
+  change_number TINYINT(3) UNSIGNED NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+ALTER TABLE sales_payment_states_changes
+  ADD PRIMARY KEY (id),
+  ADD KEY sale_id (sale_id),
+  ADD KEY old_state_id (old_state_id),
+  ADD KEY new_state_id (new_state_id);
+ALTER TABLE sales_payment_states_changes
+  MODIFY id INT(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE sales_payment_states_changes
+  ADD CONSTRAINT pay_changes_sale FOREIGN KEY (sale_id) REFERENCES sales (sale_id) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT pay_state_old FOREIGN KEY (old_state_id) REFERENCES payment_states (payment_state_id) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT pay_state_new FOREIGN KEY (new_state_id) REFERENCES payment_states (payment_state_id) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+CREATE TABLE sales_shipment_states_changes (
+  id INT(10) UNSIGNED NOT NULL,
+  sale_id INT(10) UNSIGNED NOT NULL,
+  old_state_id INT(10) UNSIGNED NOT NULL,
+  new_state_id INT(10) UNSIGNED NOT NULL,
+  active TINYINT(3) UNSIGNED NOT NULL DEFAULT 1,
+  change_number TINYINT(3) UNSIGNED NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+ALTER TABLE sales_shipment_states_changes
+  ADD PRIMARY KEY (id),
+  ADD KEY sale_id (sale_id),
+  ADD KEY old_state_id (old_state_id),
+  ADD KEY new_state_id (new_state_id);
+ALTER TABLE sales_shipment_states_changes
+  MODIFY id INT(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE sales_shipment_states_changes
+  ADD CONSTRAINT ship_changes_sale FOREIGN KEY (sale_id) REFERENCES sales (sale_id) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT ship_state_old FOREIGN KEY (old_state_id) REFERENCES shipment_states (shipment_state_id) ON DELETE NO ACTION ON UPDATE CASCADE,
+  ADD CONSTRAINT ship_state_new FOREIGN KEY (new_state_id) REFERENCES shipment_states (shipment_state_id) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+-- Se agregan fechas de ejecución y usuario a sales_payment_states_changes y sales_shipment_states_changes
+ALTER TABLE sales_payment_states_changes
+  ADD COLUMN date timestamp NOT NULL DEFAULT current_timestamp(),
+  ADD COLUMN user_id INT(10) UNSIGNED NOT NULL;
+ALTER TABLE sales_payment_states_changes
+  ADD KEY user_id (user_id);
+ALTER TABLE sales_payment_states_changes
+  ADD CONSTRAINT pay_changes_user FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+ALTER TABLE sales_shipment_states_changes
+  ADD COLUMN date timestamp NOT NULL DEFAULT current_timestamp(),
+  ADD COLUMN user_id INT(10) UNSIGNED NOT NULL;
+ALTER TABLE sales_shipment_states_changes
+  ADD KEY user_id (user_id);
+ALTER TABLE sales_shipment_states_changes
+  ADD CONSTRAINT ship_changes_user FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE NO ACTION ON UPDATE CASCADE;
+

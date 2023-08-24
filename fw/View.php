@@ -44,7 +44,8 @@ abstract class View{
         }
         if(!empty($this->includesCSS) && count($this->includesCSS)) {
             foreach ($this->includesCSS as $v) {
-                $this->includes .= "<link rel='stylesheet' type='text/css' href='". $this->$v ."' />";
+                // exit(print_r($this->$v));
+                $this->includes .= "<link rel='stylesheet' type='text/css' href='". $v ."' />";
             }
         }
     }

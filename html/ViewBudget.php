@@ -8,6 +8,7 @@
     <div class="col-md-2">
         <label class="form-label rounded text-bg-secondary fs-6" for="versionDetail"><strong>Versión</strong></label>
         <p id="versionDetail" class="rounded text-bg-light fs-6"><?php echo sprintf("%'.04d\n", $this->budget->info['version']) ?><?php echo $this->budget->info['last_version'] ? "<i class='bi bi-arrow-right-circle-fill text-success'></i> Última versión" : "" ?></p>
+        <input type="hidden" name="budgetVersion" id="budgetVersion" value="<?php echo $this->budget->info['version'] ?>">
     </div>
     <div class="col-md-3">
         <label class="form-label rounded text-bg-secondary fs-6" for="userDetail"><strong>Usuario</strong></label>
@@ -125,6 +126,32 @@ if($this->budget->info['last_version']) {
 <?php
 }
 ?>
+    <div class="col-2">
+        <button class="btn btn-success mb-3" type="button" id="newBudgetToSale" data-bs-toggle="modal" data-bs-target="#confirmBudgetToSaleModal">
+            <i class="bi bi-bag-plus"></i>
+            Pasar a venta
+        </button>
+    </div>
+    <!-- Modal (Pasar cotización a venta) -->
+    <div class="modal fade modal-lg" id="confirmBudgetToSaleModal" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Pasar cotización a venta > Confirmación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        ¿Estás seguro de pasar la cotización #<?php echo sprintf("%'.04d\n", $this->budget->info['budget_number']) ?> > v<?php echo sprintf("%'.02d\n", $this->budget->info['version']) ?> a venta?
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-success" id="newBudgetToSaleConfirm"><i class="bi bi-bag-check"></i> Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <hr>
 <h4>Versiones</h4>

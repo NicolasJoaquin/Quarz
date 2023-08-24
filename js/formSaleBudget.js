@@ -21,7 +21,7 @@ $(document).ready(function() {
 
     // Getters
     // Clientes
-    function getClients() { // OK
+    function getClients() {
         $("#clientToPush").empty();
         var filterValue = ""; // VER ESTO
         $.get("./viewClients", {get: true, filterColumn: false, filterValue: filterValue, order: false}, function(response) {
@@ -83,7 +83,7 @@ $(document).ready(function() {
         });
     }    
     // Productos
-    function getProducts() { // OK
+    function getProducts() {
         var filterValue = "";
         $.get("./viewProducts", {getProductsToSelect: true, filterColumn: false, filterValue: filterValue, order: false}, function(response) {
             response = JSON.parse(response);
@@ -111,7 +111,7 @@ $(document).ready(function() {
 
     // Validaciones
     // Items
-    function validateItemToAdd() { // OK
+    function validateItemToAdd() { 
         if(productToAdd.cost_price.length === 0 || productToAdd.cost_price == "NaN") { // Revisar si se quieren evitar costos = 0
             alert("Falta el costo del producto a agregar");
             return false;
@@ -154,14 +154,14 @@ $(document).ready(function() {
         }
         return true;
     }
-    function validateBudget() { // OK
+    function validateBudget() { 
         if(budget.items.length == 0) {
             alert("Agregá items");
             return false;
         }
         return true;
     }
-    function validateSale() { // Revisar
+    function validateSale() { // Falta fix
         if(!validateBudget())
             return false;
         var flag = 1;
@@ -277,7 +277,7 @@ $(document).ready(function() {
 
     // Renders y clears
     // Clientes
-    function renderClientInDetail() { // OK
+    function renderClientInDetail() { 
         $("#client").empty();
         $("#client").val(budget.client.name);
     }

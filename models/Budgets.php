@@ -289,7 +289,7 @@ class Budgets extends Model {
 
     // VALIDACIONES
     /* Recibe el número de la cotización y su versión (budget_numer + version de budget_versions) */
-    public function existNumberVersion($number, $version) { // OK
+    public function existNumberVersion($number, $version) { 
         $this->db->validateSanitizeId($number, "El número de cotización es erróneo");
         $this->db->validateSanitizeId($version, "El número de versión de la cotización es erróneo");
         $query = "SELECT bv.budget_number, bv.budget_version_id, bv.version
@@ -308,11 +308,12 @@ class Budgets extends Model {
         return $ret;
     }
     /* Recibe el número de la cotización (budget_numer de budget_versions) */
-    public function existNumber($number) { // OK
+    public function existNumber($number, $lastVersion = true) { 
         $this->db->validateSanitizeId($number, "El número de cotización es erróneo");
+        $lastVFilter = ($lastVersion) ? "AND last_version = 1" : "";
         $query = "SELECT bv.budget_number, bv.budget_version_id, bv.version
                 FROM budget_versions AS bv
-                WHERE bv.active = 1 AND last_version = 1 AND bv.budget_number = $number";
+                WHERE bv.active = 1 $lastVFilter AND bv.budget_number = $number";
         $this->db->query($query);
         $this->db->validateLastQuery();
         return (empty($this->db->numRows()) ? false : $this->db->fetch());

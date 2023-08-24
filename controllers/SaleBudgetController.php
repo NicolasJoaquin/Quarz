@@ -5,6 +5,8 @@ require_once '../fw/fw.php'; //archivo que tiene todos los includes y requires d
 require_once '../models/Sales.php';
 require_once '../models/Budgets.php';
 require_once '../models/Stock.php';
+require_once '../models/ShipmentStates.php';
+require_once '../models/PaymentStates.php';
 
 require_once '../views/FormNewSaleBudget.php';
 require_once '../views/NewBudgetVersion.php';
@@ -20,13 +22,15 @@ class SaleBudgetController extends Controller {
         $this->models['sales']   = new Sales();
         $this->models['budgets'] = new Budgets();
         $this->models['stock']   = new Stock();
+        $this->models['shipment_states'] = new ShipmentStates();
+        $this->models['payment_states']  = new PaymentStates();
 
-        $this->views['dashboard']       = new ViewSales(title: "Dashboard ventas", includeJs: "js/viewSales.js", includeCSS: "css/viewSales.css");
-        $this->views['budgetDashboard'] = new ViewBudgets(title: "Dashboard cotizaciones", includeJs: "js/viewBudgets.js", includeCSS: "css/viewBudgets.css");
+        $this->views['dashboard']       = new ViewSales(title: "Dashboard ventas", includeJs: "js/viewSales.js", includeCSS: "css/viewSales.css", includesCSS: ["css/stdCustom.css"]);
+        // $this->views['budgetDashboard'] = new ViewBudgets(title: "Dashboard cotizaciones", includeJs: "js/viewBudgets.js", includeCSS: "css/viewBudgets.css");
+        $this->views['budgetDashboard'] = new ViewBudgets(title: "Dashboard cotizaciones", includeJs: "js/viewBudgets.js", includesCSS: ["css/viewBudgets.css", "css/stdCustom.css"]);
         $this->views['form']            = new FormNewSaleBudget(title: "Nueva venta o cotización", includeJs: "./js/formSaleBudget.js", includeCSS: "./css/formSaleBudget.css");
         $this->views['saleDetail']      = new ViewSale(includeJs: "js/viewSale.js", includeCSS: "css/stdCustom.css");
         $this->views['budgetDetail']    = new ViewBudget(includeJs: "js/viewBudget.js", includeCSS: "css/stdCustom.css");
-        // $this->views['view']     = new ViewBudgets();
         /* Budget versions */
         $this->views['formNewBudgetVersion'] = new NewBudgetVersion(includeJs: "js/newBudgetVersion.js", includeCSS: "css/stdCustom.css");
     }
@@ -96,23 +100,43 @@ class SaleBudgetController extends Controller {
         $filters   = new stdClass();
         $orders    = new stdClass();
         $budgets   = new stdClass();
+        $limitIni  = 0;
+        $limitEnd  = 10000;
         if(!empty($_GET['filters']))
             $filters = json_decode($_GET['filters']);
         if(!empty($_GET['orders']))
             $orders = json_decode($_GET['orders']);
+        if(!empty($_GET['limitIni']))
+            $limitIni = json_decode($_GET['limitIni']);
+        if(!empty($_GET['limitEnd']))
+            $limitEnd = json_decode($_GET['limitEnd']);
         $budgets = $this->models['budgets']->getBudgets($filters, $orders);
         return $budgets;
     }
     public function getSalesToDashboard() {
-        $filters = new stdClass();
-        $orders  = new stdClass();
-        $sales   = new stdClass();
+        $filters        = new stdClass();
+        $orders         = new stdClass();
+        $sales          = new stdClass();
+        $limitOffset    = 0;
+        $limitLength    = 10000;
         if(!empty($_GET['filters']))
             $filters = json_decode($_GET['filters']);
         if(!empty($_GET['orders']))
             $orders = json_decode($_GET['orders']);
-        $sales->sales = $this->models['sales']->getSales($filters, $orders);
-        $sales->total = $this->models['sales']->getTotalOfSales($filters);
+        if(!empty($_GET['limitOffset']))
+            $limitOffset = json_decode($_GET['limitOffset']);
+        if(!empty($_GET['limitLength']))
+            $limitLength = json_decode($_GET['limitLength']);
+        $sales->sales = $this->models['sales']->getSales($filters, $orders, $limitOffset, $limitLength);
+        /* Format de fecha para mostrar en el front */
+        foreach($sales->sales as $k => $sale) 
+            $sales->sales[$k]['start_date'] = $this->sqlDateToNormal($sale['start_date']);
+
+        $sales->total       = $this->models['sales']->getTotalOfSales($filters, $limitOffset, $limitLength);
+        $sales->registers   = $this->models['sales']->getTotalRegisters($filters);
+        $sales->lastShipState = $this->models['shipment_states']->getLastStep()['title'];
+        $sales->lastPayState  = $this->models['payment_states']->getLastStep()['title'];
+
         return $sales;
     }
     public function getBudgetToNewVersion() {
@@ -230,45 +254,54 @@ class SaleBudgetController extends Controller {
         $msg = "Se dió de alta la venta #$sale->id";
         return $msg;
     }
+    public function newBudgetToSale() { 
+        /* Se toma el number que viene desde el front para filtrar por budget_number (budget_versions) */
+        if(empty($_POST['number'])) throw new Exception("El número de la cotización está vacío o es inválido");
+        if(!$this->models['budgets']->existNumber($_POST['number'], false)) { 
+            header("Location: ./viewBudgets");
+            exit();
+        }    
+        $budget = new stdClass();
+        if(empty($_POST['version'])) {
+            /* Se trae como cotización principal, siempre la última versión */
+            $budget->info           = $this->models['budgets']->getLastVersionBudgetInfo($_POST['number']);
+            $budget->items          = $this->models['budgets']->getLastVersionBudgetItems($_POST['number']);
+        }
+        else {
+            if(!$this->models['budgets']->existNumberVersion($_POST['number'], $_POST['version'])) { 
+                /* Por default redirecciona a la última versión del número de cotización provisto */
+                header("Location: ./viewBudget-".$_POST['number']);
+                exit();
+            }    
+            $budget->info           = $this->models['budgets']->getNumberVersionBudgetInfo($_POST['number'], $_POST['version']); 
+            $budget->items          = $this->models['budgets']->getNumberVersionBudgetItems($_POST['number'], $_POST['version']); 
+        }
+        $budget->items = $this->arrayItemsToObject($budget->items);
+        $this->models['stock']->validateStockItems($budget->items); // Acá arroja excepciones si no hay stock, la venta no se genera
+        $sale     = new stdClass();
+        $sale->id = $this->models['sales']->newSale2($budget->info); // Falta formatear la info. a objeto (hay que hacer nueva función de formateo, definir si en el modelo o controlador)
+        $this->models['sales']->newSaleItems2($budget->items, $sale->id);
+        $this->models['stock']->registerStockChanges($sale->id); // Acá se hacen los descuentos (hacer métodos mas pequeños en los modelos)
+        return $sale;
+    }
+    public function changeSaleState() { 
+        if(empty($_POST['sale_id'])) throw new Exception("La acción a realizar está vacía o es inválida");
+        if(empty($_POST['action'])) throw new Exception("La acción a realizar está vacía o es inválida");
+        $response = new stdClass();
+        if(!$response->sale_id = $this->models['sales']->exist($_POST['sale_id'])) 
+            throw new Exception("La venta no existe"); 
+        
+        $response->change = $this->models['sales']->changeSaleState($_POST['action'], $_POST['sale_id']);
+
+        $response->successMsg = "Se cambió el estado de " . $response->change->action 
+                                . " de la venta #" . sprintf("%'.04d\n", $response->sale_id) 
+                                . " de " . $response->change->old_state 
+                                . " a " . $response->change->new_state;
+        return $response;
+    }
+
 
     // Fixeado de acá para arriba
-
-
-
-
-
-
-
-
-    public function registerSale($sale, $userId) { 
-        if(!($newSale = $this->models['sales']->newSale($sale, $userId))){
-            return false;
-        }
-
-        $this->sendMail($newSale);
-        return $newSale['sale_id'];
-    }
-
-    public function registerItems($items, $saleId){
-        if(!isset($saleId)) die("error 1 controllers/SaleController registerItems");
-        foreach($items as $pos => $item){
-            if(!isset($item->prodId)) die("error 2 controllers/SaleController registerItems");
-            if(!isset($item->prodPrice)) die("error 3 controllers/SaleController registerItems");
-            if(!isset($item->prodCost)) die("error 4 controllers/SaleController registerItems");
-            if(!isset($item->prodQuantity)) die("error 5 controllers/SaleController registerItems");
-            $item->totalPrice = ($item->prodPrice * $item->prodQuantity);
-            $item->totalCost = ($item->prodCost * $item->prodQuantity);
-            $item->position = (string)$pos;
-        }
-
-        foreach($items as $pos => $item){
-            if(!$this->models['stock']->discountQuantity($item)) return false;
-        }
-
-        if(!$this->models['sales']->newSaleItems($items, $saleId)) return false;
-
-        return true;
-    }
 
 
     public function getSaleItems($saleId){
