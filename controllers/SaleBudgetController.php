@@ -89,8 +89,15 @@ class SaleBudgetController extends Controller {
             header("Location: ./viewSales");
             exit();
         }
-        $sale->info  = $this->models['sales']->getSaleInfo($_GET['id']);
-        $sale->items = $this->models['sales']->getSaleItems($_GET['id']);
+        $sale->info        = $this->models['sales']->getSaleInfo($_GET['id']);
+        $sale->items       = $this->models['sales']->getSaleItems($_GET['id']);
+        $sale->payChanges  = $this->models['sales']->getPaymentStateChanges($_GET['id']);
+        $sale->shipChanges = $this->models['sales']->getShipmentStateChanges($_GET['id']);
+        /* Format de fechas para mostrar en el front */
+        foreach($sale->payChanges as $k => $change) 
+            $sale->payChanges[$k]['date'] = $this->sqlDateToNormal($change['date']);
+        foreach($sale->shipChanges as $k => $change) 
+            $sale->shipChanges[$k]['date'] = $this->sqlDateToNormal($change['date']);
         $this->views['saleDetail']->sale = $sale;
         $this->views['saleDetail']->render();
     }

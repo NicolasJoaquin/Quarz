@@ -27,7 +27,6 @@ abstract class View{
 
         $this->setIncludes();
     }    
-
     private function setIncludes() {
         // Includes JS
         if(!empty($this->includeJs)) {

@@ -5,30 +5,11 @@ require_once '../fw/fw.php';
 
 class Sales extends Model {
     //GETERS------------------------------------------------------------------------------------------------------------------------
-    public function getAll(){ //MODIFICAR LIMIT
+    public function getAll() { //MODIFICAR LIMIT
         $this->db->query("SELECT *
                             FROM sales"); // MODIFICAR PARA VER VISTA
         return $this->db->fetchAll();
     }
-
-    // public function getSaleItems($saleId){
-    //     //Valido $saleId
-    //     if(!ctype_digit($saleId)) die ("error 1 getSaleItems/Sales (modelo)");
-
-    //     //QUERY SELECT 
-    //     $this->db->query("SELECT *
-    //                         FROM `view_sales_items` 
-    //                         WHERE sale_id = '$saleId'");
-
-    //     //VERIFICACIÓN DE LA QUERY Y RETORNO
-    //     $errno = $this->db->getErrorNo();
-    //     if($errno !== 0) throw new QueryErrorException($this->db->getError());
-    //     return $this->db->fetchAll();
-    // }
-
-    //ALTAS, BAJAS Y MODIFICACIONES------------------------------------------------------------------------------------------------------------------
-    // A partir de acá se usan nuevas validaciones y sanitizaciones
-    //GETERS------------------------------------------------------------------------------------------------------------------------
     public function getSales($filters, $orders, $limitOffset, $limitLength) {
         $sqlFilters = "";
         $sqlOrders = "";
@@ -128,7 +109,6 @@ class Sales extends Model {
         $this->db->validateLastQuery();
         return $this->db->fetchAll();
     }
-
     public function getSalesIds($filters, $limitOffset, $limitLength) {
         $sqlFilters = "";
         $sqlLimit = "";
@@ -202,7 +182,6 @@ class Sales extends Model {
                 $sqlFilters .= "WHERE ";
             $sqlFilters .= "s.payment_state_id = $filters->payment";
         }
-
         // Activo (alta/baja lógica)
         if(!empty($sqlFilters))
             $sqlFilters .= " AND ";
@@ -212,22 +191,20 @@ class Sales extends Model {
 
         $sqlLimit = "LIMIT $limitOffset,$limitLength";
 
-        $sql = "SELECT s.sale_id, s.user_id, u.user AS user_name, c.name AS client_name, s.budget_id, s.start_date, s.shipment_state_id, ship.title AS ship_name, s.payment_state_id, pay.title AS pay_name, s.total, s.description AS notes
+        $query = "SELECT s.sale_id, s.user_id, u.user AS user_name, c.name AS client_name, s.budget_id, s.start_date, s.shipment_state_id, ship.title AS ship_name, s.payment_state_id, pay.title AS pay_name, s.total, s.description AS notes
             FROM sales AS s 
             LEFT JOIN users AS u ON s.user_id = u.user_id
             LEFT JOIN shipment_states AS ship ON s.shipment_state_id = ship.shipment_state_id
             LEFT JOIN payment_states AS pay ON s.payment_state_id = pay.payment_state_id
             LEFT JOIN clients AS c ON s.client_id = c.client_id $sqlFilters $sqlLimit"; 
-        $this->db->query($sql);
+        $this->db->query($query);
         $this->db->validateLastQuery();
         $ids = array();
         foreach($this->db->fetchAll() as $fila) {
             $ids[] = $fila['sale_id'];
         }
-
         return $ids;
     }
-
     public function getTotalOfSales($filters, $limitOffset, $limitLength) {
         $sqlFilters = "WHERE";
         $ids = $this->getSalesIds($filters, $limitOffset, $limitLength);
@@ -236,14 +213,13 @@ class Sales extends Model {
         else
             $sqlFilters .= " sale_id = 0 AND";
         $sqlFilters .= " active = 1"; 
-        $sql = "SELECT SUM(total) AS total 
+        $query = "SELECT SUM(total) AS total 
             FROM sales AS s $sqlFilters 
             ORDER BY sale_id"; 
-        $this->db->query($sql);
+        $this->db->query($query);
         $this->db->validateLastQuery();
         return $this->db->fetch()['total'];
     }
-
     public function getSaleInfo($saleId) {
         $this->db->validateSanitizeId($saleId, "El número de venta es erróneo");
         $query = "SELECT s.sale_id, s.user_id, u.user AS user_name, c.name AS client_name, s.budget_id, s.start_date, s.shipment_state_id, ship.title AS ship_name, s.payment_state_id, pay.title AS pay_name, s.description, s.subtotal, s.discount, s.tax, s.ship, sm.title AS ship_method_name, pm.title AS pay_method_name, s.total
@@ -341,14 +317,14 @@ class Sales extends Model {
             $sqlFilters .= "WHERE ";
         $sqlFilters .= "s.active = 1";
 
-        $query = "";
+        $query = "SELECT COUNT(*) AS total_registers
+            FROM sales AS s 
+            LEFT JOIN users AS u ON s.user_id = u.user_id
+            LEFT JOIN shipment_states AS ship ON s.shipment_state_id = ship.shipment_state_id
+            LEFT JOIN payment_states AS pay ON s.payment_state_id = pay.payment_state_id
+            LEFT JOIN clients AS c ON s.client_id = c.client_id $sqlFilters";
 
-        $this->db->query("SELECT COUNT(*) AS total_registers
-                FROM sales AS s 
-                LEFT JOIN users AS u ON s.user_id = u.user_id
-                LEFT JOIN shipment_states AS ship ON s.shipment_state_id = ship.shipment_state_id
-                LEFT JOIN payment_states AS pay ON s.payment_state_id = pay.payment_state_id
-                LEFT JOIN clients AS c ON s.client_id = c.client_id $sqlFilters");
+        $this->db->query($query);
         $this->db->validateLastQuery();
         return $this->db->fetch()['total_registers'];
     }
@@ -390,7 +366,37 @@ class Sales extends Model {
             return false;
         return $this->db->fetch();
     }
-    // VALIDACIONES
+    public function getPaymentStateChanges($id) {
+        $this->db->validateSanitizeId($id, "El identificador de la venta es inválido");
+        $query = "SELECT c.sale_id, old.payment_state_id AS old_id, old.title AS old_title, 
+            new.payment_state_id AS new_id, new.title AS new_title, u.user AS user_name, 
+            c.change_number, c.date
+                FROM sales_payment_states_changes AS c 
+                LEFT JOIN payment_states AS old ON old.payment_state_id = c.old_state_id
+                LEFT JOIN payment_states AS new ON new.payment_state_id = c.new_state_id 
+                LEFT JOIN users AS u ON u.user_id = c.user_id
+                WHERE c.active = 1 AND c.sale_id = $id
+                ORDER BY change_number";
+        $this->db->query($query);
+        $this->db->validateLastQuery();
+        return $this->db->fetchAll();
+    }
+    public function getShipmentStateChanges($id) {
+        $this->db->validateSanitizeId($id, "El identificador de la venta es inválido");
+        $query = "SELECT c.sale_id, old.shipment_state_id AS old_id, old.title AS old_title, 
+            new.shipment_state_id AS new_id, new.title AS new_title, u.user AS user_name, 
+            c.change_number, c.date
+                FROM sales_shipment_states_changes AS c 
+                LEFT JOIN shipment_states AS old ON old.shipment_state_id = c.old_state_id
+                LEFT JOIN shipment_states AS new ON new.shipment_state_id = c.new_state_id 
+                LEFT JOIN users AS u ON u.user_id = c.user_id
+                WHERE c.active = 1 AND c.sale_id = $id
+                ORDER BY change_number";
+        $this->db->query($query);
+        $this->db->validateLastQuery();
+        return $this->db->fetchAll();
+    }
+    // Validaciones
     public function exist($id) {
         $this->db->validateSanitizeId($id, "El número de venta es erróneo");
         $query = "SELECT s.sale_id 
@@ -400,7 +406,6 @@ class Sales extends Model {
         $this->db->validateLastQuery();
         return (!empty($this->db->numRows()) ? $this->db->fetch()['sale_id'] : false);
     }
-
     // Altas, bajas y modificaciones
     /* Se arma función de nueva venta según formato de retorno de info. de la base datos */
     public function newSale2($info) {
@@ -482,7 +487,6 @@ class Sales extends Model {
 
         return $lastSale;
     }
-
     public function newSale($sale) {
         $query   = "";
         $columns = "";
@@ -553,12 +557,10 @@ class Sales extends Model {
         $lastSale = $this->db->getLastInsertId();
         if(!$lastSale)
             throw new Exception("Hubo un error al dar de alta la venta");
-
         return $lastSale;
     }
-
     /* Se arma función de nuevo ítem según formato de retorno de items de la base datos */
-    public function newSaleItem2($item, $saleId){
+    public function newSaleItem2($item, $saleId) {
         $this->db->validateSanitizeId($saleId, "El identificador de la venta es inválido");
 
         $prodId = (int)trim($item["product_id"]);
@@ -587,19 +589,17 @@ class Sales extends Model {
         $this->db->validateSanitizeInt($position, "La posición del producto #$prodId es inválida"); // cambiar por SanitizeId (las posiciones arrancan en 1)
 
         //QUERY INSERT
-        $this->db->query("INSERT INTO sales_items (sale_id, product_id, sale_price, cost_price, quantity, total_price, total_cost, position) 
-                            VALUES ($saleId, $prodId, $salePrice, $costPrice, $quantity,
-                            $totalPrice, $totalCost, $position)"); 
+        $query = "INSERT INTO sales_items (sale_id, product_id, sale_price, cost_price, quantity, total_price, total_cost, position) 
+                VALUES ($saleId, $prodId, $salePrice, $costPrice, $quantity,
+                $totalPrice, $totalCost, $position)";
+        $this->db->query($query); 
         $this->db->validateLastQuery();
         $lastSaleItem = $this->db->getLastInsertId();
         if(!$lastSaleItem)
             throw new Exception("Hubo un error al dar de alta un ítem en la venta " . $saleId);
-
         return $lastSaleItem;
     }
-
-
-    public function newSaleItem($saleItem, $saleId){
+    public function newSaleItem($saleItem, $saleId) {
         $this->db->validateSanitizeId($saleId, "El identificador de la venta es inválido");
 
         $prodId = (int)trim($saleItem->product_id);
@@ -628,18 +628,17 @@ class Sales extends Model {
         $this->db->validateSanitizeInt($position, "La posición del producto #$prodId es inválida"); // cambiar por SanitizeId (las posiciones arrancan en 1)
 
         //QUERY INSERT
-        $this->db->query("INSERT INTO sales_items (sale_id, product_id, sale_price, cost_price, quantity, total_price, total_cost, position) 
-                            VALUES ($saleId, $prodId, $salePrice, $costPrice, $quantity,
-                            $totalPrice, $totalCost, $position)"); 
+        $query = "INSERT INTO sales_items (sale_id, product_id, sale_price, cost_price, quantity, total_price, total_cost, position) 
+                VALUES ($saleId, $prodId, $salePrice, $costPrice, $quantity,
+                $totalPrice, $totalCost, $position)";
+        $this->db->query($query); 
         $this->db->validateLastQuery();
         $lastSaleItem = $this->db->getLastInsertId();
         if(!$lastSaleItem)
             throw new Exception("Hubo un error al dar de alta un ítem en el presupuesto " . $saleId);
-
         return $lastSaleItem;
     }
-
-    public function newSaleItems($items, $saleId){
+    public function newSaleItems($items, $saleId) {
         $ret = array();
         foreach($items as $k => $item) {
             $item->position = $k;
@@ -647,9 +646,8 @@ class Sales extends Model {
         }
         return $ret;
     }
-
     /* Se arma función de nuevos ítems según formato de retorno de items de la base datos */
-    public function newSaleItems2($items, $saleId){
+    public function newSaleItems2($items, $saleId) {
         $ret = array();
         foreach($items as $k => $item) {
             $ret[] = $this->newSaleItem($item, $saleId); // Se usa newSaleItem porque viene formateado como object
@@ -800,9 +798,7 @@ class Sales extends Model {
         $change->change_number  = $lastChange;
         return $change;
     }
-
     public function changeSaleState($action, $id) {
-        // $this->db->validateSanitizeId($id, "El identificador de la venta es inválido");
         $this->db->validateSanitizeString(str: $action, errorMsg: "La acción a realizar es errónea");
         $change = new stdClass;
         switch ($action) {

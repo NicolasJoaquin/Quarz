@@ -15,7 +15,7 @@
     </div>
     <div class="col-md-2">
         <label class="form-label rounded text-bg-secondary fs-6" for="budgetDetail"><strong>Presupuesto</strong></label>
-        <p id="budgetDetail" class="rounded text-bg-light fs-6"><?php echo sprintf("%'.04d\n", $this->sale->info['budget_id']) ?></p>
+        <p id="budgetDetail" class="rounded text-bg-light fs-6"><?php echo !empty($this->sale->info['budget_id']) ? sprintf("%'.04d\n", $this->sale->info['budget_id']) : "<small><em>Sin presupuesto de referencia</em></small>" ?></p>
     </div>
     <div class="col-md-2">
         <label class="form-label rounded text-bg-secondary fs-6" for="dateDetail"><strong>Fecha</strong></label>
@@ -25,13 +25,16 @@
 <div class="row">
     <div class="col-md-3">
         <label class="form-label rounded text-bg-secondary fs-6" for="shipDetail"><strong>Estado de envío</strong></label>
-        <p id="shipDetail" class="rounded text-bg-light fs-6"><?php echo $this->sale->info['ship_name'] ?></p>
+        <p id="shipDetail" class="rounded text-bg-light fs-6 d-flex bd-highlight">
+            <?php echo $this->sale->info['ship_name'] ?>
+            <button type="button" class="btn btn-secondary btn-sm ms-auto" data-bs-toggle="modal" data-bs-target="#shipStatesChanges"><i class="bi bi-clock-history"></i> Ver cambios</button>
+        </p>
     </div>
     <div class="col-md-3">
         <label class="form-label rounded text-bg-secondary fs-6" for="payDetail"><strong>Estado de pago</strong></label>
         <p id="payDetail" class="rounded text-bg-light fs-6 d-flex bd-highlight">
             <?php echo $this->sale->info['pay_name'] ?>
-            <button type="button" class="btn btn-success btn-sm ms-auto" data-bs-toggle="modal" data-bs-target="#payStatesChanges"><i class="bi bi-clock-history"></i> Ver cambios</button>    
+            <button type="button" class="btn btn-secondary btn-sm ms-auto" data-bs-toggle="modal" data-bs-target="#payStatesChanges"><i class="bi bi-clock-history"></i> Ver cambios</button>    
         </p>
     </div>
     <div class="col-md-3">
@@ -136,97 +139,78 @@ foreach($this->sale->items as $i) {
             </div>
             <div class="modal-body">
                 <section class="timeline">
-                    <!-- <h3>Viernes, 5 Junio 2017</h3> -->
                     <ul>
-                        <li class="first-child">
-                            <span class="timeline-date">9:30</span>
-                            <span class="titulo">Registro y acrehhditaciones</span>
+<?php
+if(empty($this->sale->payChanges)) {
+    echo "<li class='first-child'>" . 
+        '<span class="titulo"><em>Sin cambios en los estados del pago</em></span>' . 
+        '</li>';
+}
+else {
+    foreach($this->sale->payChanges as $k => $change) {
+?>
+                        <li <?php echo !$k ? "class='first-child'" : "" ?>>
+                            <span class="timeline-date">
+                                <?php echo $change['change_number'] . ". " . $change['date'] ?>
+                            </span>
+                            <span class="titulo">
+                                De <em><?php echo $change['old_title'] ?></em> 
+                                a <em><?php echo $change['new_title'] ?></em> 
+                                por <strong><?php echo $change['user_name'] ?></strong>
+                            </span>
                         </li>
-                        <!-- <li>
-                            <span class="timeline-date">10:00</span>
-                            <span class="titulo">Presentación</span>
-                        </li>
-                        <li>
-                            <span class="timeline-date">10:00</span>
-                            <span class="titulo">Presentación</span>
-                        </li>
-                        <li>
-                            <span class="timeline-date">10:00</span>
-                            <span class="titulo">Presentación</span>
-                        </li>
-                        <li>
-                            <span class="timeline-date">10:00</span>
-                            <span class="titulo">Presentación</span>
-                        </li>
-                        <li>
-                            <span class="timeline-date">10:00</span>
-                            <span class="titulo">Presentación</span>
-                        </li>
-                        <li>
-                            <span class="timeline-date">10:00</span>
-                            <span class="titulo">Presentación</span>
-                        </li>
-                        <li>
-                            <span class="timeline-date">10:00</span>
-                            <span class="titulo">Presentación</span>
-                        </li>
-                        <li>
-                            <span class="timeline-date">10:00</span>
-                            <span class="titulo">Presentación</span>
-                        </li>
-                        <li>
-                            <span class="timeline-date">10:00</span>
-                            <span class="titulo">Presentación</span>
-                        </li>
-                        <li>
-                            <span class="timeline-date">10:00</span>
-                            <span class="titulo">Presentación</span>
-                        </li>
-                        <li>
-                            <span class="timeline-date">10:00</span>
-                            <span class="titulo">Presentación</span>
-                        </li> -->
-                        <li>
-                            <span class="timeline-date">10:00</span>
-                            <span class="titulo">Presentación</span>
-                        </li>
-                        <li>
-                            <span class="timeline-date">10:00</span>
-                            <span class="titulo">Presentación</span>
-                        </li>
-                        <li>
-                            <span class="timeline-date">10:00</span>
-                            <span class="titulo">Presentación</span>
-                        </li>
-
-                        <!-- ===== -->
-                        <!-- <li>
-                            <span class="hora">10:30</span>
-                            <div class="charla">
-                                <a href="detallePonente.html" title=”Ficha de Nombre del Ponente”><img src="./extras/quarz-logo.png" alt="Nombre del ponente"></a>
-                                <a href="detallePonente.html" class="link" title=”Ficha de Nombre del Ponente”>Valentín Morales</a>Cómo dar una charla de UX sin que te dé la risa
-                            </div>
-                        </li> -->
-                        <!-- ===== -->
-                        <!-- <li class="cafe">
-                            <span class="hora">12:00</span>
-                            <span class="titulo">Café</span>
-                        </li> -->
+<?php       
+    }
+}
+?>
                     </ul>
                 </section>
-
-                <!-- <section class="timeline">
-                    <ul>
-
-                </section> -->
-
-                <!-- <p>
-                    ¿Estás seguro de pasar la cotización #<?php echo sprintf("%'.04d\n", $this->budget->info['budget_number']) ?> > v<?php echo sprintf("%'.02d\n", $this->budget->info['version']) ?> a venta?
-                </p> -->
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <!-- <button type="button" class="btn btn-success" id="newBudgetToSaleConfirm"><i class="bi bi-bag-check"></i> Confirmar</button> -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal (Historial de cambios en los estados de envío) -->
+<div class="modal fade modal-lg" id="shipStatesChanges" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog ">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Historial de cambios > Estados de envío</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <section class="timeline">
+                    <ul>
+<?php
+if(empty($this->sale->shipChanges)) {
+    echo "<li class='first-child'>" . 
+        '<span class="titulo"><em>Sin cambios en los estados del envío</em></span>' . 
+        '</li>';
+}
+else {
+    foreach($this->sale->shipChanges as $k => $change) {
+?>
+                        <li <?php echo !$k ? "class='first-child'" : "" ?>>
+                            <span class="timeline-date">
+                                <?php echo $change['change_number'] . ". " . $change['date'] ?>
+                            </span>
+                            <span class="titulo">
+                                De <em><?php echo $change['old_title'] ?></em> 
+                                a <em><?php echo $change['new_title'] ?></em> 
+                                por <strong><?php echo $change['user_name'] ?></strong>
+                            </span>
+                        </li>
+<?php       
+    }
+}
+?>
+                    </ul>
+                </section>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>
     </div>
