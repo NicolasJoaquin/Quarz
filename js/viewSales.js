@@ -44,7 +44,6 @@ $(document).ready(function() {
         $('#limitOffset').val(0); // Cuando cambia la cantidad de registros a ver, se setea el offset en 0
         getSales();
     });
-
     // Funciones 
     // Filtros y órdenes
     function getFilters() {
@@ -69,7 +68,6 @@ $(document).ready(function() {
         orders.payment  = $.trim($("#paymentOrder").val());
         console.log(orders);
     }
-
     // Datepicker
     function setDate() {
         $("#fromDateFilter").datepicker($.datepicker.regional[ "es" ]);
@@ -103,7 +101,6 @@ $(document).ready(function() {
             return date;
         }
     }
-
     // Ventas
     function getSales() { 
         jsonFilters         = JSON.stringify(filters);

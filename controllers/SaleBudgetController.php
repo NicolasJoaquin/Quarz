@@ -1,13 +1,11 @@
 <?php
 //controllers/SaleBudgetController.php
-
 require_once '../fw/fw.php'; //archivo que tiene todos los includes y requires del framework
 require_once '../models/Sales.php';
 require_once '../models/Budgets.php';
 require_once '../models/Stock.php';
 require_once '../models/ShipmentStates.php';
 require_once '../models/PaymentStates.php';
-
 require_once '../views/FormNewSaleBudget.php';
 require_once '../views/NewBudgetVersion.php';
 require_once '../views/ViewSales.php';
@@ -15,26 +13,25 @@ require_once '../views/ViewSale.php';
 require_once '../views/ViewBudgets.php';
 require_once '../views/ViewBudget.php';
 
-// require_once '../views/ViewBudgets.php';
-
 class SaleBudgetController extends Controller {
     public function __construct() {
+        /* Models */
         $this->models['sales']   = new Sales();
         $this->models['budgets'] = new Budgets();
         $this->models['stock']   = new Stock();
         $this->models['shipment_states'] = new ShipmentStates();
         $this->models['payment_states']  = new PaymentStates();
-
+        $this->models['shipment_methods'] = new ShipmentStates();
+        $this->models['payment_states']  = new PaymentStates();
+        /* Views */
         $this->views['dashboard']       = new ViewSales(title: "Dashboard ventas", includeJs: "js/viewSales.js", includeCSS: "css/viewSales.css", includesCSS: ["css/stdCustom.css"]);
-        // $this->views['budgetDashboard'] = new ViewBudgets(title: "Dashboard cotizaciones", includeJs: "js/viewBudgets.js", includeCSS: "css/viewBudgets.css");
-        $this->views['budgetDashboard'] = new ViewBudgets(title: "Dashboard cotizaciones", includeJs: "js/viewBudgets.js", includesCSS: ["css/viewBudgets.css", "css/stdCustom.css"]);
+        $this->views['budgetDashboard'] = new ViewBudgets(title: "Dashboard cotizaciones", includeJs: "js/viewBudgets.js", includesCSS: ["css/stdCustom.css"]);
         $this->views['form']            = new FormNewSaleBudget(title: "Nueva venta o cotización", includeJs: "./js/formSaleBudget.js", includeCSS: "./css/formSaleBudget.css");
         $this->views['saleDetail']      = new ViewSale(includeJs: "js/viewSale.js", includeCSS: "css/stdCustom.css");
         $this->views['budgetDetail']    = new ViewBudget(includeJs: "js/viewBudget.js", includeCSS: "css/stdCustom.css");
         /* Budget versions */
         $this->views['formNewBudgetVersion'] = new NewBudgetVersion(includeJs: "js/newBudgetVersion.js", includeCSS: "css/stdCustom.css");
     }
-
     // Vistas
     public function viewFormNewBudgetVersion() {
         if(empty($_GET['number'])) throw new Exception("El número de la cotización está vacío o es inválido");
@@ -44,16 +41,15 @@ class SaleBudgetController extends Controller {
         }    
         $this->views['formNewBudgetVersion']->budgetNumber  = $budget['budget_number'];
         $this->views['formNewBudgetVersion']->budgetVersion = $budget['version'];
-
         $this->views['formNewBudgetVersion']->render();
     }
-    public function viewForm(){
+    public function viewForm() {
         $this->views['form']->render();
     }
     public function viewDashboard() { 
         $this->views['dashboard']->render();
     }
-    public function viewBudgetDashboard() { // OK
+    public function viewBudgetDashboard() { 
         $this->views['budgetDashboard']->render();
     }
     public function viewBudgetDetail() { // OK
@@ -101,24 +97,31 @@ class SaleBudgetController extends Controller {
         $this->views['saleDetail']->sale = $sale;
         $this->views['saleDetail']->render();
     }
-
     // Getters
     public function getBudgetsToDashboard() { 
-        $filters   = new stdClass();
-        $orders    = new stdClass();
-        $budgets   = new stdClass();
-        $limitIni  = 0;
-        $limitEnd  = 10000;
+        $filters        = new stdClass();
+        $orders         = new stdClass();
+        $data           = new stdClass();
+        $limitOffset    = 0;
+        $limitLength    = 10000;
         if(!empty($_GET['filters']))
             $filters = json_decode($_GET['filters']);
         if(!empty($_GET['orders']))
             $orders = json_decode($_GET['orders']);
-        if(!empty($_GET['limitIni']))
-            $limitIni = json_decode($_GET['limitIni']);
-        if(!empty($_GET['limitEnd']))
-            $limitEnd = json_decode($_GET['limitEnd']);
-        $budgets = $this->models['budgets']->getBudgets($filters, $orders);
-        return $budgets;
+        if(!empty($_GET['limitOffset']))
+            $limitOffset = json_decode($_GET['limitOffset']);
+        if(!empty($_GET['limitLength']))
+            $limitLength = json_decode($_GET['limitLength']);
+        $data->budgets = $this->models['budgets']->getBudgets($filters, $orders, $limitOffset, $limitLength);
+        /* Format de fecha para mostrar en el front */
+        foreach($data->budgets as $k => $budget) 
+            $data->budgets[$k]['start_date'] = $this->sqlDateToNormal($budget['start_date']);
+        $data->subtotal    = $this->models['budgets']->getSubtotalOfBudgets($filters, $limitOffset, $limitLength);
+        $data->total       = $this->models['budgets']->getTotalOfBudgets($filters, $limitOffset, $limitLength);
+        $data->registers   = $this->models['budgets']->getTotalRegisters($filters);
+        // $data->lastShipState = $this->models['shipment_methods']->getLastStep()['title'];
+        // $data->lastPayState  = $this->models['payment_methods']->getLastStep()['title'];
+        return $data;
     }
     public function getSalesToDashboard() {
         $filters        = new stdClass();
@@ -143,7 +146,6 @@ class SaleBudgetController extends Controller {
         $sales->registers   = $this->models['sales']->getTotalRegisters($filters);
         $sales->lastShipState = $this->models['shipment_states']->getLastStep()['title'];
         $sales->lastPayState  = $this->models['payment_states']->getLastStep()['title'];
-
         return $sales;
     }
     public function getBudgetToNewVersion() {

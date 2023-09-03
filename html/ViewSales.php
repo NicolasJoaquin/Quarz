@@ -11,10 +11,6 @@
 </div>
 <div class="row g-5">
     <div class="col-md-12 col-lg-12 order-md-last">
-        <!-- <div class="col-sm-12 mb-4">
-            <label for="filter" class="form-label">Filtro</label>
-            <input type="text" class="form-control" id="filter" placeholder="Filtre por usuario" value="" required="" >
-        </div> -->
         <div class="table-wrapper table-responsive">
             <table class="table table-striped table-hover mb-none">
                 <thead>
@@ -82,7 +78,6 @@
                                 Acciones
                             </div>
                         </th>
-
                     </tr>
                 </thead>
                 <thead>
@@ -144,20 +139,6 @@
             <nav class="mb-none d-flex bd-highlight">
                 <input type="hidden" name="limitOffset" id="limitOffset" value="0">
                 <ul class="pagination ms-auto">
-                    <!-- <li class="page-item">
-                        <a class="page-link" href="#" aria-label="Previous">
-                            <span aria-hidden="true">&laquo;</span>
-                        </a>
-                    </li>
-                    <li class="page-item"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    <li class="page-item">
-                        <a class="page-link" href="#" aria-label="Next">
-                            <span aria-hidden="true">&raquo;</span>
-                        </a>
-                    </li> -->
                 </ul>
             </nav>
         </div>

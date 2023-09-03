@@ -11,28 +11,23 @@ if(!isset($_SESSION['log'])) {
 
 $controller = new SaleBudgetController();
 if(count($_GET)>0) {
-    if(isset($_GET['getBudgetsToDashboard'])) {
+    if(isset($_GET['getToDashboard'])) {
         $response = new stdClass();
         $response->state = 1;
         try {
-            $response->budgets    = $controller->getBudgetsToDashboard();
-            $response->successMsg = "Se consultaron con éxito las cotizaciones."; 
+            $response->data     = $controller->getBudgetsToDashboard();
+            $response->msg = "Se consultaron con éxito las cotizaciones."; 
         }
         catch (Exception $e) {
             $response->state = 0;
-            $response->errorMsg = "Hubo un error al consultar las cotizaciones: " . $e->getMessage() . " | Intentá de nuevo.";
-            echo json_encode($response);
-            exit;
+            $response->msg = "Hubo un error al consultar las cotizaciones: " . $e->getMessage() . " | Intentá de nuevo.";
         }
         echo json_encode($response);
         exit;
     }
+    exit;
 }
 $controller->viewBudgetDashboard();
 exit;
-
-// Fixeado de acá para arriba
-
-
 
 ?>

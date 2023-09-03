@@ -16,19 +16,17 @@ if(count($_GET)>0) {
         $response->state = 1;
         try {
             $response->payMethods = $controller->getPaymentMethodsToSelect();
-            $response->successMsg = "Se consultaron con éxito los medios de pago.";
+            $response->msg = "Se consultaron con éxito los medios de pago.";
         }
         catch (Exception $e) {
             $response->state = 0;
-            $response->errorMsg = "Hubo un error al consultar los medios de pago: " . $e->getMessage() . " | Intentá de nuevo.";
-            echo json_encode($response);
-            exit;
+            $response->msg = "Hubo un error al consultar los medios de pago: " . $e->getMessage() . " | Intentá de nuevo.";
         }
         echo json_encode($response);
         exit;
     }
+    exit;
 }
 exit;
-// Fixeado de acá para arriba
 
 ?>

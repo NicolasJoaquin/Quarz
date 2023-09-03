@@ -19,6 +19,38 @@ h3.popover-header {
 /* input-compact {
 
 } */
+
+.container {
+    padding: 50px 15px 0 !important;
+}
+.table {
+    margin-bottom: 0% !important;
+}
+p {
+    display: inline !important;
+}
+th input {
+    padding: 0.2rem !important;
+}
+tr.filters th {
+    height: 55px !important;
+}
+select.ms-auto {
+    width: 30%;
+}
+
+i, li.page-item {
+    cursor: pointer;
+}
+i.text-primary {
+    margin: 0.5rem;
+}
+.popover-body a {
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    margin-bottom: 0.15em;
+}
+
 /* Timelines - Historys */
 .timeline {
     float: left;

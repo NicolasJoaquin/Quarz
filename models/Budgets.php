@@ -5,39 +5,40 @@ require_once '../fw/fw.php';
 
 class Budgets extends Model {
     //GETERS------------------------------------------------------------------------------------------------------------------------
-    public function getAll() { //MODIFICAR LIMIT
-        $this->db->query("SELECT *
-                            FROM budgets"); // MODIFICAR PARA VER VISTA
-        return $this->db->fetchAll();
-    }
-
-    //GETERS------------------------------------------------------------------------------------------------------------------------
-    public function getLastBudgetNumber() { // OK
+    public function getLastBudgetNumber() {
         $query = "SELECT MAX(budget_number) AS last_number FROM budget_versions";
         $this->db->query($query);
         $this->db->validateLastQuery();
         return $this->db->fetch()['last_number'];
     }
-    public function getLastBudgetVersion($number) { // OK
+    public function getLastBudgetVersion($number) { 
         $query = "SELECT MAX(version) AS last_version FROM budget_versions WHERE budget_number = $number";
         $this->db->query($query);
         $this->db->validateLastQuery();
         return $this->db->fetch()['last_version'];
     }
-    public function getLastBudgetVersionData($number) { // OK
+    public function getLastBudgetVersionData($number) { 
         $query = "SELECT init_budget_id, old_budget_id, new_budget_id, budget_number, version 
                 FROM budget_versions WHERE last_version = 1 AND budget_number = $number";
         $this->db->query($query);
         $this->db->validateLastQuery();
         return $this->db->fetch();
     }
-    public function getBudgets($filters, $orders, $onlyLastVersions = true) { // OK
+    public function getBudgets($filters, $orders, $limitOffset, $limitLength) {
         $sqlFilters = "";
         $sqlOrders = "";
+        $sqlLimit = "";
+        // Validación de limit
+        $this->db->validateSanitizeInt($limitOffset, "El límite (offset) es erróneo");
+        $this->db->validateSanitizeInt($limitLength, "El límite (length) es erróneo");
+        if($limitOffset < 0)
+            throw new Exception("El límite (offset) no puede ser menor a 0");
+        if($limitLength < 0)
+            throw new Exception("El límite (length) no puede ser menor a 0");
         // Validación de filtros e inclusión en query
-        if(!empty($filters->budgetNumber)) {
-            $this->db->validateSanitizeId($filters->budgetNumber, "El número de la cotización es erróneo");
-            $sqlFilters .= "WHERE bv.budget_number LIKE '%$filters->budgetNumber%'";
+        if(!empty($filters->number)) {
+            $this->db->validateSanitizeId($filters->number, "El número de la cotización es erróneo");
+            $sqlFilters .= "WHERE v.budget_number LIKE '%$filters->number%'";
         }
         if(!empty($filters->user)) {
             $this->db->validateSanitizeString(str: $filters->user, wildcards: true, errorMsg: "El filtro de usuario es erróneo");
@@ -45,7 +46,7 @@ class Budgets extends Model {
                 $sqlFilters .= " AND ";
             else
                 $sqlFilters .= "WHERE ";
-            $sqlFilters .= "u.name LIKE '%$filters->user%'";
+            $sqlFilters .= "u.user LIKE '%$filters->user%'";
         }
         if(!empty($filters->client)) {
             $this->db->validateSanitizeString(str: $filters->client, wildcards: true, errorMsg: "El filtro de cliente es erróneo");
@@ -55,10 +56,6 @@ class Budgets extends Model {
                 $sqlFilters .= "WHERE ";
             $sqlFilters .= "c.name LIKE '%$filters->client%'";
         }
-
-        // ACÁ VA EL FILTRO DE ACTIVIDAD DE LA COTIZACIÓN (REGULADO POR TIEMPO)
-        // SE EVITAN FILTROS DE VERSIONES POR EL MOMENTO
-        
         if(!empty($filters->fromDate)) {
             $this->db->validateSanitizeDate(date: $filters->fromDate, format: "Y-m-d H:i:s", errorMsg: "El filtro de fecha de inicio es erróneo");
             if(!empty($sqlFilters))
@@ -77,108 +74,176 @@ class Budgets extends Model {
         }
         if(!empty($filters->fromDate) && !empty($filters->toDate) && $filters->fromDate > $filters->toDate)
             throw new Exception("La fecha de inicio no puede ser posterior a la de final");
-        // FALTA AGREGAR ESTE FILTRO A DASHBOARD DE VENTAS (MÉTODOS DE ENVÍO Y PAGO)
-        if(!empty($filters->shipmentMethod)) {
-            $this->db->validateSanitizeId($filters->shipmentMethod, "El filtro de medio de envío es erróneo");
+        if(!empty($filters->shipment)) {
+            $this->db->validateSanitizeId($filters->shipment, "El filtro de envío es erróneo");
             if(!empty($sqlFilters))
                 $sqlFilters .= " AND ";
             else
                 $sqlFilters .= "WHERE ";
-            $sqlFilters .= "b.shipment_method_id = $filters->shipmentMethod";
+            $sqlFilters .= "b.shipment_method_id = $filters->shipment";
         }
-        if(!empty($filters->paymentMethod)) {
-            $this->db->validateSanitizeId($filters->paymentMethod, "El filtro de medio de pago es erróneo");
+        if(!empty($filters->payment)) {
+            $this->db->validateSanitizeId($filters->payment, "El filtro de pago es erróneo");
             if(!empty($sqlFilters))
                 $sqlFilters .= " AND ";
             else
                 $sqlFilters .= "WHERE ";
-            $sqlFilters .= "b.payment_method_id = $filters->paymentMethod";
+            $sqlFilters .= "b.payment_method_id = $filters->payment";
         }
-        if(!empty($filters->subtotal)) { // Revisar validación (por ahora string)
-            $this->db->validateSanitizeString(str: $filters->subtotal, wildcards: true, errorMsg: "El filtro de subtotal es erróneo");
-            if(!empty($sqlFilters))
-                $sqlFilters .= " AND ";
-            else
-                $sqlFilters .= "WHERE ";
-            $sqlFilters .= "b.subtotal LIKE '%$filters->subtotal%'";
-        }
-        if(!empty($filters->total)) { // Revisar validación (por ahora string)
-            $this->db->validateSanitizeString(str: $filters->total, wildcards: true, errorMsg: "El filtro de total es erróneo");
-            if(!empty($sqlFilters))
-                $sqlFilters .= " AND ";
-            else
-                $sqlFilters .= "WHERE ";
-            $sqlFilters .= "b.total LIKE '%$filters->total%'";
-        }
+        /* Sólo números */
+        if(!empty($sqlFilters))
+            $sqlFilters .= " AND ";
+        else
+            $sqlFilters .= "WHERE ";
+        $sqlFilters .= "v.last_version = 1";
         // Activo (alta/baja lógica)
         if(!empty($sqlFilters))
             $sqlFilters .= " AND ";
         else
             $sqlFilters .= "WHERE ";
         $sqlFilters .= "b.active = 1";
-        // Última versión
-        if($onlyLastVersions) {
+
+        $sqlOrders = "ORDER BY v.budget_number DESC"; // Provisorio
+
+        $sqlLimit = "LIMIT $limitOffset,$limitLength";
+
+        $query = "SELECT b.budget_id, v.budget_number, v.version, v.last_version, b.user_id, u.user AS user_name, 
+            c.name AS client_name, b.start_date, b.shipment_method_id, ship.title AS ship_name, b.payment_method_id,
+            pay.title AS pay_name, b.subtotal, b.total, b.description AS notes
+                FROM budgets AS b 
+                LEFT JOIN users AS u ON b.user_id = u.user_id
+                LEFT JOIN budget_versions AS v ON v.new_budget_id = b.budget_id
+                LEFT JOIN shipment_methods AS ship ON b.shipment_method_id = ship.shipment_method_id
+                LEFT JOIN payment_methods AS pay ON b.payment_method_id = pay.payment_method_id
+                LEFT JOIN clients AS c ON b.client_id = c.client_id $sqlFilters $sqlOrders $sqlLimit";
+        $this->db->query($query); 
+        $this->db->validateLastQuery();
+        return $this->db->fetchAll();
+    }
+    public function getBudgetIds($filters, $limitOffset, $limitLength) {
+        $sqlFilters = "";
+        $sqlLimit = "";
+        // Validación de limit
+        $this->db->validateSanitizeInt($limitOffset, "El límite (offset) es erróneo");
+        $this->db->validateSanitizeInt($limitLength, "El límite (length) es erróneo");
+        if($limitOffset < 0)
+            throw new Exception("El límite (offset) no puede ser menor a 0");
+        if($limitLength < 0)
+            throw new Exception("El límite (length) no puede ser menor a 0");
+        // Validación de filtros e inclusión en query
+        if(!empty($filters->number)) { 
+            $this->db->validateSanitizeId($filters->number, "El número de la cotización es erróneo");
+            $sqlFilters .= "WHERE v.budget_number LIKE '%$filters->number%'";
+        }
+        if(!empty($filters->user)) {
+            $this->db->validateSanitizeString(str: $filters->user, wildcards: true, errorMsg: "El filtro de usuario es erróneo");
             if(!empty($sqlFilters))
                 $sqlFilters .= " AND ";
             else
                 $sqlFilters .= "WHERE ";
-            $sqlFilters .= "bv.last_version = 1";
+            $sqlFilters .= "u.user LIKE '%$filters->user%'";
         }
+        if(!empty($filters->client)) {
+            $this->db->validateSanitizeString(str: $filters->client, wildcards: true, errorMsg: "El filtro de cliente es erróneo");
+            if(!empty($sqlFilters))
+                $sqlFilters .= " AND ";
+            else
+                $sqlFilters .= "WHERE ";
+            $sqlFilters .= "c.name LIKE '%$filters->client%'";
+        }
+        if(!empty($filters->fromDate)) {
+            $this->db->validateSanitizeDate(date: $filters->fromDate, format: "Y-m-d H:i:s", errorMsg: "El filtro de fecha de inicio es erróneo");
+            if(!empty($sqlFilters))
+                $sqlFilters .= " AND ";
+            else
+                $sqlFilters .= "WHERE ";
+            $sqlFilters .= "b.start_date >= '$filters->fromDate'";
+        }
+        if(!empty($filters->toDate)) {
+            $this->db->validateSanitizeDate(date: $filters->toDate, format: "Y-m-d H:i:s", errorMsg: "El filtro de fecha de inicio es erróneo");
+            if(!empty($sqlFilters))
+                $sqlFilters .= " AND ";
+            else
+                $sqlFilters .= "WHERE ";
+            $sqlFilters .= "b.start_date <= '$filters->toDate'";
+        }
+        if(!empty($filters->fromDate) && !empty($filters->toDate) && $filters->fromDate > $filters->toDate)
+            throw new Exception("La fecha de inicio no puede ser posterior a la de final");
+        if(!empty($filters->shipment)) {
+            $this->db->validateSanitizeId($filters->shipment, "El filtro de envío es erróneo");
+            if(!empty($sqlFilters))
+                $sqlFilters .= " AND ";
+            else
+                $sqlFilters .= "WHERE ";
+            $sqlFilters .= "b.shipment_method_id = $filters->shipment";
+        }
+        if(!empty($filters->payment)) {
+            $this->db->validateSanitizeId($filters->payment, "El filtro de envío es erróneo");
+            if(!empty($sqlFilters))
+                $sqlFilters .= " AND ";
+            else
+                $sqlFilters .= "WHERE ";
+            $sqlFilters .= "b.payment_method_id = $filters->payment";
+        }
+        /* Sólo números */
+        if(!empty($sqlFilters))
+            $sqlFilters .= " AND ";
+        else
+            $sqlFilters .= "WHERE ";
+        $sqlFilters .= "v.last_version = 1";
+        // Activo (alta/baja lógica)
+        if(!empty($sqlFilters))
+            $sqlFilters .= " AND ";
+        else
+            $sqlFilters .= "WHERE ";
+        $sqlFilters .= "b.active = 1";
 
-        $sqlOrders = "ORDER BY bv.budget_number DESC"; // Provisorio
+        $sqlLimit = "LIMIT $limitOffset,$limitLength";
 
-        $return = new stdClass();
-
-        $query = "SELECT bv.init_budget_id, bv.old_budget_id, bv.new_budget_id, bv.budget_number, bv.version, bv.last_version,
-                    b.budget_id, b.user_id, u.user AS user_name, c.name AS client_name, b.start_date, b.shipment_method_id, 
-                    shipMet.title AS ship_method_name, b.payment_method_id, payMet.title AS pay_method_name, b.subtotal, 
-                    b.total, b.description AS notes
-                FROM budgets AS b 
-                LEFT JOIN budget_versions AS bv ON b.budget_id = bv.new_budget_id 
-                LEFT JOIN users AS u ON b.user_id = u.user_id
-                LEFT JOIN shipment_methods AS shipMet ON b.shipment_method_id = shipMet.shipment_method_id
-                LEFT JOIN payment_methods AS payMet ON b.payment_method_id = payMet.payment_method_id
-                LEFT JOIN clients AS c ON b.client_id = c.client_id $sqlFilters $sqlOrders"; // MODIFICAR LIMIT ACA
-        // exit(json_encode($query));
-
-        $this->db->query($query); 
+        $query = "SELECT b.budget_id 
+            FROM budgets AS b 
+            LEFT JOIN users AS u ON b.user_id = u.user_id
+            LEFT JOIN budget_versions AS v ON v.new_budget_id = b.budget_id
+            LEFT JOIN shipment_methods AS ship ON b.shipment_method_id = ship.shipment_method_id
+            LEFT JOIN payment_methods AS pay ON b.payment_method_id = pay.payment_method_id
+            LEFT JOIN clients AS c ON b.client_id = c.client_id $sqlFilters $sqlLimit"; 
+        $this->db->query($query);
         $this->db->validateLastQuery();
-        $return->budgets = $this->db->fetchAll();
-
-        $querySubtotal = "SELECT SUM(b.subtotal) AS subtotal
-                        FROM budgets AS b 
-                        LEFT JOIN budget_versions AS bv ON b.budget_id = bv.new_budget_id 
-                        LEFT JOIN users AS u ON b.user_id = u.user_id
-                        LEFT JOIN shipment_methods AS shipMet ON b.shipment_method_id = shipMet.shipment_method_id
-                        LEFT JOIN payment_methods AS payMet ON b.payment_method_id = payMet.payment_method_id
-                        LEFT JOIN clients AS c ON b.client_id = c.client_id $sqlFilters $sqlOrders"; // MODIFICAR LIMIT ACA
-        $this->db->query($querySubtotal); 
+        $ids = array();
+        foreach($this->db->fetchAll() as $fila) {
+            $ids[] = $fila['budget_id'];
+        }
+        return $ids;
+    }
+    public function getSubtotalOfBudgets($filters, $limitOffset, $limitLength) {
+        $sqlFilters = "WHERE";
+        $ids = $this->getBudgetIds($filters, $limitOffset, $limitLength);
+        if(!empty($ids)) 
+            $sqlFilters .= " (budget_id = " . implode(" OR budget_id = ", $ids) . ") AND";
+        else
+            $sqlFilters .= " budget_id = 0 AND";
+        $sqlFilters .= " active = 1"; 
+        $query = "SELECT SUM(subtotal) AS subtotal 
+            FROM budgets AS b $sqlFilters 
+            ORDER BY budget_id"; 
+        $this->db->query($query);
         $this->db->validateLastQuery();
-        $return->subtotal = $this->db->fetch()['subtotal'];
-
-        $queryShips = "SELECT SUM(b.ship) AS ships
-                        FROM budgets AS b 
-                        LEFT JOIN budget_versions AS bv ON b.budget_id = bv.new_budget_id 
-                        LEFT JOIN users AS u ON b.user_id = u.user_id
-                        LEFT JOIN shipment_methods AS shipMet ON b.shipment_method_id = shipMet.shipment_method_id
-                        LEFT JOIN payment_methods AS payMet ON b.payment_method_id = payMet.payment_method_id
-                        LEFT JOIN clients AS c ON b.client_id = c.client_id $sqlFilters $sqlOrders"; // MODIFICAR LIMIT ACA
-        $this->db->query($queryShips); 
+        return $this->db->fetch()['subtotal'];
+    }
+    public function getTotalOfBudgets($filters, $limitOffset, $limitLength) {
+        $sqlFilters = "WHERE";
+        $ids = $this->getBudgetIds($filters, $limitOffset, $limitLength);
+        if(!empty($ids)) 
+            $sqlFilters .= " (budget_id = " . implode(" OR budget_id = ", $ids) . ") AND";
+        else
+            $sqlFilters .= " budget_id = 0 AND";
+        $sqlFilters .= " active = 1"; 
+        $query = "SELECT SUM(total) AS total 
+            FROM budgets AS b $sqlFilters 
+            ORDER BY budget_id"; 
+        $this->db->query($query);
         $this->db->validateLastQuery();
-        $return->ships = $this->db->fetch()['ships'];
-
-        $queryTotal = "SELECT SUM(b.total) AS total
-                        FROM budgets AS b 
-                        LEFT JOIN budget_versions AS bv ON b.budget_id = bv.new_budget_id 
-                        LEFT JOIN users AS u ON b.user_id = u.user_id
-                        LEFT JOIN shipment_methods AS shipMet ON b.shipment_method_id = shipMet.shipment_method_id
-                        LEFT JOIN payment_methods AS payMet ON b.payment_method_id = payMet.payment_method_id
-                        LEFT JOIN clients AS c ON b.client_id = c.client_id $sqlFilters $sqlOrders"; // MODIFICAR LIMIT ACA
-        $this->db->query($queryTotal); 
-        $this->db->validateLastQuery();
-        $return->total = $this->db->fetch()['total'];
-
-        return $return;
+        return $this->db->fetch()['total'];
     }
     /* Recibe el id de la cotización (PK de budgets) */
     public function getBudgetInfo($id) { // OK
@@ -214,6 +279,87 @@ class Budgets extends Model {
         if(!$this->db->numRows())
             return false;
         return $this->db->fetchAll(); 
+    }
+    public function getTotalRegisters($filters) {
+        $sqlFilters = "";
+        // Validación de filtros e inclusión en query
+        if(!empty($filters->number)) {
+            $this->db->validateSanitizeId($filters->number, "El número de la cotización es erróneo");
+            $sqlFilters .= "WHERE v.budget_number LIKE '%$filters->number%'";
+        }
+        if(!empty($filters->user)) {
+            $this->db->validateSanitizeString(str: $filters->user, wildcards: true, errorMsg: "El filtro de usuario es erróneo");
+            if(!empty($sqlFilters))
+                $sqlFilters .= " AND ";
+            else
+                $sqlFilters .= "WHERE ";
+            $sqlFilters .= "u.user LIKE '%$filters->user%'";
+        }
+        if(!empty($filters->client)) {
+            $this->db->validateSanitizeString(str: $filters->client, wildcards: true, errorMsg: "El filtro de cliente es erróneo");
+            if(!empty($sqlFilters))
+                $sqlFilters .= " AND ";
+            else
+                $sqlFilters .= "WHERE ";
+            $sqlFilters .= "c.name LIKE '%$filters->client%'";
+        }
+        if(!empty($filters->fromDate)) {
+            $this->db->validateSanitizeDate(date: $filters->fromDate, format: "Y-m-d H:i:s", errorMsg: "El filtro de fecha de inicio es erróneo");
+            if(!empty($sqlFilters))
+                $sqlFilters .= " AND ";
+            else
+                $sqlFilters .= "WHERE ";
+            $sqlFilters .= "b.start_date >= '$filters->fromDate'";
+        }
+        if(!empty($filters->toDate)) {
+            $this->db->validateSanitizeDate(date: $filters->toDate, format: "Y-m-d H:i:s", errorMsg: "El filtro de fecha de inicio es erróneo");
+            if(!empty($sqlFilters))
+                $sqlFilters .= " AND ";
+            else
+                $sqlFilters .= "WHERE ";
+            $sqlFilters .= "b.start_date <= '$filters->toDate'";
+        }
+        if(!empty($filters->fromDate) && !empty($filters->toDate) && $filters->fromDate > $filters->toDate)
+            throw new Exception("La fecha de inicio no puede ser posterior a la de final");
+        if(!empty($filters->shipment)) {
+            $this->db->validateSanitizeId($filters->shipment, "El filtro de envío es erróneo");
+            if(!empty($sqlFilters))
+                $sqlFilters .= " AND ";
+            else
+                $sqlFilters .= "WHERE ";
+            $sqlFilters .= "b.shipment_method_id = $filters->shipment";
+        }
+        if(!empty($filters->payment)) {
+            $this->db->validateSanitizeId($filters->payment, "El filtro de pago es erróneo");
+            if(!empty($sqlFilters))
+                $sqlFilters .= " AND ";
+            else
+                $sqlFilters .= "WHERE ";
+            $sqlFilters .= "b.payment_method_id = $filters->payment";
+        }
+        /* Sólo números */
+        if(!empty($sqlFilters))
+            $sqlFilters .= " AND ";
+        else
+            $sqlFilters .= "WHERE ";
+        $sqlFilters .= "v.last_version = 1";
+        // Activo (alta/baja lógica)
+        if(!empty($sqlFilters))
+            $sqlFilters .= " AND ";
+        else
+            $sqlFilters .= "WHERE ";
+        $sqlFilters .= "b.active = 1";
+
+        $query = "SELECT COUNT(*) AS total_registers
+            FROM budgets AS b 
+            LEFT JOIN users AS u ON b.user_id = u.user_id
+            LEFT JOIN budget_versions AS v ON v.new_budget_id = b.budget_id
+            LEFT JOIN shipment_methods AS ship ON b.shipment_method_id = ship.shipment_method_id
+            LEFT JOIN payment_methods AS pay ON b.payment_method_id = pay.payment_method_id
+            LEFT JOIN clients AS c ON b.client_id = c.client_id $sqlFilters";
+        $this->db->query($query);
+        $this->db->validateLastQuery();
+        return $this->db->fetch()['total_registers'];
     }
     /* Recibe el número de la cotización (budget_numer de budget_versions) */
     private function getLastVersionBudgetId($number) { // OK
