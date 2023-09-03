@@ -9,10 +9,10 @@ $(document).ready(function() {
         payMethods  = new Object();
 
     // Eventos
-    // $("th input").on("keyup", function() {
-    //     getFilters();
-    //     getBudgets();
-    // });   
+    $("th input").on("keyup", function() {
+        getFilters();
+        getBudgets();
+    });   
     $("th input").on("change", function() {
         getFilters();
         getBudgets();

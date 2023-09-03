@@ -1,6 +1,6 @@
 <?php
 //controllers/SaleBudgetController.php
-require_once '../fw/fw.php'; //archivo que tiene todos los includes y requires del framework
+require_once '../fw/fw.php'; 
 require_once '../models/Sales.php';
 require_once '../models/Budgets.php';
 require_once '../models/Stock.php';
@@ -52,7 +52,7 @@ class SaleBudgetController extends Controller {
     public function viewBudgetDashboard() { 
         $this->views['budgetDashboard']->render();
     }
-    public function viewBudgetDetail() { // OK
+    public function viewBudgetDetail() { 
         /* Se toma el number que viene desde el front para filtrar por budget_number (budget_versions) */
         if(empty($_GET['number'])) throw new Exception("El número de la cotización está vacío o es inválido");
         $budget = new stdClass();
@@ -62,8 +62,8 @@ class SaleBudgetController extends Controller {
                 exit();
             }    
             /* Se trae como cotización principal, siempre la última versión */
-            $budget->info           = $this->models['budgets']->getLastVersionBudgetInfo($_GET['number']);
-            $budget->items          = $this->models['budgets']->getLastVersionBudgetItems($_GET['number']);
+            $budget->info  = $this->models['budgets']->getLastVersionBudgetInfo($_GET['number']);
+            $budget->items = $this->models['budgets']->getLastVersionBudgetItems($_GET['number']);
         }
         else {
             if(!$this->models['budgets']->existNumberVersion($_GET['number'], $_GET['version'])) { 
@@ -71,10 +71,11 @@ class SaleBudgetController extends Controller {
                 header("Location: ./viewBudget-".$_GET['number']);
                 exit();
             }    
-            $budget->info           = $this->models['budgets']->getNumberVersionBudgetInfo($_GET['number'], $_GET['version']); 
-            $budget->items          = $this->models['budgets']->getNumberVersionBudgetItems($_GET['number'], $_GET['version']); 
+            $budget->info  = $this->models['budgets']->getNumberVersionBudgetInfo($_GET['number'], $_GET['version']); 
+            $budget->items = $this->models['budgets']->getNumberVersionBudgetItems($_GET['number'], $_GET['version']); 
         }
         $budget->versionsIds    = $this->models['budgets']->getBudgetVersionsIds($_GET['number']); 
+        $budget->info['start_date'] = $this->sqlDateToNormal($budget->info['start_date']);
         $this->views['budgetDetail']->budget = $budget;
         $this->views['budgetDetail']->render();
     }
@@ -94,6 +95,7 @@ class SaleBudgetController extends Controller {
             $sale->payChanges[$k]['date'] = $this->sqlDateToNormal($change['date']);
         foreach($sale->shipChanges as $k => $change) 
             $sale->shipChanges[$k]['date'] = $this->sqlDateToNormal($change['date']);
+        $sale->info['start_date'] = $this->sqlDateToNormal($sale->info['start_date']);
         $this->views['saleDetail']->sale = $sale;
         $this->views['saleDetail']->render();
     }
@@ -119,8 +121,6 @@ class SaleBudgetController extends Controller {
         $data->subtotal    = $this->models['budgets']->getSubtotalOfBudgets($filters, $limitOffset, $limitLength);
         $data->total       = $this->models['budgets']->getTotalOfBudgets($filters, $limitOffset, $limitLength);
         $data->registers   = $this->models['budgets']->getTotalRegisters($filters);
-        // $data->lastShipState = $this->models['shipment_methods']->getLastStep()['title'];
-        // $data->lastPayState  = $this->models['payment_methods']->getLastStep()['title'];
         return $data;
     }
     public function getSalesToDashboard() {
@@ -141,7 +141,6 @@ class SaleBudgetController extends Controller {
         /* Format de fecha para mostrar en el front */
         foreach($sales->sales as $k => $sale) 
             $sales->sales[$k]['start_date'] = $this->sqlDateToNormal($sale['start_date']);
-
         $sales->total       = $this->models['sales']->getTotalOfSales($filters, $limitOffset, $limitLength);
         $sales->registers   = $this->models['sales']->getTotalRegisters($filters);
         $sales->lastShipState = $this->models['shipment_states']->getLastStep()['title'];
@@ -174,7 +173,6 @@ class SaleBudgetController extends Controller {
         /* End: Pendiente de fix */        
         return $budget;
     }
-
     // Validadores
     public function validateExistItems($items) {
         foreach($items as $k => $item) {
@@ -232,7 +230,6 @@ class SaleBudgetController extends Controller {
         if(empty($sale->totalPrice) && $sale->totalPrice != 0) throw new Exception("Envíe el precio total de la venta");
         return true;
     }
-
     // Altas y modificaciones
     public function newBudget() {
         $budget = $this->validateExistBudget();
@@ -273,8 +270,8 @@ class SaleBudgetController extends Controller {
         $budget = new stdClass();
         if(empty($_POST['version'])) {
             /* Se trae como cotización principal, siempre la última versión */
-            $budget->info           = $this->models['budgets']->getLastVersionBudgetInfo($_POST['number']);
-            $budget->items          = $this->models['budgets']->getLastVersionBudgetItems($_POST['number']);
+            $budget->info  = $this->models['budgets']->getLastVersionBudgetInfo($_POST['number']);
+            $budget->items = $this->models['budgets']->getLastVersionBudgetItems($_POST['number']);
         }
         else {
             if(!$this->models['budgets']->existNumberVersion($_POST['number'], $_POST['version'])) { 
@@ -282,8 +279,8 @@ class SaleBudgetController extends Controller {
                 header("Location: ./viewBudget-".$_POST['number']);
                 exit();
             }    
-            $budget->info           = $this->models['budgets']->getNumberVersionBudgetInfo($_POST['number'], $_POST['version']); 
-            $budget->items          = $this->models['budgets']->getNumberVersionBudgetItems($_POST['number'], $_POST['version']); 
+            $budget->info  = $this->models['budgets']->getNumberVersionBudgetInfo($_POST['number'], $_POST['version']); 
+            $budget->items = $this->models['budgets']->getNumberVersionBudgetItems($_POST['number'], $_POST['version']); 
         }
         $budget->items = $this->arrayItemsToObject($budget->items);
         $this->models['stock']->validateStockItems($budget->items); // Acá arroja excepciones si no hay stock, la venta no se genera
@@ -299,9 +296,7 @@ class SaleBudgetController extends Controller {
         $response = new stdClass();
         if(!$response->sale_id = $this->models['sales']->exist($_POST['sale_id'])) 
             throw new Exception("La venta no existe"); 
-        
         $response->change = $this->models['sales']->changeSaleState($_POST['action'], $_POST['sale_id']);
-
         $response->successMsg = "Se cambió el estado de " . $response->change->action 
                                 . " de la venta #" . sprintf("%'.04d\n", $response->sale_id) 
                                 . " de " . $response->change->old_state 
@@ -309,78 +304,7 @@ class SaleBudgetController extends Controller {
         return $response;
     }
 
-
     // Fixeado de acá para arriba
-
-
-    public function getSaleItems($saleId){
-        //EN ESTO FALTAN EXCEPCIONES
-        return $this->models['sales']->getSaleItems($saleId);
-    }
-
-    public function getShipmentStates(){
-        return $this->models['shipStates']->getAll();
-    }
-
-    public function getPaymentStates(){
-        return $this->models['payStates']->getAll();
-    }
-
-    public function deleteSale($sale_id){ // MODIFICAR ESTO, PASAR LOGICA DEL MODELO ACA
-        if($this->models['sales']->deleteSale($sale_id)){
-            return true;
-        }else{
-            return false;
-        }
-    }
-
-    public function updateSale($sale){
-        $ret = false;
-        try{
-            $this->models['sales']->updateSale($sale);
-        }
-        catch(QueryErrorException $error){ 
-            $ret = "Se produjo un error intentando actualizar la venta " . $sale->id . ",
-            la base devuelve el siguiente error: " . $error->getErrorMsg();
-        }
-        if(!$ret) $ret = "Se ha actualizado con éxito la venta " . $sale->id;
-        return $ret;
-    }
-
-    // public function updateItem($item){
-    //     try{
-    //         $this->models['sales']->updateStock($item);
-    //     }
-    //     catch(QueryErrorException $error){ 
-    //         $msg = "Se produjo un error intentando modificar el ítem " . $item->product_name . ",
-    //         la base devuelve el siguiente error: " . $error->getErrorMsg();
-    //         return false;
-    //     }
-    //     return true;
-    // }
-
-    public function viewCRUD(){
-        $this->views['CRUD']->render();
-    }
-
-
-    public function validateStock($items){
-        if(empty($items)) die("error 0 controllers/SaleController validateStock");
-        foreach($items as $posFLoop => $itemFLoop){
-            if(!isset($itemFLoop->prodId)) die("error 1 controllers/SaleController validateStock");
-            if(!isset($itemFLoop->prodQuantity)) die("error 2 controllers/SaleController validateStock");
-            $prodToValidate = new StdClass();
-            $prodToValidate->id = $itemFLoop->prodId;
-            $prodToValidate->quantity = 0;
-
-            foreach($items as $posSLoop => $itemSLoop){
-                if($prodToValidate->id == $itemSLoop->prodId) $prodToValidate->quantity += $itemSLoop->prodQuantity;
-            }
-
-            if(!$this->models['stock']->validateStock($prodToValidate->id, strval($prodToValidate->quantity))) return false;
-        }
-        return true;
-    }
 
     private function sendMail($sale){
         if(empty($_SESSION['user_email'])) return false;

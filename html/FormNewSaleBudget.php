@@ -13,7 +13,6 @@
         </p>
     </div>
 </div>
-
 <!-- COLUMNA DERECHA -->
 <div class="row g-5">
     <div class="col-md-7 col-lg-7 order-md-last">
@@ -26,7 +25,7 @@
             <input type="text" class="form-control" id="client" placeholder="Ingrese un cliente" value="" required="" readonly disabled>
         </div>
         <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-1">
-            <button type="button" class="btn btn-outline-secondary btn-sm">Limpiar detalle</button>
+            <!-- <button type="button" class="btn btn-outline-secondary btn-sm">Limpiar detalle</button> -->
         </div>
         <div class="table-wrapper">
             <table class="table table-striped table-hover mb-none">

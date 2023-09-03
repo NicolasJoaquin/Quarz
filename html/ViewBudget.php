@@ -34,7 +34,7 @@
     </div>
     <div class="col-md-6">
         <label class="form-label rounded text-bg-secondary fs-6" for="descDetail"><strong>Notas</strong></label>
-        <textarea disabled readonly id="descDetail" class="rounded text-bg-light fs-6 text-desc"><?php echo $this->budget->info['description'] ?></textarea>
+        <textarea disabled readonly id="descDetail" class="rounded text-bg-light fs-6 desc-detail"><?php echo $this->budget->info['description'] ?></textarea>
     </div>
 </div>
 <hr>
@@ -78,20 +78,36 @@ foreach($this->budget->items as $i) {
         <table class="table table-striped table-hover mb-none">
             <tfoot class="table-dark">
                 <tr>
-                    <th scope="col" class="col-md-10"><div class="d-flex bd-highlight">Subotal</div></th>
-                    <th scope="col" class="col-md-2"><div class="d-flex bd-highlight"><?php echo "$" . $this->budget->info["subtotal"] ?></div></th>
+                    <td colspan="5">Subotal</td>
+                    <td colspan="1">
+                        <span class="d-flex bd-highlight" ><?php echo "$" . $this->budget->info["subtotal"] ?></span>
+                    </td>
                 </tr>
                 <tr>
-                    <th scope="col" class="col-md-2"><div class="d-flex bd-highlight">Descuento</div></th>
-                    <th scope="col" class="col-md-2"><div class="d-flex bd-highlight"><?php echo !empty($this->budget->info["discount"]) ? "-$" . $this->budget->info["discount"] : "<em>Sin descuento</em>" ?></div></th>
-                    <th scope="col" class="col-md-2"><div class="d-flex bd-highlight">Recargo</div></th>
-                    <th scope="col" class="col-md-2"><div class="d-flex bd-highlight"><?php echo !empty($this->budget->info["tax"]) ? "$" . $this->budget->info["tax"] : "<em>Sin recargos</em>" ?></div></th>
-                    <th scope="col" class="col-md-2"><div class="d-flex bd-highlight">Envío</div></th>
-                    <th scope="col" class="col-md-2"><div class="d-flex bd-highlight"><?php echo !empty($this->budget->info["ship"]) ? "$" . $this->budget->info["ship"] : "<em>Sin costo de envío</em>" ?></div></th>
+                    <td colspan="1">Descuento</td>
+                    <td colspan="1">
+                        <span class="d-flex bd-highlight">
+                            <?php echo !empty($this->budget->info["discount"]) ? "-$" . $this->budget->info["discount"] : "<em>Sin descuento</em>" ?>
+                        </span>
+                    </td>
+                    <td colspan="1">Recargo</td>
+                    <td colspan="1">
+                        <span class="d-flex bd-highlight">
+                            <?php echo !empty($this->budget->info["tax"]) ? "$" . $this->budget->info["tax"] : "<em>Sin recargos</em>" ?>
+                        </span>
+                    </td>
+                    <td colspan="1">Envío</td>
+                    <td colspan="1">
+                        <span class="d-flex bd-highlight">
+                            <?php echo !empty($this->budget->info["ship"]) ? "$" . $this->budget->info["ship"] : "<em>Sin costo de envío</em>" ?>
+                        </span>
+                    </td>
                 </tr>
                 <tr>
-                    <th scope="col" class="col-md-10"><div class="d-flex bd-highlight">Total</div></th>
-                    <th scope="col" class="col-md-2"><div class="d-flex bd-highlight"><?php echo "$" . $this->budget->info["total"] ?></div></th>
+                    <td colspan="5">Total</td>
+                    <td colspan="1">
+                        <span class="d-flex bd-highlight" ><?php echo "$" . $this->budget->info["total"] ?></span>
+                    </td>
                 </tr>
             </tfoot>
         </table>

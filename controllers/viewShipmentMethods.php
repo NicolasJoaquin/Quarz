@@ -28,6 +28,5 @@ if(count($_GET)>0) {
     exit;
 }
 exit;
-// Fixeado de acá para arriba
 
 ?>

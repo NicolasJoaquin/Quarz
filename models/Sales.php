@@ -48,7 +48,7 @@ class Sales extends Model {
                 $sqlFilters .= " AND ";
             else
                 $sqlFilters .= "WHERE ";
-            $sqlFilters .= "s.budget_id LIKE '%$filters->budget%'";
+            $sqlFilters .= "v.budget_number LIKE '%$filters->budget%'";
         }
         if(!empty($filters->fromDate)) {
             $this->db->validateSanitizeDate(date: $filters->fromDate, format: "Y-m-d H:i:s", errorMsg: "El filtro de fecha de inicio es erróneo");
@@ -95,11 +95,12 @@ class Sales extends Model {
 
         $sqlLimit = "LIMIT $limitOffset,$limitLength";
 
-        $query = "SELECT s.sale_id, s.user_id, u.user AS user_name, c.name AS client_name, s.budget_id, 
+        $query = "SELECT s.sale_id, s.user_id, u.user AS user_name, c.name AS client_name, s.budget_id, v.budget_number, v.version AS budget_version, 
             s.start_date, s.shipment_state_id, ship.title AS ship_name, s.payment_state_id, nextShip.title AS next_shipment_state, 
             pay.title AS pay_name, nextPay.title AS next_payment_state, s.total, s.description AS notes
                 FROM sales AS s 
                 LEFT JOIN users AS u ON s.user_id = u.user_id
+                LEFT JOIN budget_versions AS v ON v.new_budget_id = s.budget_id 
                 LEFT JOIN shipment_states AS ship ON s.shipment_state_id = ship.shipment_state_id
                 LEFT JOIN shipment_states AS nextShip ON ship.next_step = nextShip.shipment_state_id
                 LEFT JOIN payment_states AS pay ON s.payment_state_id = pay.payment_state_id
@@ -146,7 +147,7 @@ class Sales extends Model {
                 $sqlFilters .= " AND ";
             else
                 $sqlFilters .= "WHERE ";
-            $sqlFilters .= "s.budget_id LIKE '%$filters->budget%'";
+            $sqlFilters .= "v.budget_number LIKE '%$filters->budget%'";
         }
         if(!empty($filters->fromDate)) {
             $this->db->validateSanitizeDate(date: $filters->fromDate, format: "Y-m-d H:i:s", errorMsg: "El filtro de fecha de inicio es erróneo");
@@ -194,6 +195,7 @@ class Sales extends Model {
         $query = "SELECT s.sale_id, s.user_id, u.user AS user_name, c.name AS client_name, s.budget_id, s.start_date, s.shipment_state_id, ship.title AS ship_name, s.payment_state_id, pay.title AS pay_name, s.total, s.description AS notes
             FROM sales AS s 
             LEFT JOIN users AS u ON s.user_id = u.user_id
+            LEFT JOIN budget_versions AS v ON v.new_budget_id = s.budget_id 
             LEFT JOIN shipment_states AS ship ON s.shipment_state_id = ship.shipment_state_id
             LEFT JOIN payment_states AS pay ON s.payment_state_id = pay.payment_state_id
             LEFT JOIN clients AS c ON s.client_id = c.client_id $sqlFilters $sqlLimit"; 
@@ -222,9 +224,10 @@ class Sales extends Model {
     }
     public function getSaleInfo($saleId) {
         $this->db->validateSanitizeId($saleId, "El número de venta es erróneo");
-        $query = "SELECT s.sale_id, s.user_id, u.user AS user_name, c.name AS client_name, s.budget_id, s.start_date, s.shipment_state_id, ship.title AS ship_name, s.payment_state_id, pay.title AS pay_name, s.description, s.subtotal, s.discount, s.tax, s.ship, sm.title AS ship_method_name, pm.title AS pay_method_name, s.total
+        $query = "SELECT s.sale_id, s.user_id, u.user AS user_name, c.name AS client_name, s.budget_id, v.budget_number, v.version AS budget_version, s.start_date, s.shipment_state_id, ship.title AS ship_name, s.payment_state_id, pay.title AS pay_name, s.description, s.subtotal, s.discount, s.tax, s.ship, sm.title AS ship_method_name, pm.title AS pay_method_name, s.total
                 FROM sales AS s 
                 LEFT JOIN users AS u ON s.user_id = u.user_id
+                LEFT JOIN budget_versions AS v ON v.new_budget_id = s.budget_id 
                 LEFT JOIN shipment_states AS ship ON s.shipment_state_id = ship.shipment_state_id
                 LEFT JOIN payment_states AS pay ON s.payment_state_id = pay.payment_state_id
                 LEFT JOIN shipment_methods AS sm ON s.shipment_method_id = sm.shipment_method_id
@@ -274,7 +277,7 @@ class Sales extends Model {
                 $sqlFilters .= " AND ";
             else
                 $sqlFilters .= "WHERE ";
-            $sqlFilters .= "s.budget_id LIKE '%$filters->budget%'";
+            $sqlFilters .= "v.budget_number LIKE '%$filters->budget%'";
         }
         if(!empty($filters->fromDate)) {
             $this->db->validateSanitizeDate(date: $filters->fromDate, format: "Y-m-d H:i:s", errorMsg: "El filtro de fecha de inicio es erróneo");
@@ -320,6 +323,7 @@ class Sales extends Model {
         $query = "SELECT COUNT(*) AS total_registers
             FROM sales AS s 
             LEFT JOIN users AS u ON s.user_id = u.user_id
+            LEFT JOIN budget_versions AS v ON v.new_budget_id = s.budget_id 
             LEFT JOIN shipment_states AS ship ON s.shipment_state_id = ship.shipment_state_id
             LEFT JOIN payment_states AS pay ON s.payment_state_id = pay.payment_state_id
             LEFT JOIN clients AS c ON s.client_id = c.client_id $sqlFilters";

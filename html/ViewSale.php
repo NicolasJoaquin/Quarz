@@ -2,48 +2,48 @@
 <div class="row">
     <div class="col-md-2">
         <label class="form-label rounded text-bg-secondary fs-6" for="codDetail"><strong>#</strong></label>
-        <p id="codDetail" class="rounded text-bg-light fs-6"><?php echo sprintf("%'.04d\n", $this->sale->info['sale_id']) ?></p>
+        <p id="codDetail" class="rounded text-bg-light fs-6 info-container"><?php echo sprintf("%'.04d\n", $this->sale->info['sale_id']) ?></p>
         <input type="hidden" name="saleId" id="saleId" value="<?php echo $this->sale->info['sale_id'] ?>">
     </div>
     <div class="col-md-3">
         <label class="form-label rounded text-bg-secondary fs-6" for="userDetail"><strong>Usuario</strong></label>
-        <p id="userDetail" class="rounded text-bg-light fs-6"><?php echo $this->sale->info['user_name'] ?></p>
+        <p id="userDetail" class="rounded text-bg-light fs-6 info-container"><?php echo $this->sale->info['user_name'] ?></p>
     </div>
     <div class="col-md-3">
         <label class="form-label rounded text-bg-secondary fs-6" for="clientDetail"><strong>Cliente</strong></label>
-        <p id="clientDetail" class="rounded text-bg-light fs-6"><?php echo $this->sale->info['client_name'] ?></p>
+        <p id="clientDetail" class="rounded text-bg-light fs-6 info-container"><?php echo $this->sale->info['client_name'] ?></p>
     </div>
     <div class="col-md-2">
         <label class="form-label rounded text-bg-secondary fs-6" for="budgetDetail"><strong>Presupuesto</strong></label>
-        <p id="budgetDetail" class="rounded text-bg-light fs-6"><?php echo !empty($this->sale->info['budget_id']) ? sprintf("%'.04d\n", $this->sale->info['budget_id']) : "<small><em>Sin presupuesto de referencia</em></small>" ?></p>
+        <p id="budgetDetail" class="rounded text-bg-light fs-6 info-container"><?php echo !empty($this->sale->info['budget_number']) ? "#" . sprintf("%'.04d\n", $this->sale->info['budget_number']) . " > v" . sprintf("%'.02d\n", $this->sale->info['budget_version']) : "<small><em>Sin presupuesto de referencia</em></small>" ?></p>
     </div>
     <div class="col-md-2">
         <label class="form-label rounded text-bg-secondary fs-6" for="dateDetail"><strong>Fecha</strong></label>
-        <p id="dateDetail" class="rounded text-bg-light fs-6"><?php echo $this->sale->info['start_date'] ?></p>
+        <p id="dateDetail" class="rounded text-bg-light fs-6 info-container"><?php echo $this->sale->info['start_date'] ?></p>
     </div>
 </div>
 <div class="row">
     <div class="col-md-3">
         <label class="form-label rounded text-bg-secondary fs-6" for="shipDetail"><strong>Estado de envío</strong></label>
-        <p id="shipDetail" class="rounded text-bg-light fs-6 d-flex bd-highlight">
+        <p id="shipDetail" class="rounded text-bg-light fs-6 d-flex bd-highlight info-container">
             <?php echo $this->sale->info['ship_name'] ?>
             <button type="button" class="btn btn-secondary btn-sm ms-auto" data-bs-toggle="modal" data-bs-target="#shipStatesChanges"><i class="bi bi-clock-history"></i> Ver cambios</button>
         </p>
     </div>
     <div class="col-md-3">
         <label class="form-label rounded text-bg-secondary fs-6" for="payDetail"><strong>Estado de pago</strong></label>
-        <p id="payDetail" class="rounded text-bg-light fs-6 d-flex bd-highlight">
+        <p id="payDetail" class="rounded text-bg-light fs-6 d-flex bd-highlight info-container">
             <?php echo $this->sale->info['pay_name'] ?>
             <button type="button" class="btn btn-secondary btn-sm ms-auto" data-bs-toggle="modal" data-bs-target="#payStatesChanges"><i class="bi bi-clock-history"></i> Ver cambios</button>    
         </p>
     </div>
     <div class="col-md-3">
         <label class="form-label rounded text-bg-secondary fs-6" for="shipMethodDetail"><strong>Medio de envío</strong></label>
-        <p id="shipMethodDetail" class="rounded text-bg-light fs-6"><?php echo $this->sale->info['ship_method_name'] ?></p>
+        <p id="shipMethodDetail" class="rounded text-bg-light fs-6 info-container"><?php echo $this->sale->info['ship_method_name'] ?></p>
     </div>
     <div class="col-md-3">
         <label class="form-label rounded text-bg-secondary fs-6" for="payMethodDetail"><strong>Medio de pago</strong></label>
-        <p id="payMethodDetail" class="rounded text-bg-light fs-6"><?php echo $this->sale->info['pay_method_name'] ?></p>
+        <p id="payMethodDetail" class="rounded text-bg-light fs-6 info-container"><?php echo $this->sale->info['pay_method_name'] ?></p>
     </div>
 </div>
 <div class="row">
@@ -125,7 +125,6 @@ foreach($this->sale->items as $i) {
                     </td>
                 </tr>
             </tfoot>
-
         </table>
     </div>
 </div>

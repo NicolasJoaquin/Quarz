@@ -172,8 +172,8 @@
                 </a>
                 <ul class="dropdown-menu">
                   <li><a class="dropdown-item" href="./newBuy">Nueva compra</a></li>
-                  <li><a class="dropdown-item" href="./viewBuys">Ver compras</a></li>
                   <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="./viewBuys">Ver compras</a></li>
                 </ul>
               </li>
               <li class="nav-item dropdown">
@@ -181,9 +181,9 @@
                   Ventas
                 </a>
                 <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="./newSale">Nueva venta</a></li>
-                  <li><a class="dropdown-item" href="./viewSales">Ver ventas</a></li>
+                  <li><a class="dropdown-item" href="./newSale">Nueva venta o cotización</a></li>
                   <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="./viewSales">Ver ventas</a></li>
                   <li><a class="dropdown-item" href="./viewBudgets">Ver cotizaciones</a></li>
                 </ul>
               </li>
@@ -193,27 +193,27 @@
                 </a>
                 <ul class="dropdown-menu">
                   <li><a class="dropdown-item" href="./newProduct">Nuevo producto</a></li>
-                  <li><a class="dropdown-item" href="./viewProducts">Ver productos</a></li>
                   <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="./viewProducts">Ver productos</a></li>
                 </ul>
               </li>
-              <li class="nav-item dropdown">
+              <!-- ELIMINAR MÓDULO STOCK -->
+              <!-- <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                   Stock
                 </a>
                 <ul class="dropdown-menu">
                   <li><a class="dropdown-item" href="./viewStock">Ver stock</a></li>
-                  <li><hr class="dropdown-divider"></li>
                 </ul>
-              </li>
+              </li> -->
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                   Clientes
                 </a>
                 <ul class="dropdown-menu">
                   <li><a class="dropdown-item" href="./newClient">Nuevo cliente</a></li>
-                  <li><a class="dropdown-item" href="./viewClients">Ver clientes</a></li>
                   <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="./viewClients">Ver clientes</a></li>
                 </ul>
               </li>
               <li class="nav-item dropdown">
@@ -222,8 +222,8 @@
                 </a>
                 <ul class="dropdown-menu">
                   <li><a class="dropdown-item" href="./newProvider">Nuevo proveedor</a></li>
-                  <li><a class="dropdown-item" href="./viewProviders">Ver proveedores</a></li>
                   <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="./viewProviders">Ver proveedores</a></li>
                 </ul>
               </li>
             </ul>

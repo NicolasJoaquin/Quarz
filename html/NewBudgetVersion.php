@@ -8,10 +8,6 @@
         <p id="codDetail" class="rounded text-bg-light fs-6"><?php echo sprintf("%'.04d\n", $this->budgetNumber) ?></p>
         <input type="hidden" name="budgetNumber" id="budgetNumber" value="<?php echo $this->budgetNumber ?>">
     </div>
-    <!-- <div class="col-md-2">
-        <label class="form-label rounded text-bg-secondary fs-6" for="versionDetail"><strong>Versión</strong></label>
-        <p id="versionDetail" class="rounded text-bg-light fs-6"></p>
-    </div> -->
     <div class="col-md-4">
         <label class="form-label rounded text-bg-secondary fs-6" for="userDetail"><strong>Usuario</strong></label>
         <p id="userDetail" class="rounded text-bg-light fs-6"></p>
@@ -176,43 +172,56 @@
     </div>
     <div class="table-wrapper">
         <table class="table table-striped table-hover mb-none">
+
             <tfoot class="table-dark">
                 <tr>
-                    <th scope="col" class="col-md-10"><label class="d-flex bd-highlight">Subotal</label></th>
-                    <th scope="col" class="col-md-2"><label class="d-flex bd-highlight" id="subtotalDetail"></label></th>
+                    <td colspan="6">Subotal</td>
+                    <td colspan="1">
+                        <span class="d-flex bd-highlight" id="subtotalDetail"></span>
+                    </td>
                 </tr>
                 <tr>
-                    <th scope="col" class="col-md-1"><label class="d-flex bd-highlight">Descuento</label></th>
-                    <th scope="col" class="col-md-3">
-                        <div class="d-flex bd-highlight input-group">
-                            <select name="discountType" id="discountType" class="col-md-2 form-select input-group-text">
-                                <option value="1" selected>$</option>
-                                <!-- <option value="2">%</option> -->
-                            </select>
-                            <input class="form-control input-compact" type="number" name="discount" id="discount">
-                        </div>
-                    </th>
-                    <th scope="col" class="col-md-1"><label class="d-flex bd-highlight">Recargo</label></th>
-                    <th scope="col" class="col-md-3">
-                        <div class="d-flex bd-highlight input-group">
-                            <select name="taxType" id="taxType" class="form-select input-group-text">
-                                <option value="1" selected>$</option>
-                                <!-- <option value="2">%</option> -->
-                            </select>
-                            <input class="form-control input-compact" type="number" name="tax" id="tax">
-                        </div>
-                    </th>
-                    <th scope="col" class="col-md-2"><label class="d-flex bd-highlight">Envío</label></th>
-                    <th scope="col" class="col-md-2">
-                        <div class="d-flex bd-highlight input-group">
-                            <span class="input-group-text">$</span>
-                            <input class="form-control input-compact" type="number" name="ship" id="ship">
-                        </div>
-                    </th>
+                    <td colspan="1">Descuento</td>
+                    <td colspan="1">
+                        <span class="d-flex bd-highlight">
+                            <div class="d-flex bd-highlight input-group">
+                                <select name="discountType" id="discountType" class="col-md-2 form-select input-group-text">
+                                    <option value="1" selected>$</option>
+                                    <!-- <option value="2">%</option> -->
+                                </select>
+                                <input class="form-control input-compact" type="number" name="discount" id="discount">
+                            </div>
+                        </span>
+                    </td>
+
+                    <td colspan="1">Recargo</td>
+                    <td colspan="1">
+                        <span class="d-flex bd-highlight">
+                            <div class="d-flex bd-highlight input-group">
+                                <select name="taxType" id="taxType" class="form-select input-group-text">
+                                    <option value="1" selected>$</option>
+                                    <!-- <option value="2">%</option> -->
+                                </select>
+                                <input class="form-control input-compact" type="number" name="tax" id="tax">
+                            </div>
+                        </span>
+                    </td>
+                    <td colspan="1">Envío</td>
+                    <td colspan="1">
+                        <span class="d-flex bd-highlight">
+                            <div class="d-flex bd-highlight input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control input-compact" type="number" name="ship" id="ship">
+                            </div>
+                        </span>
+                    </td>
+                    <td colspan="1"></td>
                 </tr>
                 <tr>
-                    <th scope="col" class="col-md-10"><label class="d-flex bd-highlight">Total</label></th>
-                    <th scope="col" class="col-md-2"><div class="d-flex bd-highlight" id="totalDetail"></div></th>
+                    <td colspan="6">Total</td>
+                    <td colspan="1">
+                        <span class="d-flex bd-highlight" id="totalDetail"></span>
+                    </td>
                 </tr>
             </tfoot>
         </table>

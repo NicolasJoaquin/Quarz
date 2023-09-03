@@ -6,6 +6,10 @@ textarea.desc-detail {
     max-height: 80px !important; 
     overflow-y: scroll;
 }
+.info-container {
+    width: 100% !important;
+    margin-bottom: 1rem !important;
+}
 /* tfoot tr {
     display: flex !important;
 } */
@@ -27,7 +31,7 @@ h3.popover-header {
     margin-bottom: 0% !important;
 }
 p {
-    display: inline !important;
+    /* display: inline !important; */
 }
 th input {
     padding: 0.2rem !important;
