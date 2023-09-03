@@ -5,7 +5,6 @@
     </div>
     <div class="text-right col-md-4 mt-5">
         <p class="lead">
-            Podés filtrar y ordenar los cambios por usuario o fecha. <br>
         </p>
     </div>
 </div>

@@ -156,6 +156,7 @@ class SaleBudgetController extends Controller {
         }    
         /* Se trae como cotización principal, siempre la última versión */
         $budget->info  = $this->models['budgets']->getLastVersionBudgetInfo($_GET['number']);
+        $budget->info['start_date'] = $this->sqlDateToNormal($budget->info['start_date']);
         $budget->items = $this->models['budgets']->getLastVersionBudgetItems($_GET['number']);
         /* Pendiente de fix */
         $budget->client     = new stdClass();

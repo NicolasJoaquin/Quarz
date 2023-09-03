@@ -45,6 +45,12 @@ class ProductController extends Controller{
         if(!isset($_GET['id'])) throw new Exception("Falta el identificador del producto a consultar");
         if(empty($_GET['id'])) throw new Exception("El identificador del producto a consultar está vacío o es inválido");
         $changes = $this->models['products']->getProductChanges($_GET['id']);
+        /* Format de fecha para mostrar en el front */
+        foreach($changes as $k => $change) {
+            if($k == -1)
+                continue;
+            $changes[$k]['date'] = $this->sqlDateToNormal($change['date']);
+        }
         $this->views['productChanges']->changes = $changes;
         $this->views['productChanges']->render();
     }
@@ -52,6 +58,12 @@ class ProductController extends Controller{
         if(!isset($_GET['id'])) throw new Exception("Falta el identificador del producto a consultar");
         if(empty($_GET['id'])) throw new Exception("El identificador del producto a consultar está vacío o es inválido");
         $changes = $this->models['products']->getPriceChanges($_GET['id']);
+        /* Format de fecha para mostrar en el front */
+        foreach($changes as $k => $change) {
+            if($k == -1)
+                continue;
+            $changes[$k]['date'] = $this->sqlDateToNormal($change['date']);
+        }
         $this->views['priceChanges']->changes = $changes;
         $this->views['priceChanges']->render();
     }
@@ -59,6 +71,12 @@ class ProductController extends Controller{
         if(!isset($_GET['id'])) throw new Exception("Falta el identificador del producto a consultar");
         if(empty($_GET['id'])) throw new Exception("El identificador del producto a consultar está vacío o es inválido");
         $changes = $this->models['products']->getStockChanges($_GET['id']);
+        /* Format de fecha para mostrar en el front */
+        foreach($changes as $k => $change) {
+            if($k == -1)
+                continue;
+            $changes[$k]['date'] = $this->sqlDateToNormal($change['date']);
+        }
         $this->views['stockChanges']->changes = $changes;
         $this->views['stockChanges']->render();
     }

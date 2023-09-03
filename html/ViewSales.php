@@ -5,7 +5,6 @@
     </div>
     <div class="text-right col-md-6 mt-5">
         <p class="lead">
-            FIX <br>
         </p>
     </div>
 </div>

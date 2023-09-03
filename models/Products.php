@@ -29,7 +29,8 @@ class Products extends Model{
                         FROM product_changes AS pc
                         JOIN products AS prod ON pc.product_id = prod.product_id 
                         JOIN users AS u ON pc.user_id = u.user_id
-                        WHERE pc.product_id = $id");
+                        WHERE pc.product_id = $id 
+                        ORDER BY pc.date DESC");
         $this->db->validateLastQuery();
         $changes = $this->db->fetchAll();
         $this->db->query("SELECT description FROM products WHERE product_id = $id");
@@ -46,7 +47,8 @@ class Products extends Model{
                         JOIN sale_prices AS sp ON pc.sale_price_id = sp.sale_price_id 
                         JOIN products AS prod ON sp.product_id = prod.product_id 
                         JOIN users AS u ON pc.user_id = u.user_id
-                        WHERE sp.product_id = $id AND sp.price_list_id = 1"); // Por ahora sólo lista 1
+                        WHERE sp.product_id = $id AND sp.price_list_id = 1 
+                        ORDER BY pc.date DESC"); // Por ahora sólo lista 1
         $this->db->validateLastQuery();
         $changes = $this->db->fetchAll();
         $this->db->query("SELECT description FROM products WHERE product_id = $id");
@@ -68,7 +70,8 @@ class Products extends Model{
                         LEFT JOIN sales AS s ON sitems.sale_id = s.sale_id
                         LEFT JOIN buys AS b ON bitems.buy_id = b.buy_id
                         LEFT JOIN users AS u ON sc.user_id = u.user_id
-                        WHERE si.product_id = $id AND si.warehouse_id = 1"); // Por ahora sólo depósito 1
+                        WHERE si.product_id = $id AND si.warehouse_id = 1
+                        ORDER BY sc.date DESC"); // Por ahora sólo depósito 1
         $this->db->validateLastQuery();
         $changes = $this->db->fetchAll();
         $this->db->query("SELECT description FROM products WHERE product_id = $id");
@@ -253,16 +256,13 @@ class Products extends Model{
             $filterValue = $this->db->escape($filterValue);
             $filterValue = $this->db->escapeWildcards($filterValue);
         }
-
-        $this->db->query("SELECT *
-                            FROM view_products_list_stock as p 
-                            WHERE p.product_id LIKE '%$filterValue%' OR 
-                                    p.description LIKE '%$filterValue%' OR
-                                    p.packing_unit LIKE '%$filterValue%'
-                            ORDER BY product_id DESC"); // MODIFICAR LIMIT Y FILTROS
-        //VERIFICACIÓN DE LA QUERY Y RETORNO
-        $errno = $this->db->getErrorNo();
-        if($errno !== 0) throw new QueryErrorException($this->db->getError());
+        $query = "SELECT * FROM view_products_list_stock as p 
+                WHERE p.product_id LIKE '%$filterValue%' OR 
+                        p.description LIKE '%$filterValue%' OR
+                        p.packing_unit LIKE '%$filterValue%'
+                ORDER BY product_id DESC"; // MODIFICAR LIMIT Y FILTROS
+        $this->db->query($query); 
+        $this->db->validateLastQuery();
         return $this->db->fetchAll();
     }
 

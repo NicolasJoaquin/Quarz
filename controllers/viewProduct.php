@@ -22,8 +22,6 @@ if(count($_POST)>0) {
         catch (Exception $e) {
             $response->state = 0;
             $response->errorMsg = "Hubo un error al modificar el producto: " . $e->getMessage();
-            // echo json_encode($response);
-            // exit;
         }
         echo json_encode($response);
         exit;

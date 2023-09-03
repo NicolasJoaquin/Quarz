@@ -11,18 +11,16 @@ if(!isset($_SESSION['log'])) {
 
 $controller = new ProductController();
 if(count($_GET)>0) {
-    if(isset($_GET['getProductsToDashboard'])) {
+    if(isset($_GET['getToDashboard'])) {
         $response = new stdClass();
         $response->state = 1;
         try {
             $response->products   = $controller->getProductsToDashboard();
-            $response->successMsg = "Se consultaron con éxito los productos";
+            $response->msg = "Se consultaron con éxito los productos";
         }
         catch (Exception $e) {
             $response->state = 0;
-            $response->errorMsg = "Hubo un error al consultar los productos: " . $e->getMessage() . " | Intentá de nuevo.";
-            echo json_encode($response);
-            exit;
+            $response->msg = "Hubo un error al consultar los productos: " . $e->getMessage() . " | Intentá de nuevo.";
         }
         echo json_encode($response);
         exit;
@@ -37,15 +35,14 @@ if(count($_GET)>0) {
         catch (Exception $e) {
             $response->state = 0;
             $response->errorMsg = "Hubo un error al consultar los productos: " . $e->getMessage() . " | Intentá de nuevo.";
-            echo json_encode($response);
-            exit;
         }
         echo json_encode($response);
         exit;
     }
+    exit;
 }
 $controller->viewDashboard();
-
+exit;
 
 if(count($_POST)>0) {
     // if(!isset($_SESSION['perm'])) die ("error 0 controllers/newProduct");

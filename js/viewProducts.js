@@ -13,15 +13,15 @@ $(document).ready(function() {
     }
     // Productos
     function getProducts() { 
-        $.get("./viewProducts", {getProductsToDashboard: true, filterDesc: filter.desc, order: false}, function(response) {
+        $.get("./viewProducts", {getToDashboard: true, filterDesc: filter.desc, order: false}, function(response) {
             response = JSON.parse(response);
             products = response.products;
+            console.log(response.msg);
             if(response.state == 1) {
                 renderTable();
-                console.log(response.successMsg); 
             }
             else if(response.state == 0) {
-                alert(response.errorMsg); 
+                alert(response.msg); 
             }
         });
     }
@@ -33,9 +33,10 @@ $(document).ready(function() {
             $("#prodRow_"+ product.product_id).append('<td class="td-desc">' + product.description + '</td>');
             // $("#prodRow_"+ product.product_id).append('<td>' + product.provider_name + '</td>');
             $("#prodRow_"+ product.product_id).append('<td class="td-pack">' + product.packing_unit + '</td>');
+            $("#prodRow_"+ product.product_id).append('<td class="td-acc"> $' + product.cost_price + '</td>');
+            $("#prodRow_"+ product.product_id).append('<td class="td-acc"> $' + product.sale_price + '</td>');
             $("#prodRow_"+ product.product_id).append('<td class="td-stock">' + product.stock_quantity + '</td>');
             // $("#prodRow_"+ product.product_id).append('<td class="td-acc">' + "..." + '</td>');
-            $("#prodRow_"+ product.product_id).append('<td class="td-acc"> $' + product.sale_price + '</td>');
 
             $("#prodRow_"+ product.product_id).click(function() { // Revisar
                 viewProduct(product.product_id);
