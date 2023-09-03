@@ -8,10 +8,10 @@ $(document).ready(function() {
         payStates  = new Object();
 
     // Eventos
-    // $("th input").on("keyup", function() {
-    //     getFilters();
-    //     getSales();
-    // });   
+    $("th input").on("keyup", function() {
+        getFilters();
+        getSales();
+    });   
     $("th input").on("change", function() {
         getFilters();
         getSales();
@@ -132,7 +132,14 @@ $(document).ready(function() {
             $("#saleRow_"+ sale.sale_id).append('<th scope="row">' + sale.sale_id + '</th>');
             $("#saleRow_"+ sale.sale_id).append('<td>' + sale.user_name + '</td>');
             $("#saleRow_"+ sale.sale_id).append('<td>' + sale.client_name + '</td>');
-            var budNumber = (sale.budget_id) ? sale.budget_id : "-"; // FALTA FIX, TRAER NUMBER NO ID
+            var budNumber = "-";
+            if(sale.budget_number) {
+                var bn = sale.budget_number.toString(),
+                    bv = sale.budget_version.toString();
+                bn = bn.padStart(4, '0');
+                bv = bv.padStart(2, '0');
+                budNumber = "#" + bn + " > v" + bv;
+            }
             $("#saleRow_"+ sale.sale_id).append('<td>' + budNumber + '</td>');
             $("#saleRow_"+ sale.sale_id).append('<td>' + sale.start_date + '</td>');
             $("#saleRow_"+ sale.sale_id).append('<td>' + sale.ship_name + '</td>');
@@ -189,7 +196,8 @@ $(document).ready(function() {
         var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
             return new bootstrap.Popover(popoverTriggerEl);
         }); 
-
+        if(total == null)
+            total = 0;
         $("#total").html("$" + total);
         $("#registers").html(registers);
         renderPagination();
