@@ -185,6 +185,16 @@ class Clients extends Model {
         $this->db->validateLastQuery();
         return $this->db->fetch()['total_registers'];
     }
+    public function getClientDetail($id) {
+        $this->db->validateSanitizeId($id, "El identificador del cliente es inválido");
+        $query = "SELECT * FROM clients WHERE client_id = $id";
+        $this->db->query($query); 
+        $this->db->validateLastQuery();
+        $client = $this->db->fetch();
+        if($this->db->numRows() != 1)
+            throw new Exception("Hubo un error al consultar el cliente #$id");
+        return $client;
+    }
 
     /* Altas, bajas y modificaciones */
     public function newClient($data) { 

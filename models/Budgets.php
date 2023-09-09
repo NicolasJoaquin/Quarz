@@ -432,6 +432,23 @@ class Budgets extends Model {
         }
         return $versions;
     }
+    public function getClientBudgets($id) {
+        $this->db->validateSanitizeId($id, "El identificador del cliente es inválido");
+        $query = "SELECT b.budget_id, v.budget_number, v.version, v.last_version, b.user_id, u.user AS user_name, 
+            c.name AS client_name, b.start_date, b.shipment_method_id, ship.title AS ship_name, b.payment_method_id,
+            pay.title AS pay_name, b.subtotal, b.total, b.description AS notes
+            FROM budgets AS b 
+            LEFT JOIN users AS u ON b.user_id = u.user_id
+            LEFT JOIN budget_versions AS v ON v.new_budget_id = b.budget_id
+            LEFT JOIN shipment_methods AS ship ON b.shipment_method_id = ship.shipment_method_id
+            LEFT JOIN payment_methods AS pay ON b.payment_method_id = pay.payment_method_id
+            LEFT JOIN clients AS c ON b.client_id = c.client_id 
+            WHERE c.client_id = $id ORDER BY b.start_date DESC";
+        $this->db->query($query); 
+        $this->db->validateLastQuery();
+        return $this->db->fetchAll();
+    }
+
 
     // VALIDACIONES
     /* Recibe el número de la cotización y su versión (budget_numer + version de budget_versions) */

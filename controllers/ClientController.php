@@ -2,16 +2,26 @@
 //controllers/ClientController.php
 require_once '../fw/fw.php'; 
 require_once '../models/Clients.php';
+require_once '../models/Sales.php';
+require_once '../models/Budgets.php';
 require_once '../views/FormNewClient.php';
 require_once '../views/ViewClients.php';
+require_once '../views/ViewClient.php';
+require_once '../views/ViewClientSales.php';
+// require_once '../views/ViewClientBudgets.php';
 
 class ClientController extends Controller {
     public function __construct() {
         /* Models */
         $this->models['clients'] = new Clients();
+        $this->models['sales']   = new Sales();
+        $this->models['budgets'] = new Budgets();
         /* Views */
-        $this->views['formNew']   = new FormNewClient(title: "Nuevo cliente", includeJs: "js/newClient.js", includeCSS: "css/newClient.css", includesCSS: ["css/stdCustom.css"]);
-        $this->views['dashboard'] = new ViewClients(title: "Dashboard clientes", includeJs: "js/viewClients.js", includeCSS: "css/viewClients.css", includesCSS: ["css/stdCustom.css"]);
+        $this->views['formNew']       = new FormNewClient(title: "Nuevo cliente", includeJs: "js/newClient.js", includeCSS: "css/newClient.css", includesCSS: ["css/stdCustom.css"]);
+        $this->views['dashboard']     = new ViewClients(title: "Dashboard clientes", includeJs: "js/viewClients.js", includeCSS: "css/viewClients.css", includesCSS: ["css/stdCustom.css"]);
+        $this->views['clientDetail']  = new ViewClient(title: "Detalle del cliente", includeJs: "js/viewClient.js", includeCSS: "css/viewClient.css", includesCSS: ["css/stdCustom.css"]);
+        $this->views['clientSales']   = new ViewClientSales(title: "Ventas del cliente", includeJs: "js/viewClientSales.js", includeCSS: "css/viewClientSales.css", includesCSS: ["css/stdCustom.css"]);
+        // $this->views['clientBudgets'] = new ViewClientBudgets(title: "Cotizaciones del cliente", includeJs: "js/viewClientBudgets.js", includeCSS: "css/viewClientBudgets.css", includesCSS: ["css/stdCustom.css"]);
         // $this->views['result'] = new CreateClientResult();
     }
     /* Validadores */
@@ -34,6 +44,44 @@ class ClientController extends Controller {
     public function viewDashboard() {
         $this->views['dashboard']->render();
     }
+    public function viewClientDetail() { 
+        if(empty($_GET['id'])) throw new Exception("El identificador del cliente a consultar está vacío o es inválido");
+        $client = $this->models['clients']->getClientDetail($_GET['id']);
+        $this->views['clientDetail']->client = $client;
+        $this->views['clientDetail']->render();
+    }
+    public function viewClientSales() { 
+        if(empty($_GET['id'])) throw new Exception("El identificador del cliente está vacío o es inválido");
+        $sales  = $this->models['sales']->getClientSales($_GET['id']);
+        $client = $this->models['clients']->getClientDetail($_GET['id']);
+        /* Format de fecha para mostrar en el front */
+        foreach($sales as $k => $sale) {
+            if($k == -1)
+                continue;
+            $sales[$k]['start_date'] = $this->sqlDateToNormal($sale['start_date']);
+        }
+        $this->views['clientSales']->client = $client;
+        $this->views['clientSales']->sales = $sales;
+        $this->views['clientSales']->render();
+    }
+    public function viewClientBudgets() { 
+        if(empty($_GET['id'])) throw new Exception("El identificador del cliente está vacío o es inválido");
+        $budgets  = $this->models['budgets']->getClientBudgets($_GET['id']);
+        $client = $this->models['clients']->getClientDetail($_GET['id']);
+        /* Format de fecha para mostrar en el front */
+        foreach($budgets as $k => $budget) {
+            if($k == -1)
+                continue;
+            $budget[$k]['start_date'] = $this->sqlDateToNormal($budget['start_date']);
+        }
+        $this->views['clientBudgets']->client = $client;
+        $this->views['clientBudgets']->budgets = $budgets;
+        $this->views['clientBudgets']->render();
+    }
+
+
+    
+    // viewClientBudgets
     /* Getters */
     public function getClientsToDashboard() { 
         $filters        = new stdClass();

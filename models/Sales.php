@@ -400,6 +400,24 @@ class Sales extends Model {
         $this->db->validateLastQuery();
         return $this->db->fetchAll();
     }
+    public function getClientSales($id) {
+        $this->db->validateSanitizeId($id, "El identificador del cliente es inválido");
+        $query = "SELECT s.sale_id, s.user_id, u.user AS user_name, c.name AS client_name, s.budget_id, v.budget_number, v.version AS budget_version, 
+            s.start_date, s.shipment_state_id, ship.title AS ship_name, s.payment_state_id, nextShip.title AS next_shipment_state, 
+            pay.title AS pay_name, nextPay.title AS next_payment_state, s.total, s.description AS notes
+                FROM sales AS s 
+            LEFT JOIN users AS u ON s.user_id = u.user_id
+            LEFT JOIN budget_versions AS v ON v.new_budget_id = s.budget_id 
+            LEFT JOIN shipment_states AS ship ON s.shipment_state_id = ship.shipment_state_id
+            LEFT JOIN shipment_states AS nextShip ON ship.next_step = nextShip.shipment_state_id
+            LEFT JOIN payment_states AS pay ON s.payment_state_id = pay.payment_state_id
+            LEFT JOIN payment_states AS nextPay ON pay.next_step = nextPay.payment_state_id
+            LEFT JOIN clients AS c ON s.client_id = c.client_id 
+            WHERE c.client_id = $id ORDER BY s.start_date DESC";
+        $this->db->query($query); 
+        $this->db->validateLastQuery();
+        return $this->db->fetchAll();
+    }
     // Validaciones
     public function exist($id) {
         $this->db->validateSanitizeId($id, "El número de venta es erróneo");

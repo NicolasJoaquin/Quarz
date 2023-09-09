@@ -4,38 +4,43 @@ RewriteEngine on
 
 RewriteRule ^home$ controllers/home.php
 
-RewriteRule ^viewClients$ controllers/viewClients.php
-RewriteRule ^viewShipmentMethods$ controllers/viewShipmentMethods.php
-RewriteRule ^viewPaymentMethods$ controllers/viewPaymentMethods.php
-
-RewriteRule ^viewProducts$ controllers/viewProducts.php
-
-RewriteRule ^viewProduct$ controllers/viewProduct.php
-RewriteRule ^viewProduct-([0-9]+)$ controllers/viewProduct.php?id=$1&viewProductDetail=true [NC,L]
-RewriteRule ^viewProduct-([0-9]+)-product-changes$ controllers/viewProduct.php?id=$1&viewProductChanges=true [NC,L]
-RewriteRule ^viewProduct-([0-9]+)-price-changes$ controllers/viewProduct.php?id=$1&viewPriceChanges=true [NC,L]
-RewriteRule ^viewProduct-([0-9]+)-stock-changes$ controllers/viewProduct.php?id=$1&viewStockChanges=true [NC,L]
-
-RewriteRule ^viewStock$ controllers/viewStock.php
-
 RewriteRule ^viewSales$                     controllers/viewSales.php
 RewriteRule ^viewSale-([0-9]+)$             controllers/viewSale.php?id=$1&viewSaleDetail=true [NC,L]
+RewriteRule ^newSale$ controllers/newSaleBudget.php
+RewriteRule ^newSaleBudget$ controllers/newSaleBudget.php
+
 RewriteRule ^viewBudgets$                   controllers/viewBudgets.php
 RewriteRule ^viewBudget$                    controllers/viewBudget.php [NC,L]
 RewriteRule ^viewBudget-([0-9]+)$           controllers/viewBudget.php?number=$1&viewBudgetDetail=true [NC,L]
 RewriteRule ^viewBudget-([0-9]+)-([0-9]+)$  controllers/viewBudget.php?number=$1&version=$2&viewBudgetDetail=true [NC,L]
 RewriteRule ^newBudgetVersion-([0-9]+)$     controllers/viewBudget.php?number=$1&newBudgetVersion=true [NC,L]
+RewriteRule ^newBudget$ controllers/newSaleBudget.php
+
+RewriteRule ^viewProducts$ controllers/viewProducts.php
+RewriteRule ^viewProduct$ controllers/viewProduct.php
+RewriteRule ^viewProduct-([0-9]+)$ controllers/viewProduct.php?id=$1&viewProductDetail=true [NC,L]
+RewriteRule ^viewProduct-([0-9]+)-product-changes$ controllers/viewProduct.php?id=$1&viewProductChanges=true [NC,L]
+RewriteRule ^viewProduct-([0-9]+)-price-changes$ controllers/viewProduct.php?id=$1&viewPriceChanges=true [NC,L]
+RewriteRule ^viewProduct-([0-9]+)-stock-changes$ controllers/viewProduct.php?id=$1&viewStockChanges=true [NC,L]
+RewriteRule ^newProduct$ controllers/newProduct.php
+
+RewriteRule ^viewClients$ controllers/viewClients.php
+RewriteRule ^viewClient-([0-9]+)$ controllers/viewClient.php?id=$1&viewClientDetail=true [NC,L]
+RewriteRule ^viewClient-([0-9]+)-sales$ controllers/viewClient.php?id=$1&viewClientSales=true [NC,L]
+RewriteRule ^viewClient-([0-9]+)-budgets$ controllers/viewClient.php?id=$1&viewClientBudgets=true [NC,L]
+RewriteRule ^newClient$ controllers/newClient.php
+
+
+
+RewriteRule ^viewShipmentMethods$ controllers/viewShipmentMethods.php
+RewriteRule ^viewPaymentMethods$ controllers/viewPaymentMethods.php
+
+RewriteRule ^viewStock$ controllers/viewStock.php
 
 RewriteRule ^viewProviders$ controllers/viewProviders.php
 RewriteRule ^viewBuys$ controllers/viewBuys.php
 
 RewriteRule ^newUser$ controllers/newUser.php
-RewriteRule ^newProduct$ controllers/newProduct.php
-RewriteRule ^newClient$ controllers/newClient.php
-# RewriteRule ^newSale$ controllers/newSale.php
-RewriteRule ^newSale$ controllers/newSaleBudget.php
-RewriteRule ^newBudget$ controllers/newSaleBudget.php
-RewriteRule ^newSaleBudget$ controllers/newSaleBudget.php
 RewriteRule ^newProvider$ controllers/newProvider.php
 RewriteRule ^newBuy$ controllers/newBuy.php
 

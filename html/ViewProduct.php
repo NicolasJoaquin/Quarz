@@ -59,6 +59,12 @@
 <hr>
 <h4>Acciones</h4>
 <div class="row">
+    <div class="col-2">
+        <button class="btn btn-primary" type="button" id="goBack">
+            <i class="bi bi-arrow-bar-left"></i>
+            Volver
+        </button>
+    </div>
     <div class="col-3"> 
         <button class="btn btn-success" type="button" id="viewProductChanges">
             <i class="bi bi-list-ul"></i>
@@ -75,12 +81,6 @@
         <button class="btn btn-success" type="button" id="viewStockChanges">
             <i class="bi bi-list-ul"></i>
             Ver movimientos de stock
-        </button>
-    </div>
-    <div class="col-2">
-        <button class="btn btn-primary" type="button" id="goBack">
-            <i class="bi bi-arrow-bar-left"></i>
-            Volver
         </button>
     </div>
 </div>

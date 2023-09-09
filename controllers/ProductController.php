@@ -35,14 +35,12 @@ class ProductController extends Controller{
         $this->views['dashboard']->render();
     }
     public function viewProductDetail() { 
-        if(!isset($_GET['id'])) throw new Exception("Falta el identificador del producto a consultar");
         if(empty($_GET['id'])) throw new Exception("El identificador del producto a consultar está vacío o es inválido");
         $product = $this->models['products']->getProductDetail($_GET['id']);
         $this->views['productDetail']->product = $product;
         $this->views['productDetail']->render();
     }
     public function viewProductChanges() { 
-        if(!isset($_GET['id'])) throw new Exception("Falta el identificador del producto a consultar");
         if(empty($_GET['id'])) throw new Exception("El identificador del producto a consultar está vacío o es inválido");
         $changes = $this->models['products']->getProductChanges($_GET['id']);
         /* Format de fecha para mostrar en el front */
@@ -55,7 +53,6 @@ class ProductController extends Controller{
         $this->views['productChanges']->render();
     }
     public function viewPriceChanges() { 
-        if(!isset($_GET['id'])) throw new Exception("Falta el identificador del producto a consultar");
         if(empty($_GET['id'])) throw new Exception("El identificador del producto a consultar está vacío o es inválido");
         $changes = $this->models['products']->getPriceChanges($_GET['id']);
         /* Format de fecha para mostrar en el front */
@@ -68,7 +65,6 @@ class ProductController extends Controller{
         $this->views['priceChanges']->render();
     }
     public function viewStockChanges() { 
-        if(!isset($_GET['id'])) throw new Exception("Falta el identificador del producto a consultar");
         if(empty($_GET['id'])) throw new Exception("El identificador del producto a consultar está vacío o es inválido");
         $changes = $this->models['products']->getStockChanges($_GET['id']);
         /* Format de fecha para mostrar en el front */
