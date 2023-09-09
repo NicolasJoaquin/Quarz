@@ -3,13 +3,15 @@
 require_once '../fw/fw.php'; 
 require_once '../models/Clients.php';
 require_once '../views/FormNewClient.php';
+require_once '../views/ViewClients.php';
 
 class ClientController extends Controller {
     public function __construct() {
         /* Models */
         $this->models['clients'] = new Clients();
         /* Views */
-        $this->views['formNew'] = new FormNewClient(title: "Nuevo cliente", includeJs: "js/newClient.js", includeCSS: "css/newClient.css", includesCSS: ["css/stdCustom.css"]);
+        $this->views['formNew']   = new FormNewClient(title: "Nuevo cliente", includeJs: "js/newClient.js", includeCSS: "css/newClient.css", includesCSS: ["css/stdCustom.css"]);
+        $this->views['dashboard'] = new ViewClients(title: "Dashboard clientes", includeJs: "js/viewClients.js", includeCSS: "css/viewClients.css", includesCSS: ["css/stdCustom.css"]);
         // $this->views['result'] = new CreateClientResult();
     }
     /* Validadores */
@@ -28,6 +30,28 @@ class ClientController extends Controller {
     /* Views */
     public function viewForm() {
         $this->views['formNew']->render();
+    }
+    public function viewDashboard() {
+        $this->views['dashboard']->render();
+    }
+    /* Getters */
+    public function getClientsToDashboard() { 
+        $filters        = new stdClass();
+        $orders         = new stdClass();
+        $data           = new stdClass();
+        $limitOffset    = 0;
+        $limitLength    = 10000;
+        if(!empty($_GET['filters']))
+            $filters = json_decode($_GET['filters']);
+        if(!empty($_GET['orders']))
+            $orders = json_decode($_GET['orders']);
+        if(!empty($_GET['limitOffset']))
+            $limitOffset = json_decode($_GET['limitOffset']);
+        if(!empty($_GET['limitLength']))
+            $limitLength = json_decode($_GET['limitLength']);
+        $data->clients   = $this->models['clients']->getClients($filters, $orders, $limitOffset, $limitLength);
+        $data->registers = $this->models['clients']->getTotalRegisters($filters);
+        return $data;
     }
 
     /* END: Nuevo */

@@ -138,7 +138,7 @@ $(document).ready(function() {
             $("#row_"+ budget.budget_number).append('<td>' + 
                 '<i id="view-' + budget.budget_number + '" class="bi bi-search ms-auto text-primary"></i>' + 
             '</td>');
-            $("#view-"+ budget.budget_number).click(function(event) { // Revisar
+            $("#view-"+ budget.budget_number).click(function(event) { 
                 event.preventDefault();
                 viewBudget(budget.budget_number);
             });
@@ -158,7 +158,7 @@ $(document).ready(function() {
     function viewBudget(number) {
         window.location = "./viewBudget-" + number;
     }
-    function getShipmentMethods() { //ACA
+    function getShipmentMethods() { 
         $.get("./controllers/viewShipmentMethods.php", {getShipmentMethodsToSelect: true}, function(response) {
             response = JSON.parse(response);
             console.log(response.msg); 

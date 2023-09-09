@@ -1,141 +1,98 @@
-<?php 
-// html/ViewClients.php
-require_once '../views/StdHeader.php'; 
-require_once '../views/StdFooter.php';
-
-$header = new StdHeader("Visualización y Modificación de Clientes");
-$header->render();
-
-?>
-
-
-<h1>Visualización y Modificación de Clientes</h1>
-
-<div id="main" class="noBloq">
-  <input type="search" name="filterValue" id="filterValue" placeholder = "Buscar">
-  <input type="button" name="refresh" id="refresh" value="Actualizar">
-  <table id="clientsTable">    
-      <thead> <tr><th>Razón Social</th> <th>CUIT</th> <th>Nombre Fantasía</th> <th>Dirección</th> <th>Email</th> <th>Teléfono</th></tr> </thead>
-      <tbody id="clientsTableBody">
-
-      </tbody>
-  </table>
+<div class="row mb-3">
+    <div class="text-right col-md-6">
+        <img class="d-block mx-auto mb-none" src="./extras/quarz-logo.png" alt="" width="72" height="90">
+        <h2 class="text-center">Visualización de clientes</h2>
+    </div>
+    <div class="text-right col-md-6 mt-5">
+        <p class="lead">
+        </p>
+    </div>
 </div>
-    
-<div id="modal" class="hidden">
-  <div id="modalHeader">
-    <button id="closeModal">Cerrar</button>
-  </div>
-
-  <div id="modalBody">
-    <label for="id">ID de Cliente: </label>
-    <input type="number" readonly name="id" id="id"> <br>
-
-    <label for="name">Razón Social: </label>
-    <input type="text" name="name" id="name"> <br>
-
-    <label for="CUIT">CUIT: </label>
-    <input type="number" name="CUIT" id="CUIT"> <br> 
-
-    <label for="nickname">Nombre Fantasía: </label>
-    <input type="text" name="nickname" id="nickname"> <br>
-    
-    <label for="direction">Dirección: </label>
-    <input type="text" name="direction" id="direction"> <br>
-
-    <label for="email">Email: </label>
-    <input type="text" name="email" id="email"> <br>
-
-    <label for="phone">Teléfono: </label>
-    <input type="number" name="phone" id="phone"> <br>
-  </div>
-
-  <div id="modalFooter">
-    <button id="deleteClient">Borrar</button>
-    <button id="updateClient">Modificar</button>
-  </div>
+<div class="row g-5">
+    <div class="col-md-12 col-lg-12 order-md-last">
+        <div class="table-wrapper table-responsive">
+            <table class="table table-striped table-hover mb-none">
+                <thead>
+                    <div class="d-flex bd-highlight">
+                        <select class="ms-auto mb-2 form-select col-md-4" name="limitLength" id="limitLength">
+                            <option value="20" selected>Mostrar de a 20 registros</option>
+                            <option value="50">Mostrar de a 50 registros</option>
+                            <option value="100">Mostrar de a 100 registros</option>
+                            <option value="9999">Mostrar todos los registros</option>
+                        </select>
+                    </div>
+                </thead>
+                <thead class="table-dark">
+                    <tr class="orders">
+                        <th scope="col">
+                            <div class="d-flex bd-highlight">
+                                N°<i class="bi bi-sort-down ms-auto"></i>
+                                <input type="hidden" name="numberOrder" id="numberOrder" value="desc">
+                            </div>
+                        </th>
+                        <th scope="col">
+                            <div class="d-flex bd-highlight">
+                                Nombre<i class="bi bi-sort-down ms-auto"></i>
+                                <input type="hidden" name="nameOrder" id="nameOrder" value="desc">
+                            </div>
+                        </th>
+                        <th scope="col">
+                            <div class="d-flex bd-highlight">
+                                DNI<i class="bi bi-sort-down ms-auto"></i>
+                                <input type="hidden" name="dniOrder" id="dniOrder" value="desc">
+                            </div>
+                        </th>
+                        <th scope="col">
+                            <div class="d-flex bd-highlight">
+                                Mail<i class="bi bi-sort-down ms-auto"></i>
+                                <input type="hidden" name="emailOrder" id="emailOrder" value="desc">
+                            </div>
+                        </th>
+                        <th scope="col">
+                            <div class="d-flex bd-highlight">
+                                Acciones
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <thead>
+                    <tr class="filters">
+                        <th scope="col">
+                            <input placeholder="#" type="number" class="form-control" name="numberFilter" id="numberFilter">
+                        </th>
+                        <th scope="col">
+                            <input placeholder="Mario Santos" type="text" class="form-control" name="nameFilter" id="nameFilter">
+                        </th>
+                        <th scope="col">
+                            <input placeholder="41146999" type="text" class="form-control" name="dniFilter" id="dniFilter">
+                        </th>
+                        <th scope="col">
+                            <input placeholder="quarz@resinaepoxi.com.ar" type="text" class="form-control" name="emailFilter" id="emailFilter">
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="scrolleable" id="tableBody">
+                </tbody>
+                <tfoot class="table-dark">
+                    <tr>
+                        <td colspan="1">
+                            Registros
+                        </td>
+                        <td colspan="1">
+                            <span class="d-flex bd-highlight" id="registers"></span>
+                        </td>
+                        <td colspan="5">
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <div class="row mt-2">
+            <nav class="mb-none d-flex bd-highlight">
+                <input type="hidden" name="limitOffset" id="limitOffset" value="0">
+                <ul class="pagination ms-auto">
+                </ul>
+            </nav>
+        </div>
+    </div>
 </div>
-
-
-<script>
-  $(document).ready(function (){
-      function locate(url){
-          $(location).attr('href',url);
-      }
-
-      function cleanTable(){
-        $("#clientsTableBody").empty();
-      }
-
-      function getClientData(){
-        var client = {id : $("#id").val().trim(), name : $("#name").val().trim(), CUIT : $("#CUIT").val().trim(),
-                          nickname : $("#nickname").val().trim(), direction : $("#direction").val().trim(), email : $("#email").val().trim(),
-                          phone : $("#phone").val().trim()};
-        return client;
-      }
-
-      function getClients(){
-        cleanTable();
-        var filterValue = $("#filterValue").val();
-        $.get("./viewClients", {get: true, filterColumn: false, filterValue: filterValue, order: false}, function(response) { //AGREGAR FILTER COLUMN Y ORDER
-          response = JSON.parse(response);
-          response.forEach(function(client) {
-            $("#clientsTableBody").append('<tr id=' + client['client_id'] + '></tr>');
-            $("#" + client['client_id']).append('<td>' + client['name'] + '</td>');
-            $("#" + client['client_id']).append('<td>' + client['CUIT'] + '</td>');
-            $("#" + client['client_id']).append('<td>' + client['nickname'] + '</td>');
-            $("#" + client['client_id']).append('<td>' + client['direction'] + '</td>');
-            $("#" + client['client_id']).append('<td>' + client['email'] + '</td>');
-            $("#" + client['client_id']).append('<td>' + client['phone'] + '</td>');
-
-            $("#" + client['client_id']).click(function (){  //
-                $("#main").removeClass('noBloq').addClass('bloq');
-                $("#modal").removeClass('hidden').addClass('show');
-                $("#id").val(client['client_id']);
-                $("#name").val(client['name']);
-                $("#CUIT").val(client['CUIT']);
-                $("#nickname").val(client['nickname']);
-                $("#direction").val(client['direction']);
-                $("#email").val(client['email']);
-                $("#phone").val(client['phone']);
-            });
-          });
-        });
-      }
-
-      getClients();
-
-      $("#closeModal").click(function(){
-          $("#main").removeClass('bloq').addClass('noBloq');
-          $("#modal").removeClass('show').addClass('hidden');
-      });
-
-      $("#deleteClient").click(function(){ // VER COMO TENER EN CUENTA LA ELIMINACIÓN DE DATOS FORANEOS DEL CLIENTE A ELIMINAR
-        var id = $("#id").val();
-        if(confirm("¿Seguro de eliminar al cliente con id " + id + "?")){
-          $.post("", {delete: "", client_id: id}, function(response){
-            alert(response); 
-          });
-        }
-        locate("./viewClients"); // CAMBIAR POR getClients(); 
-      });
-
-      $("#updateClient").click(function(){
-        var client = getClientData();
-        client = JSON.stringify(client);
-        $.post("", {update: "", client: client}, function(response){
-          alert(response); // BORRAR
-          locate("./viewClients");
-        });
-      });
-
-      $("#refresh").click(function(){
-        getClients();
-      });
-  });
-</script>   
-
-<?php
-$footer = new StdFooter();
-$footer->render();
-?>

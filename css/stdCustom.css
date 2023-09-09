@@ -43,7 +43,7 @@ select.ms-auto {
     width: 30%;
 }
 
-i, li.page-item {
+td i, li.page-item {
     cursor: pointer;
 }
 i.text-primary {
