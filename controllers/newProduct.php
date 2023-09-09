@@ -22,10 +22,9 @@ if(count($_POST)>0){
             $response->errorMsg = "Hubo un error al dar de alta el producto: " . $e->getMessage();
         }
         echo json_encode($response);
-        exit;
     } 
+    exit;
 }
-
 $controller->viewForm();
 exit();
 

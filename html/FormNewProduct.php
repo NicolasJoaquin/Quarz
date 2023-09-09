@@ -4,12 +4,14 @@
         <div class="col-sm-9">
             <label for="desc" class="form-label">Descripción</label>
             <input type="text" class="form-control" id="desc" placeholder="Glitter metálico rojo 5 gr." value="" required>
+            <small><i class="bi bi-info-circle text-primary"></i> Campo obligatorio</small>
             <div class="invalid-feedback">
             </div>
         </div>
         <div class="col-sm-3">
             <label for="packingUnit" class="form-label">Unidad de empaque</label>
             <input type="text" class="form-control" id="packingUnit" placeholder="5 gr." value="" required>
+            <small><i class="bi bi-info-circle text-primary"></i> Campo obligatorio</small>
             <div class="invalid-feedback">
             </div>
         </div>
@@ -18,6 +20,7 @@
             <select class="form-select" id="provider" required>
                 <option value="0">Elegir...</option>
             </select>
+            <small><i class="bi bi-info-circle text-primary"></i> Campo obligatorio</small>
             <div class="invalid-feedback">
             </div>
         </div>
@@ -54,12 +57,12 @@
 
     <h4>Acciones</h4>
     <div class="row g-3">
-        <!-- <div class="col-2">
+        <div class="col-2">
             <button class="btn btn-primary" type="button" id="goBack">
                 <i class="bi bi-arrow-bar-left"></i>
                 Volver
             </button>
-        </div> -->
+        </div>
         <div class="col-3">
             <button class="w-100 btn btn-success" type="button" id="save">
                 <i class="bi bi-check-lg"></i>

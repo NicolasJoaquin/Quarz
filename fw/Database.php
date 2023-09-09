@@ -142,7 +142,7 @@ class Database {
         return $str;
     }
 
-    public function validateString($str, $maxLen = 100, $minLen = 0) {
+    public function validateString($str, $maxLen = 300, $minLen = 0) {
         if(strlen($str) < $minLen)
             return false;
         substr($str, 0, $maxLen);

@@ -4,19 +4,12 @@
 require_once '../controllers/SaleBudgetController.php';
 
 session_start();
-
 if(!isset($_SESSION['log'])) {
     header("Location: ./home");
     exit();
 }
 
 $controller = new SaleBudgetController();
-
-// $response = new stdClass();
-// $response->state = 0;
-// $response->errorMsg = "BUGFIX";
-// echo json_encode($response);
-// exit;
 
 if(count($_POST) > 0) {
     // if(!isset($_SESSION['perm'])) die ("error 0 controllers/newProduct");
@@ -84,7 +77,6 @@ if(count($_POST) > 0) {
         echo json_encode($response);
         exit;
     } 
-    /* Aca */
     if(isset($_POST['changeSaleState'])) {
         $response = new stdClass();
         try {
@@ -99,7 +91,6 @@ if(count($_POST) > 0) {
         echo json_encode($response);
         exit;
     } 
-
     $response = new stdClass();
     $response->state = 0;
     $response->errorMsg = "Hubo un error (POST method)";

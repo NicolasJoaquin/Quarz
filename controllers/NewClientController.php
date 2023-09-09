@@ -1,17 +1,19 @@
 <?php
+//ELIMINAR FUERA DE USO
 //controllers/NewClientController.php
-
-require_once '../fw/fw.php'; //archivo que tiene todos los includes y requires del framework
+require_once '../fw/fw.php'; 
 require_once '../models/Clients.php';
 require_once '../views/FormNewClient.php';
-require_once '../views/CreateClientResult.php';
+// require_once '../views/CreateClientResult.php';
 
 //FIJARSE SI NO SE PUEDE HACER ABSTRACTA CON TODOS METODOS ESTATICOS
-class NewClientController extends Controller{
-    public function __construct(){
+class NewClientController extends Controller {
+    public function __construct() {
+        /* Models */
         $this->models['clients'] = new Clients();
-        $this->views['form'] = new FormNewClient();
-        $this->views['result'] = new CreateClientResult();
+        /* Views */
+        $this->views['form'] = new FormNewClient(title: "Nuevo cliente", includeJs: "js/newClient.js", includeCSS: "css/newClient.css", includesCSS: ["css/stdCustom.css"]);
+        // $this->views['result'] = new CreateClientResult();
     }
 
     public function register($client){  //FALTA MODIFICAR TODO ESTE METODO

@@ -1,17 +1,38 @@
 <?php
 //controllers/ClientController.php
-
-require_once '../fw/fw.php'; //archivo que tiene todos los includes y requires del framework
+require_once '../fw/fw.php'; 
 require_once '../models/Clients.php';
-require_once '../views/ViewClients.php';
-// require_once '../views/CreateClientResult.php';
+require_once '../views/FormNewClient.php';
 
-//POR AHORA ESTA CLASE SOLO MANEJA MODIFICACIÓN Y BAJA DE CLIENTES
-class ClientController extends Controller{
-    public function __construct(){
+class ClientController extends Controller {
+    public function __construct() {
+        /* Models */
         $this->models['clients'] = new Clients();
-        $this->views['CRUD'] = new ViewClients();
+        /* Views */
+        $this->views['formNew'] = new FormNewClient(title: "Nuevo cliente", includeJs: "js/newClient.js", includeCSS: "css/newClient.css", includesCSS: ["css/stdCustom.css"]);
+        // $this->views['result'] = new CreateClientResult();
     }
+    /* Validadores */
+    private function validateClientNotEmpty() {
+        if(empty($_POST['data'])) throw new Exception("Enviá un cliente para dar de alta");
+        $data = json_decode($_POST['data']);
+        if(empty($data->name)) throw new Exception("Enviá el nombre del cliente para darlo de alta");
+        return $data;
+    }
+    /* Altas, bajas y modificaciones */
+    public function newClient() {
+        if(!$client = $this->validateClientNotEmpty()) throw new Exception("Enviá todos los datos obligatorios");
+        $this->models['clients']->newClient($client);
+        return true;
+    }
+    /* Views */
+    public function viewForm() {
+        $this->views['formNew']->render();
+    }
+
+    /* END: Nuevo */
+
+
 
     public function delete($id){
         $ret = true;
@@ -54,30 +75,5 @@ class ClientController extends Controller{
         return $ret;
     }
 
-    public function viewCRUD(){
-        $this->views['CRUD']->render();
-    }
-
-    // TRASLADAR DESDE NewClientController
-    // public function register($client){ 
-    //     $msg = "Se ha dado de alta exitosamente al cliente " . $client->name . ".";
-    //     try{
-    //         $this->models['clients']->newClient($client);
-    //     }
-    //     catch(QueryErrorException $error){ 
-    //         $msg = "Se produjo un error intentando dar de alta al cliente " . $client->name . ",
-    //         la base devuelve el siguiente error: " . $error->getErrorMsg();
-    //     }
-    //     $this->viewResult($msg);
-    // }
-
-    // private function viewResult($resultMsg){
-    //     $this->views['result']->msg = $resultMsg;
-    //     $this->views['result']->render();
-    // }
-
-    // public function viewForm(){
-    //     $this->views['form']->render();
-    // }
 }
 ?>
