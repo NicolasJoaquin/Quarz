@@ -1,4 +1,4 @@
-<h4>Ventas del cliente <strong>#<?php echo sprintf("%'.04d\n", $this->client['client_id']) ?></strong></h4>
+<h4>Cotizaciones del cliente <strong>#<?php echo sprintf("%'.04d\n", $this->client['client_id']) ?></strong></h4>
 <div class="row">
     <div class="col-md-2">
         <label class="form-label rounded text-bg-secondary fs-6" for="numberDetail"><strong>#</strong></label>
@@ -52,11 +52,6 @@
                         </th>
                         <th scope="col">
                             <div class="d-flex bd-highlight">
-                                Pres. 
-                            </div>
-                        </th>
-                        <th scope="col">
-                            <div class="d-flex bd-highlight">
                                 Fecha 
                             </div>
                         </th>
@@ -84,17 +79,16 @@
                 </thead>
                 <tbody class="scrolleable" id="tableBody">
 <?php
-foreach($this->sales as $s) {
+foreach($this->budgets as $b) {
 ?>
-                    <tr id="saleRow_<?php echo $s['sale_id'] ?>">
-                        <th scope="row"><?php echo $s['sale_id'] ?></th>
-                        <td><?php echo $s['user_name'] ?></td>
-                        <td><?php echo $s['budget_number'] ? "#".sprintf("%'.04d\n", $s['budget_number'])." > v".sprintf("%'.02d\n", $s['budget_version']) : "-" ?></td>
-                        <td><?php echo $s['start_date'] ?></td>
-                        <td><?php echo $s['ship_name'] ?></td>
-                        <td><?php echo $s['pay_name'] ?></td>
-                        <td>$<?php echo $s['total'] ?></td>
-                        <td><i aria-href="viewSale-<?php echo $s['sale_id'] ?>" id="viewSale-<?php echo $s['sale_id'] ?>" class="bi bi-search ms-auto text-primary view-sale"></i></td>
+                    <tr id="budgetRow_<?php echo $b['budget_id'] ?>">
+                        <th scope="row"><?php echo "#" . sprintf("%'.04d\n", $b['budget_number']) . " > v" . sprintf("%'.02d\n", $b['version']) ?></th>
+                        <td><?php echo $b['user_name'] ?></td>
+                        <td><?php echo $b['start_date'] ?></td>
+                        <td><?php echo $b['ship_name'] ?></td>
+                        <td><?php echo $b['pay_name'] ?></td>
+                        <td>$<?php echo $b['total'] ?></td>
+                        <td><i id="viewBudget-<?php echo $b['budget_id'] ?>" class="bi bi-search ms-auto text-primary"></i></td>
                     </tr>
 <?php
 }
@@ -103,18 +97,18 @@ foreach($this->sales as $s) {
                 <tfoot class="table-dark">
                     <tr>
                         <td colspan="1">
-                            Cant. total de ventas
+                            Cant. total de cotizaciones
                         </td>
                         <td colspan="1">
                             <span class="d-flex bd-highlight" id="registers"><?php echo $this->registers ?></span>
                         </td>
-                        <td colspan="3">
+                        <td colspan="2">
                         </td>
                         <td colspan="1">
-                            Total gastado
+                            Total cotizado
                         </td>
                         <td colspan="1">
-                            <span class="d-flex bd-highlight text-left" id="total">$<?php echo $this->total ?></span>
+                            <span class="d-flex bd-highlight text-left" id="total"><?php echo $this->total ?></span>
                         </td>
                         <td colspan="1">
                         </td>

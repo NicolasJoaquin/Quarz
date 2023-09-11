@@ -24,8 +24,9 @@ $(document).ready(function() {
     function getClients() {
         $("#clientToPush").empty();
         var filterValue = ""; // VER ESTO
-        $.get("./viewClients", {get: true, filterColumn: false, filterValue: filterValue, order: false}, function(response) {
-            clients = JSON.parse(response);
+        $.get("./viewClients", {getToSelect: true, filterColumn: false, filterValue: filterValue, order: false}, function(response) {
+            decodeResponse = JSON.parse(response);
+            clients = decodeResponse.data.clients
             clients.forEach(function(c) {
                 $("#clientToPush").append('<option value=' + c['client_id'] + '>' + c['name'] + '</option>');
             });

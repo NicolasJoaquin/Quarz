@@ -131,6 +131,11 @@ class Budgets extends Model {
         if($limitLength < 0)
             throw new Exception("El límite (length) no puede ser menor a 0");
         // Validación de filtros e inclusión en query
+        if(!empty($filters->client_id)) {
+            $this->db->validateSanitizeString($filters->client_id, "El número del cliente es erróneo");
+            if(!is_numeric($filters->client_id)) throw new Exception("El número del cliente es erróneo");
+            $sqlFilters .= "WHERE c.client_id LIKE '%$filters->client_id%'";
+        }
         if(!empty($filters->number)) { 
             $this->db->validateSanitizeId($filters->number, "El número de la cotización es erróneo");
             $sqlFilters .= "WHERE v.budget_number LIKE '%$filters->number%'";
@@ -200,13 +205,15 @@ class Budgets extends Model {
 
         $sqlLimit = "LIMIT $limitOffset,$limitLength";
 
+        $sqlOrders = " ORDER BY v.budget_number DESC ";
+
         $query = "SELECT b.budget_id 
             FROM budgets AS b 
             LEFT JOIN users AS u ON b.user_id = u.user_id
             LEFT JOIN budget_versions AS v ON v.new_budget_id = b.budget_id
             LEFT JOIN shipment_methods AS ship ON b.shipment_method_id = ship.shipment_method_id
             LEFT JOIN payment_methods AS pay ON b.payment_method_id = pay.payment_method_id
-            LEFT JOIN clients AS c ON b.client_id = c.client_id $sqlFilters $sqlLimit"; 
+            LEFT JOIN clients AS c ON b.client_id = c.client_id $sqlFilters $sqlOrders $sqlLimit"; 
         $this->db->query($query);
         $this->db->validateLastQuery();
         $ids = array();
@@ -283,8 +290,14 @@ class Budgets extends Model {
     public function getTotalRegisters($filters) {
         $sqlFilters = "";
         // Validación de filtros e inclusión en query
+        if(!empty($filters->client_id)) {
+            $this->db->validateSanitizeString($filters->client_id, "El número del cliente es erróneo");
+            if(!is_numeric($filters->client_id)) throw new Exception("El número del cliente es erróneo");
+            $sqlFilters .= "WHERE b.client_id LIKE '%$filters->client_id%'";
+        }
         if(!empty($filters->number)) {
-            $this->db->validateSanitizeId($filters->number, "El número de la cotización es erróneo");
+            $this->db->validateSanitizeString($filters->number, "El número de la cotización es erróneo");
+            if(!is_numeric($filters->number)) throw new Exception("El número de la cotización es erróneo");
             $sqlFilters .= "WHERE v.budget_number LIKE '%$filters->number%'";
         }
         if(!empty($filters->user)) {
@@ -433,7 +446,7 @@ class Budgets extends Model {
         return $versions;
     }
     public function getClientBudgets($id) {
-        $this->db->validateSanitizeId($id, "El identificador del cliente es inválido");
+        $this->db->validateSanitizeId($id, "El identificador del cliente es inválido");    
         $query = "SELECT b.budget_id, v.budget_number, v.version, v.last_version, b.user_id, u.user AS user_name, 
             c.name AS client_name, b.start_date, b.shipment_method_id, ship.title AS ship_name, b.payment_method_id,
             pay.title AS pay_name, b.subtotal, b.total, b.description AS notes
@@ -443,13 +456,11 @@ class Budgets extends Model {
             LEFT JOIN shipment_methods AS ship ON b.shipment_method_id = ship.shipment_method_id
             LEFT JOIN payment_methods AS pay ON b.payment_method_id = pay.payment_method_id
             LEFT JOIN clients AS c ON b.client_id = c.client_id 
-            WHERE c.client_id = $id ORDER BY b.start_date DESC";
+            WHERE c.client_id = $id AND v.last_version = 1 ORDER BY b.start_date DESC";
         $this->db->query($query); 
         $this->db->validateLastQuery();
         return $this->db->fetchAll();
     }
-
-
     // VALIDACIONES
     /* Recibe el número de la cotización y su versión (budget_numer + version de budget_versions) */
     public function existNumberVersion($number, $version) { 

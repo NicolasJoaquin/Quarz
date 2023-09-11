@@ -42,15 +42,15 @@
             Volver
         </button>
     </div>
-    <div class="col-4"> 
+    <div class="col-3"> 
         <button class="btn btn-success" type="button" id="viewClientSales">
             <i class="bi bi-bag-check"></i>
             Ver ventas del cliente
         </button>
     </div>
-    <div class="col-4"> 
+    <div class="col-3"> 
         <button class="btn btn-success" type="button" id="viewClientBudgets">
-            <i class="bi bi-bag-check"></i>
+            <i class="bi bi-bag-heart"></i>
             Ver cotizaciones del cliente
         </button>
     </div>

@@ -8,7 +8,7 @@ require_once '../views/FormNewClient.php';
 require_once '../views/ViewClients.php';
 require_once '../views/ViewClient.php';
 require_once '../views/ViewClientSales.php';
-// require_once '../views/ViewClientBudgets.php';
+require_once '../views/ViewClientBudgets.php';
 
 class ClientController extends Controller {
     public function __construct() {
@@ -19,9 +19,9 @@ class ClientController extends Controller {
         /* Views */
         $this->views['formNew']       = new FormNewClient(title: "Nuevo cliente", includeJs: "js/newClient.js", includeCSS: "css/newClient.css", includesCSS: ["css/stdCustom.css"]);
         $this->views['dashboard']     = new ViewClients(title: "Dashboard clientes", includeJs: "js/viewClients.js", includeCSS: "css/viewClients.css", includesCSS: ["css/stdCustom.css"]);
-        $this->views['clientDetail']  = new ViewClient(title: "Detalle del cliente", includeJs: "js/viewClient.js", includeCSS: "css/viewClient.css", includesCSS: ["css/stdCustom.css"]);
-        $this->views['clientSales']   = new ViewClientSales(title: "Ventas del cliente", includeJs: "js/viewClientSales.js", includeCSS: "css/viewClientSales.css", includesCSS: ["css/stdCustom.css"]);
-        // $this->views['clientBudgets'] = new ViewClientBudgets(title: "Cotizaciones del cliente", includeJs: "js/viewClientBudgets.js", includeCSS: "css/viewClientBudgets.css", includesCSS: ["css/stdCustom.css"]);
+        $this->views['clientDetail']  = new ViewClient(title: "Detalle del cliente", includeJs: "js/viewClient.js", includesCSS: ["css/stdCustom.css"]);
+        $this->views['clientSales']   = new ViewClientSales(title: "Ventas del cliente", includeJs: "js/viewClientSales.js", includesCSS: ["css/stdCustom.css"]);
+        $this->views['clientBudgets'] = new ViewClientBudgets(title: "Cotizaciones del cliente", includeJs: "js/viewClientBudgets.js", includesCSS: ["css/stdCustom.css"]);
         // $this->views['result'] = new CreateClientResult();
     }
     /* Validadores */
@@ -52,36 +52,48 @@ class ClientController extends Controller {
     }
     public function viewClientSales() { 
         if(empty($_GET['id'])) throw new Exception("El identificador del cliente está vacío o es inválido");
-        $sales  = $this->models['sales']->getClientSales($_GET['id']);
         $client = $this->models['clients']->getClientDetail($_GET['id']);
+        $sales  = $this->models['sales']->getClientSales($_GET['id']);
+        $filters = new stdClass;
+        $filters->client_id = $_GET['id'];
+        $limitOffset    = 0;
+        $limitLength    = 10000;
+        $registers = $this->models['sales']->getTotalRegisters($filters);
+        $total     = $this->models['sales']->getTotalOfSales($filters, $limitOffset, $limitLength);
         /* Format de fecha para mostrar en el front */
         foreach($sales as $k => $sale) {
             if($k == -1)
                 continue;
             $sales[$k]['start_date'] = $this->sqlDateToNormal($sale['start_date']);
         }
-        $this->views['clientSales']->client = $client;
-        $this->views['clientSales']->sales = $sales;
+        $this->views['clientSales']->client    = $client;
+        $this->views['clientSales']->sales     = $sales;
+        $this->views['clientSales']->registers = $registers;
+        $this->views['clientSales']->total     = $total;
         $this->views['clientSales']->render();
     }
     public function viewClientBudgets() { 
         if(empty($_GET['id'])) throw new Exception("El identificador del cliente está vacío o es inválido");
-        $budgets  = $this->models['budgets']->getClientBudgets($_GET['id']);
         $client = $this->models['clients']->getClientDetail($_GET['id']);
+        $budgets  = $this->models['budgets']->getClientBudgets($_GET['id']);
+        $filters = new stdClass;
+        $filters->client_id = $_GET['id'];
+        $limitOffset    = 0;
+        $limitLength    = 10000;
+        $registers = $this->models['budgets']->getTotalRegisters($filters);
+        $total     = $this->models['budgets']->getTotalOfBudgets($filters, $limitOffset, $limitLength);
         /* Format de fecha para mostrar en el front */
         foreach($budgets as $k => $budget) {
             if($k == -1)
                 continue;
-            $budget[$k]['start_date'] = $this->sqlDateToNormal($budget['start_date']);
+            $budgets[$k]['start_date'] = $this->sqlDateToNormal($budget['start_date']);
         }
-        $this->views['clientBudgets']->client = $client;
-        $this->views['clientBudgets']->budgets = $budgets;
+        $this->views['clientBudgets']->client    = $client;
+        $this->views['clientBudgets']->budgets   = $budgets;
+        $this->views['clientBudgets']->registers = $registers;
+        $this->views['clientBudgets']->total     = $total;
         $this->views['clientBudgets']->render();
     }
-
-
-    
-    // viewClientBudgets
     /* Getters */
     public function getClientsToDashboard() { 
         $filters        = new stdClass();

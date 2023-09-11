@@ -121,6 +121,11 @@ class Sales extends Model {
         if($limitLength < 0)
             throw new Exception("El límite (length) no puede ser menor a 0");
         // Validación de filtros e inclusión en query
+        if(!empty($filters->client_id)) {
+            $this->db->validateSanitizeString($filters->client_id, "El número del cliente es erróneo");
+            if(!is_numeric($filters->client_id)) throw new Exception("El número del cliente es erróneo");
+            $sqlFilters .= "WHERE c.client_id LIKE '%$filters->client_id%'";
+        }
         if(!empty($filters->saleNumber)) {
             $this->db->validateSanitizeId($filters->saleNumber, "El número de la venta es erróneo");
             $sqlFilters .= "WHERE s.sale_id LIKE '%$filters->saleNumber%'";
@@ -192,13 +197,15 @@ class Sales extends Model {
 
         $sqlLimit = "LIMIT $limitOffset,$limitLength";
 
+        $sqlOrders = " ORDER BY s.sale_id DESC ";
+
         $query = "SELECT s.sale_id, s.user_id, u.user AS user_name, c.name AS client_name, s.budget_id, s.start_date, s.shipment_state_id, ship.title AS ship_name, s.payment_state_id, pay.title AS pay_name, s.total, s.description AS notes
             FROM sales AS s 
             LEFT JOIN users AS u ON s.user_id = u.user_id
             LEFT JOIN budget_versions AS v ON v.new_budget_id = s.budget_id 
             LEFT JOIN shipment_states AS ship ON s.shipment_state_id = ship.shipment_state_id
             LEFT JOIN payment_states AS pay ON s.payment_state_id = pay.payment_state_id
-            LEFT JOIN clients AS c ON s.client_id = c.client_id $sqlFilters $sqlLimit"; 
+            LEFT JOIN clients AS c ON s.client_id = c.client_id $sqlFilters $sqlOrders $sqlLimit"; 
         $this->db->query($query);
         $this->db->validateLastQuery();
         $ids = array();
@@ -251,8 +258,14 @@ class Sales extends Model {
     public function getTotalRegisters($filters) { 
         $sqlFilters = "";
         // Validación de filtros e inclusión en query
+        if(!empty($filters->client_id)) {
+            $this->db->validateSanitizeString($filters->client_id, "El número del cliente es erróneo");
+            if(!is_numeric($filters->client_id)) throw new Exception("El número del cliente es erróneo");
+            $sqlFilters .= "WHERE c.client_id LIKE '%$filters->client_id%'";
+        }
         if(!empty($filters->saleNumber)) {
-            $this->db->validateSanitizeId($filters->saleNumber, "El número de la venta es erróneo");
+            $this->db->validateSanitizeString($filters->saleNumber, "El número de la venta es erróneo");
+            if(!is_numeric($filters->saleNumber)) throw new Exception("El número de la venta es erróneo");
             $sqlFilters .= "WHERE s.sale_id LIKE '%$filters->saleNumber%'";
         }
         if(!empty($filters->user)) {
