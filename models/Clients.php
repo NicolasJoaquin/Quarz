@@ -195,7 +195,29 @@ class Clients extends Model {
             throw new Exception("Hubo un error al consultar el cliente #$id");
         return $client;
     }
-
+    /* Validaciones */
+    /* Revisar esta validación */
+    private function validateClient(&$client) {
+        $this->db->validateSanitizeString($client->name, "El nombre del cliente es erróneo", maxLen: 300, minLen: 5);
+        if(!empty($client->cuit)) {
+            $this->db->validateSanitizeString($client->cuit, "El CUIT es erróneo", maxLen: 11, minLen: 11);
+            if(!is_numeric($client->cuit)) throw new Exception("El CUIT es erróneo");
+        }
+        if(!empty($client->dni)) {
+            $this->db->validateSanitizeString($client->dni, "El DNI es erróneo", maxLen: 9, minLen: 7);
+            if(!is_numeric($client->dni)) throw new Exception("El DNI es erróneo");
+        }
+        if(!empty($client->nickname)) 
+            $this->db->validateSanitizeString($client->nickname, "El apodo/nombre de fantasía es erróneo", maxLen: 300, minLen: 3);
+        if(!empty($client->direction)) 
+            $this->db->validateSanitizeString($client->direction, "La dirección es errónea", maxLen: 300, minLen: 5);
+        if(!empty($client->email)) 
+            $this->db->validateSanitizeString($client->email, "El e-mail es erróneo", maxLen: 150, minLen: 10);
+        if(!empty($client->phone)) {
+            $this->db->validateSanitizeString($client->phone, "El teléfono es erróneo", maxLen: 25, minLen: 5);
+            if(!is_numeric($client->phone)) throw new Exception("El teléfono es erróneo");
+        }
+    }
     /* Altas, bajas y modificaciones */
     public function newClient($data) { 
         $query   = "";
@@ -204,7 +226,7 @@ class Clients extends Model {
 
         $columns .= "user";
         $values  .= $_SESSION['user_id'];
-
+        /* Falta fix, aplicar validateClient */
         $this->db->validateSanitizeString($data->name, "El nombre del cliente es erróneo", 300, 5);
         $columns .= ", name";
         $values  .= ", '" . $data->name . "'";
@@ -242,7 +264,6 @@ class Clients extends Model {
             $columns .= ", phone";
             $values  .= ", " . $data->phone;
         }
-
         //QUERY INSERT
         $query = "INSERT INTO clients ($columns) VALUES ($values)";
         $this->db->query($query); 
@@ -252,9 +273,29 @@ class Clients extends Model {
             throw new Exception("Hubo un error al dar de alta el cliente");
         return $lastClient;
     }
-
-
-
+    public function editClient($client) {
+        $query   = "UPDATE clients SET ";
+        $this->validateClient($client);
+        $this->db->validateSanitizeId($client->id);
+        $query .= "name = '$client->name'";
+        if(!empty($client->cuit)) 
+            $query .= ", cuit = $client->cuit";
+        if(!empty($client->dni)) 
+            $query .= ", dni = $client->dni";
+        if(!empty($client->nickname)) 
+            $query .= ", nickname = '$client->nickname'";
+        if(!empty($client->direction)) 
+            $query .= ", direction = '$client->direction'";
+        if(!empty($client->email)) 
+            $query .= ", email = '$client->email'";
+        if(!empty($client->phone)) 
+            $query .= ", phone = '$client->phone'";
+        $query .= " WHERE client_id = " . $client->id;
+        //QUERY UPDATE
+        $this->db->query($query); 
+        $this->db->validateLastQuery();
+        return true;
+    }
 
     /* End: Last version */
 

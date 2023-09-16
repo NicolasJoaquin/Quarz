@@ -95,7 +95,7 @@ class Sales extends Model {
 
         $sqlLimit = "LIMIT $limitOffset,$limitLength";
 
-        $query = "SELECT s.sale_id, s.user_id, u.user AS user_name, c.name AS client_name, s.budget_id, v.budget_number, v.version AS budget_version, 
+        $query = "SELECT s.sale_id, s.user_id, u.user AS user_name, c.client_id, c.name AS client_name, s.budget_id, v.budget_number, v.version AS budget_version, 
             s.start_date, s.shipment_state_id, ship.title AS ship_name, s.payment_state_id, nextShip.title AS next_shipment_state, 
             pay.title AS pay_name, nextPay.title AS next_payment_state, s.total, s.description AS notes
                 FROM sales AS s 
@@ -231,7 +231,7 @@ class Sales extends Model {
     }
     public function getSaleInfo($saleId) {
         $this->db->validateSanitizeId($saleId, "El número de venta es erróneo");
-        $query = "SELECT s.sale_id, s.user_id, u.user AS user_name, c.name AS client_name, s.budget_id, v.budget_number, v.version AS budget_version, s.start_date, s.shipment_state_id, ship.title AS ship_name, s.payment_state_id, pay.title AS pay_name, s.description, s.subtotal, s.discount, s.tax, s.ship, sm.title AS ship_method_name, pm.title AS pay_method_name, s.total
+        $query = "SELECT s.sale_id, s.user_id, u.user AS user_name, c.client_id, c.name AS client_name, s.budget_id, v.budget_number, v.version AS budget_version, s.start_date, s.shipment_state_id, ship.title AS ship_name, s.payment_state_id, pay.title AS pay_name, s.description, s.subtotal, s.discount, s.tax, s.ship, sm.title AS ship_method_name, pm.title AS pay_method_name, s.total
                 FROM sales AS s 
                 LEFT JOIN users AS u ON s.user_id = u.user_id
                 LEFT JOIN budget_versions AS v ON v.new_budget_id = s.budget_id 

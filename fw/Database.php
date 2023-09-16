@@ -143,9 +143,8 @@ class Database {
     }
 
     public function validateString($str, $maxLen = 300, $minLen = 0) {
-        if(strlen($str) < $minLen)
-            return false;
-        substr($str, 0, $maxLen);
+        if(strlen($str) < $minLen) return false;
+        if(strlen($str) > $maxLen) return false;
         return true;
     }
 

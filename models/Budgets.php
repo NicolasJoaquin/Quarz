@@ -108,7 +108,7 @@ class Budgets extends Model {
         $sqlLimit = "LIMIT $limitOffset,$limitLength";
 
         $query = "SELECT b.budget_id, v.budget_number, v.version, v.last_version, b.user_id, u.user AS user_name, 
-            c.name AS client_name, b.start_date, b.shipment_method_id, ship.title AS ship_name, b.payment_method_id,
+            c.client_id, c.name AS client_name, b.start_date, b.shipment_method_id, ship.title AS ship_name, b.payment_method_id,
             pay.title AS pay_name, b.subtotal, b.total, b.description AS notes
                 FROM budgets AS b 
                 LEFT JOIN users AS u ON b.user_id = u.user_id
@@ -253,10 +253,10 @@ class Budgets extends Model {
         return $this->db->fetch()['total'];
     }
     /* Recibe el id de la cotización (PK de budgets) */
-    public function getBudgetInfo($id) { // OK
+    public function getBudgetInfo($id) { 
         $this->db->validateSanitizeId($id, "El identificador de la cotización es erróneo");
         $query = "SELECT bv.init_budget_id, bv.old_budget_id, bv.budget_number, bv.version, bv.last_version, 
-                        b.budget_id, b.user_id, b.client_id, u.user AS user_name, c.name AS client_name, 
+                        b.budget_id, b.user_id, b.client_id, u.user AS user_name, c.client_id, c.name AS client_name, 
                         b.start_date, b.shipment_method_id, b.payment_method_id, b.description, b.subtotal, 
                         b.discount, b.tax, b.ship, sm.title AS ship_method_name, pm.title AS pay_method_name, 
                         b.total

@@ -33,8 +33,12 @@
         <p id="phoneDetail" class="rounded text-bg-light fs-6"><?php echo $this->client['phone'] ? $this->client['phone'] : " <small><em>Sin teléfono </em></small>" ?></p>
     </div>
 </div>
+<button class="btn btn-primary mb-1" type="button" id="goBack">
+    <i class="bi bi-arrow-bar-left"></i>
+    Volver
+</button>
 <hr>
-<div class="row g-5">
+<div class="row g-5 mb-5">
     <div class="col-md-12 col-lg-12 order-md-last">
         <div class="table-wrapper table-responsive">
             <table class="table table-striped table-hover mb-none">
@@ -122,15 +126,5 @@ foreach($this->sales as $s) {
                 </tfoot>
             </table>
         </div>
-    </div>
-</div>
-<hr>
-<h4>Acciones</h4>
-<div class="row">
-    <div class="col-2">
-        <button class="btn btn-primary mb-4" type="button" id="goBack">
-            <i class="bi bi-arrow-bar-left"></i>
-            Volver
-        </button>
     </div>
 </div>

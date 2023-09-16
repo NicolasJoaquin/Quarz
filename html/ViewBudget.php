@@ -16,7 +16,7 @@
     </div>
     <div class="col-md-3">
         <label class="form-label rounded text-bg-secondary fs-6" for="clientDetail"><strong>Cliente</strong></label>
-        <p id="clientDetail" class="rounded text-bg-light fs-6"><?php echo $this->budget->info['client_name'] ?></p>
+        <p id="clientDetail" class="rounded text-bg-light fs-6"><a href="viewClient-<?php echo $this->budget->info['client_id'] ?>"><?php echo $this->budget->info['client_name'] ?></a></p>
     </div>
     <div class="col-md-2">
         <label class="form-label rounded text-bg-secondary fs-6" for="dateDetail"><strong>Fecha</strong></label>

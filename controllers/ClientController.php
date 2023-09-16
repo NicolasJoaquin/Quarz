@@ -17,7 +17,7 @@ class ClientController extends Controller {
         $this->models['sales']   = new Sales();
         $this->models['budgets'] = new Budgets();
         /* Views */
-        $this->views['formNew']       = new FormNewClient(title: "Nuevo cliente", includeJs: "js/newClient.js", includeCSS: "css/newClient.css", includesCSS: ["css/stdCustom.css"]);
+        $this->views['formNew']       = new FormNewClient(title: "Nuevo cliente", includeJs: "js/newClient.js", includesCSS: ["css/stdCustom.css"]);
         $this->views['dashboard']     = new ViewClients(title: "Dashboard clientes", includeJs: "js/viewClients.js", includeCSS: "css/viewClients.css", includesCSS: ["css/stdCustom.css"]);
         $this->views['clientDetail']  = new ViewClient(title: "Detalle del cliente", includeJs: "js/viewClient.js", includesCSS: ["css/stdCustom.css"]);
         $this->views['clientSales']   = new ViewClientSales(title: "Ventas del cliente", includeJs: "js/viewClientSales.js", includesCSS: ["css/stdCustom.css"]);
@@ -35,6 +35,11 @@ class ClientController extends Controller {
     public function newClient() {
         if(!$client = $this->validateClientNotEmpty()) throw new Exception("Enviá todos los datos obligatorios");
         $this->models['clients']->newClient($client);
+        return true;
+    }
+    public function editClient() {
+        if(!$client = $this->validateClientNotEmpty()) throw new Exception("Enviá todos los datos obligatorios");
+        $this->models['clients']->editClient($client);
         return true;
     }
     /* Views */

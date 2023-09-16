@@ -9,7 +9,6 @@
         <label class="form-label rounded text-bg-secondary fs-6" for="nameDetail"><strong>Nombre/Razón social</strong></label>
         <p id="nameDetail" class="rounded text-bg-light fs-6"><?php echo $this->client['name'] ?></p>
     </div>
-
     <div class="col-md-2">
         <label class="form-label rounded text-bg-secondary fs-6" for="dniDetail"><strong>DNI</strong></label>
         <p id="dniDetail" class="rounded text-bg-light fs-6"><?php echo $this->client['dni'] ? $this->client['dni'] : " <small><em>Sin DNI </em></small>" ?></p>
@@ -54,6 +53,72 @@
             Ver cotizaciones del cliente
         </button>
     </div>
+    <div class="col-3"> 
+        <button class="btn btn-success" type="button" id="editClientButton" data-bs-toggle="modal" data-bs-target="#editClientModal">
+            <i class="bi bi-pencil-square"></i>
+            Editar datos
+        </button>
+    </div>
 </div>
-
-
+<!-- Modal (Modificar cliente) -->
+<div class="modal fade modal-lg" id="editClientModal" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar cliente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3 client-to-edit">
+                    <div class="col-sm-9">
+                        <label for="name" class="form-label">Nombre/Razón social</label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Jorge Britez" value="<?php echo $this->client['name'] ?>" required>
+                        <small><i class="bi bi-info-circle text-primary"></i>Campo obligatorio</small>
+                        <div class="invalid-feedback">
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <label for="cuit" class="form-label">CUIL/CUIT</label>
+                        <input type="text" class="form-control" id="cuit" name="cuit" placeholder="23-41146999-9" value="<?php echo $this->client['cuit'] ? $this->client['cuit'] : "" ?>">
+                        <div class="invalid-feedback">
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <label for="nickname" class="form-label">Apodo/Nombre de fantasía</label>
+                        <input type="text" class="form-control" id="nickname" name="nickname" placeholder="Jorge" value="<?php echo $this->client['nickname'] ? $this->client['nickname'] : "" ?>">
+                        <div class="invalid-feedback">
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <label for="dni" class="form-label">DNI</label>
+                        <input type="text" class="form-control" id="dni" name="dni" placeholder="41146999" value="<?php echo $this->client['dni'] ? $this->client['dni'] : "" ?>" >
+                        <div class="invalid-feedback">
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="text" class="form-control" id="email" name="email" placeholder="quarz@resinaepoxi.com.ar" value="<?php echo $this->client['email'] ? $this->client['email'] : "" ?>">
+                        <div class="invalid-feedback">
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <label for="phone" class="form-label">Teléfono</label>
+                        <input type="text" class="form-control" id="phone" name="phone" placeholder="11-2233-4456" value="<?php echo $this->client['phone'] ? $this->client['phone'] : "" ?>" >
+                        <div class="invalid-feedback">
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <label for="direction" class="form-label">Dirección</label>
+                        <input type="text" class="form-control" id="direction" name="direction" placeholder="Honduras 5663, Palermo, Buenos Aires" value="<?php echo $this->client['direction'] ? $this->client['direction'] : "" ?>">
+                        <div class="invalid-feedback">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="editClient"><i class="bi bi-pencil-square"></i> Editar</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -129,7 +129,7 @@ $(document).ready(function() {
             $("#tableBody").append('<tr id="row_' + budget.budget_number + '"></tr>');
             $("#row_"+ budget.budget_number).append('<th scope="row">' + budget.budget_number + '</th>');
             $("#row_"+ budget.budget_number).append('<td>' + budget.user_name + '</td>');
-            $("#row_"+ budget.budget_number).append('<td>' + budget.client_name + '</td>');
+            $("#row_"+ budget.budget_number).append('<td><a href="./viewClient-' + budget.client_id + '">' + budget.client_name + '</a></td>');
             $("#row_"+ budget.budget_number).append('<td>' + budget.start_date + '</td>');
             $("#row_"+ budget.budget_number).append('<td>' + budget.ship_name + '</td>');
             $("#row_"+ budget.budget_number).append('<td>' + budget.pay_name + '</td>');

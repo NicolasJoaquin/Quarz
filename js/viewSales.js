@@ -131,14 +131,14 @@ $(document).ready(function() {
             $("#salesTableBody").append('<tr id="saleRow_' + sale.sale_id + '"></tr>');
             $("#saleRow_"+ sale.sale_id).append('<th scope="row">' + sale.sale_id + '</th>');
             $("#saleRow_"+ sale.sale_id).append('<td>' + sale.user_name + '</td>');
-            $("#saleRow_"+ sale.sale_id).append('<td>' + sale.client_name + '</td>');
+            $("#saleRow_"+ sale.sale_id).append('<td><a href="./viewClient-' + sale.client_id + '">' + sale.client_name + '</a></td>'); 
             var budNumber = "-";
             if(sale.budget_number) {
                 var bn = sale.budget_number.toString(),
                     bv = sale.budget_version.toString();
                 bn = bn.padStart(4, '0');
                 bv = bv.padStart(2, '0');
-                budNumber = "#" + bn + " > v" + bv;
+                budNumber = "<a href='./viewBudget-" + sale.budget_number + "'>#" + bn + " > v" + bv + "</a>";
             }
             $("#saleRow_"+ sale.sale_id).append('<td>' + budNumber + '</td>');
             $("#saleRow_"+ sale.sale_id).append('<td>' + sale.start_date + '</td>');

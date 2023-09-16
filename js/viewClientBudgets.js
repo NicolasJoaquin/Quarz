@@ -4,7 +4,7 @@ $(document).ready(function() {
     $("#goBack").on("click", function() {
         window.location = "./viewClient-" + client.client_id;
     }); 
-    $(".view-sale").on("click", function() { 
+    $(".view-budget").on("click", function() { 
         var href = "./" + $(this).attr('aria-href');
         window.location = href;
     }); 

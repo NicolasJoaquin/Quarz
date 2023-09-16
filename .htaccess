@@ -25,6 +25,7 @@ RewriteRule ^viewProduct-([0-9]+)-stock-changes$ controllers/viewProduct.php?id=
 RewriteRule ^newProduct$ controllers/newProduct.php
 
 RewriteRule ^viewClients$ controllers/viewClients.php
+RewriteRule ^viewClient$ controllers/viewClient.php
 RewriteRule ^viewClient-([0-9]+)$ controllers/viewClient.php?id=$1&viewClientDetail=true [NC,L]
 RewriteRule ^viewClient-([0-9]+)-sales$ controllers/viewClient.php?id=$1&viewClientSales=true [NC,L]
 RewriteRule ^viewClient-([0-9]+)-budgets$ controllers/viewClient.php?id=$1&viewClientBudgets=true [NC,L]

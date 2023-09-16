@@ -51,22 +51,23 @@ if(count($_GET) > 0) {
     }
     exit();
 }
-
-// if(count($_POST) > 0) {
-//     if(isset($_POST['modifyProduct'])) {
-//         $response = new stdClass();
-//         $response->state = 1;
-//         try {
-//             $response->successMsg = $controller->modifyProduct();
-//         }
-//         catch (Exception $e) {
-//             $response->state = 0;
-//             $response->errorMsg = "Hubo un error al modificar el producto: " . $e->getMessage();
-//         }
-//         echo json_encode($response);
-//         exit;
-//     } 
-// }
+if(count($_POST)>0) {
+    if(isset($_POST['editClient'])) {
+        $response = new stdClass();
+        $response->state = 1;
+        try {
+            $controller->editClient();
+            $response->msg = "Se modificó el cliente correctamente";
+        }
+        catch (Exception $e) {
+            $response->state = 0;
+            $response->msg   = "Hubo un error al modificar el cliente: " . $e->getMessage();
+        }
+        echo json_encode($response);
+        exit;
+    }
+    exit;
+}
 
 header("Location: ./viewClients");
 exit();

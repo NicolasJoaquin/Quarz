@@ -11,11 +11,11 @@
     </div>
     <div class="col-md-3">
         <label class="form-label rounded text-bg-secondary fs-6" for="clientDetail"><strong>Cliente</strong></label>
-        <p id="clientDetail" class="rounded text-bg-light fs-6 info-container"><?php echo $this->sale->info['client_name'] ?></p>
+        <p id="clientDetail" class="rounded text-bg-light fs-6 info-container"><a href="viewClient-<?php echo $this->sale->info['client_id'] ?>"><?php echo $this->sale->info['client_name'] ?></a></p>
     </div>
     <div class="col-md-2">
         <label class="form-label rounded text-bg-secondary fs-6" for="budgetDetail"><strong>Presupuesto</strong></label>
-        <p id="budgetDetail" class="rounded text-bg-light fs-6 info-container"><?php echo !empty($this->sale->info['budget_number']) ? "#" . sprintf("%'.04d\n", $this->sale->info['budget_number']) . " > v" . sprintf("%'.02d\n", $this->sale->info['budget_version']) : "<small><em>Sin presupuesto de referencia</em></small>" ?></p>
+        <p id="budgetDetail" class="rounded text-bg-light fs-6 info-container"><?php echo !empty($this->sale->info['budget_number']) ? "<a href='./viewBudget-" . $this->sale->info['budget_number'] . "'>#" . sprintf("%'.04d\n", $this->sale->info['budget_number']) . " > v" . sprintf("%'.02d\n", $this->sale->info['budget_version']) . "</a>" : "<small><em>Sin presupuesto de referencia</em></small>" ?></p>
     </div>
     <div class="col-md-2">
         <label class="form-label rounded text-bg-secondary fs-6" for="dateDetail"><strong>Fecha</strong></label>
